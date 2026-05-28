@@ -98,16 +98,6 @@
 
 
     ;; Handle gesture log filling
-    (define fill-log
-      (and (not (= current-gesture 0))
-           (match log-mode
-             [3 (or (not (= current-gesture 4))
-                     (not (= current-gesture prev-gesture)))
-                (or (< current-gesture 3) fill-log #;...)]
-             ;; We'll handle this more simply
-             [_ #t])))
-
-    ;; Simpler log logic:
     (define fill-log?
       (cond
         [(= current-gesture 0) #f]
@@ -144,6 +134,56 @@
         (get-touch-position i)))
     (define mouse-pos
       (if (= touch-count 0) (get-mouse-position) (vector2 0 0)))
+
+    ;; === 绘制 ===
+    (begin-drawing)
+    (clear-background RAYWHITE)
+
+    ;; 公共元素
+    (define mx (inexact->exact (round (vector2-x message-position))))
+    (define my (inexact->exact (round (vector2-y message-position))))
+    (draw-text "*" (+ mx 5) (+ my 5) 10 BLACK)
+    (draw-text "Example optimized for Web/HTML5\non Smartphones with Touch Screen."
+               (+ mx 15) (+ my 5) 10 BLACK)
+    (draw-text "*" (+ mx 5) (+ my 35) 10 BLACK)
+    (draw-text "While running on Desktop Web Browsers,\ninspect and turn on Touch Emulation."
+               (+ mx 15) (+ my 35) 10 BLACK)
+
+    ;; Last gesture 区域
+    (define lx (inexact->exact (round (vector2-x last-gesture-position))))
+    (define ly (inexact->exact (round (vector2-y last-gesture-position))))
+    (draw-text "Last gesture" (+ lx 33) (- ly 47) 20 BLACK)
+    (draw-text "Swipe         Tap       Pinch  Touch" (+ lx 17) (- ly 18) 10 BLACK)
+
+    (draw-rectangle (+ lx 20) ly 20 20 (if (= new-last-gesture GESTURE-SWIPE-UP) RED LIGHTGRAY))
+    (draw-rectangle lx (+ ly 20) 20 20 (if (= new-last-gesture GESTURE-SWIPE-LEFT) RED LIGHTGRAY))
+    (draw-rectangle (+ lx 40) (+ ly 20) 20 20 (if (= new-last-gesture GESTURE-SWIPE-RIGHT) RED LIGHTGRAY))
+    (draw-rectangle (+ lx 20) (+ ly 40) 20 20 (if (= new-last-gesture GESTURE-SWIPE-DOWN) RED LIGHTGRAY))
+    (draw-circle (+ lx 80) (+ ly 16) 10.0 (if (= new-last-gesture GESTURE-TAP) BLUE LIGHTGRAY))
+    (draw-ring (vector2 (+ lx 103.0) (+ ly 16.0)) 6.0 11.0 0.0 360.0 0
+               (if (= new-last-gesture GESTURE-DRAG) LIME LIGHTGRAY))
+    (draw-circle (+ lx 80) (+ ly 43) 10.0 (if (= new-last-gesture GESTURE-DOUBLETAP) SKYBLUE LIGHTGRAY))
+    (draw-circle (+ lx 103) (+ ly 43) 10.0 (if (= new-last-gesture GESTURE-DOUBLETAP) SKYBLUE LIGHTGRAY))
+    (draw-triangle (vector2 (+ lx 122.0) (+ ly 16.0))
+                   (vector2 (+ lx 137.0) (+ ly 26.0))
+                   (vector2 (+ lx 137.0) (+ ly 6.0))
+                   (if (= new-last-gesture GESTURE-PINCH-OUT) ORANGE LIGHTGRAY))
+    (draw-triangle (vector2 (+ lx 147.0) (+ ly 6.0))
+                   (vector2 (+ lx 147.0) (+ ly 26.0))
+                   (vector2 (+ lx 162.0) (+ ly 16.0))
+                   (if (= new-last-gesture GESTURE-PINCH-OUT) ORANGE LIGHTGRAY))
+    (draw-triangle (vector2 (+ lx 125.0) (+ ly 33.0))
+                   (vector2 (+ lx 125.0) (+ ly 53.0))
+                   (vector2 (+ lx 140.0) (+ ly 43.0))
+                   (if (= new-last-gesture GESTURE-PINCH-IN) VIOLET LIGHTGRAY))
+    (draw-triangle (vector2 (+ lx 144.0) (+ ly 43.0))
+                   (vector2 (+ lx 159.0) (+ ly 53.0))
+                   (vector2 (+ lx 159.0) (+ ly 33.0))
+                   (if (= new-last-gesture GESTURE-PINCH-IN) VIOLET LIGHTGRAY))
+    (for ([i (in-range 4)])
+      (draw-circle (+ lx 180) (+ ly 7 (* i 15)) 5.0
+                   (if (<= touch-count i) LIGHTGRAY new-gesture-color)))
+
     ;; Gesture log
     (draw-text "Log" (inexact->exact (round (vector2-x gesture-log-position)))
                (inexact->exact (round (vector2-y gesture-log-position))) 20 BLACK)
