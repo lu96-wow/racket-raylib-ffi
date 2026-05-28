@@ -208,3 +208,6 @@ timeout 3 racket examples/core/core_xxx.rkt
 |------|---------|-------------|
 | core_basic_window | types, rcore, raylib-var | Color, init-window, close-window, window-should-close?, set-target-fps, begin-drawing, end-drawing, clear-background, draw-text, 26 colors |
 | core_delta_time | rcore, rshapes, raylib-var | Vector2, get-frame-time, get-fps, get-mouse-wheel-move, draw-fps, is-key-pressed, draw-circle-v, vector2/x/y/set-x!/set-y! |
+| core_input_keys | rcore, rshapes, raylib-var | is-key-down, draw-rectangle, use existing KEY-LEFT/RIGHT/UP/DOWN, draw-circle-v |
+| core_input_mouse | rcore, rshapes, raylib-var | is-mouse-button-pressed, get-mouse-position, is-cursor-hidden?, show-cursor, hide-cursor, get-mouse-x/y |
+| core_input_mouse_wheel | rcore, rshapes, raylib-var | get-mouse-wheel-move (existing), draw-rectangle |

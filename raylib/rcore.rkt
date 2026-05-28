@@ -34,7 +34,7 @@
       (λ (x) (f (unwrap-fn x))))))
 
 ;; ============================================================
-;; Color 传值类型
+;; 传值类型: Color 传值
 ;; ============================================================
 
 (define _color-bytes
@@ -47,6 +47,24 @@
         (ptr-ref c _ubyte 3)))
 
 ;; (预定义颜色已移入 raylib-var/core.rkt)
+
+;; ============================================================
+;; 传值类型: Vector2 传值 / 返回值
+;; ============================================================
+
+(define _vec2-bytes
+  (_list-struct _float _float))
+
+(define (vec2->bytes v)
+  (list (ptr-ref v _float 0)   ;; offset 0 = first float (x)
+        (ptr-ref v _float 1))) ;; offset 1 = second float (y, at byte 4)
+
+;; 将 C 侧返回的 (list x y) 转换回 Vector2 指针
+(define (vec2-bytes->vec2 lst)
+  (let ([v (malloc T:_Vector2 'atomic)])
+    (ptr-set! v _float 0 (car lst))
+    (ptr-set! v _float 1 (cadr lst))
+    v))
 
 ;; ============================================================
 ;; 窗口管理 (core_basic_window.c)
@@ -87,10 +105,69 @@
 (def-ffi draw-fps "DrawFPS" (_fun _int _int -> _void))
 
 ;; ============================================================
-;; 输入 (core_delta_time.c)
+;; 输入 — 键盘 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
 ;; ============================================================
 
-(def-ffi is-key-pressed "IsKeyPressed" (_fun _int -> _bool))
+(def-ffi is-key-pressed        "IsKeyPressed"        (_fun _int -> _bool))
+(def-ffi is-key-down           "IsKeyDown"           (_fun _int -> _bool))
+(def-ffi is-key-pressed-repeat "IsKeyPressedRepeat"  (_fun _int -> _bool))
+(def-ffi is-key-released       "IsKeyReleased"       (_fun _int -> _bool))
+(def-ffi is-key-up             "IsKeyUp"             (_fun _int -> _bool))
+
+(def-ffi get-key-pressed       "GetKeyPressed"       (_fun -> _int))
+(def-ffi get-char-pressed      "GetCharPressed"      (_fun -> _int))
+(def-ffi get-key-name          "GetKeyName"          (_fun _int -> _string))
+(def-ffi set-exit-key          "SetExitKey"          (_fun _int -> _void))
+
+;; ============================================================
+;; 输入 — 鼠标 (core_input_mouse.c, core_input_mouse_wheel.c)
+;; ============================================================
+
+(def-ffi is-mouse-button-pressed  "IsMouseButtonPressed"  (_fun _int -> _bool))
+(def-ffi is-mouse-button-down     "IsMouseButtonDown"     (_fun _int -> _bool))
+(def-ffi is-mouse-button-released "IsMouseButtonReleased" (_fun _int -> _bool))
+(def-ffi is-mouse-button-up       "IsMouseButtonUp"       (_fun _int -> _bool))
+
+(def-ffi get-mouse-x  "GetMouseX"  (_fun -> _int))
+(def-ffi get-mouse-y  "GetMouseY"  (_fun -> _int))
+
+(define get-mouse-position
+  (let ([f (get-ffi-obj "GetMousePosition" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+(define get-mouse-delta
+  (let ([f (get-ffi-obj "GetMouseDelta" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+(def-ffi set-mouse-position "SetMousePosition" (_fun _int _int -> _void))
+(def-ffi set-mouse-offset   "SetMouseOffset"   (_fun _int _int -> _void))
+(def-ffi set-mouse-scale    "SetMouseScale"    (_fun _float _float -> _void))
+
+(define get-mouse-wheel-move-v
+  (let ([f (get-ffi-obj "GetMouseWheelMoveV" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+(def-ffi set-mouse-cursor "SetMouseCursor" (_fun _int -> _void))
+
+;; ============================================================
+;; 输入 — cursor 可见性 (core_input_mouse.c)
+;; ============================================================
+
+(def-ffi is-cursor-hidden?  "IsCursorHidden"  (_fun -> _bool))
+(def-ffi show-cursor        "ShowCursor"      (_fun -> _void))
+(def-ffi hide-cursor        "HideCursor"      (_fun -> _void))
+(def-ffi enable-cursor      "EnableCursor"    (_fun -> _void))
+(def-ffi disable-cursor     "DisableCursor"   (_fun -> _void))
+(def-ffi is-cursor-on-screen? "IsCursorOnScreen" (_fun -> _bool))
+
+;; ============================================================
+;; 输入 — 事件轮询
+;; ============================================================
+
+(def-ffi poll-input-events "PollInputEvents" (_fun -> _void))
 
 ;; ============================================================
 ;; 导出 — 只导出当前示例需要的
@@ -99,8 +176,10 @@
 (provide
  ;; 宏（供其他模块用）
  def-ffi def-ffi/unwrap
- ;; Color 传值辅助（供其他模块用）
+
+ ;; 传值辅助（供其他模块用）
  _color-bytes color->bytes
+ _vec2-bytes vec2->bytes vec2-bytes->vec2
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -112,5 +191,21 @@
  ;; 计时
  get-frame-time get-fps get-mouse-wheel-move draw-fps
 
- ;; 输入
- is-key-pressed)
+ ;; 输入 — 键盘
+ is-key-pressed is-key-down is-key-pressed-repeat
+ is-key-released is-key-up
+ get-key-pressed get-char-pressed get-key-name set-exit-key
+
+ ;; 输入 — 鼠标
+ is-mouse-button-pressed is-mouse-button-down
+ is-mouse-button-released is-mouse-button-up
+ get-mouse-x get-mouse-y get-mouse-position get-mouse-delta
+ set-mouse-position set-mouse-offset set-mouse-scale
+ get-mouse-wheel-move-v set-mouse-cursor
+
+ ;; 输入 — cursor 可见性
+ is-cursor-hidden? show-cursor hide-cursor
+ enable-cursor disable-cursor is-cursor-on-screen?
+
+ ;; 输入 — 事件轮询
+ poll-input-events)
