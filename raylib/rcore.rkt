@@ -93,12 +93,19 @@
 (def-ffi end-mode-2d "EndMode2D" (_fun -> _void))
 
 ;; ============================================================
-;; 屏幕坐标 ↔ 世界坐标转换 (core_2d_camera_mouse_zoom.c)
+;; 屏幕坐标 ↔ 世界坐标转换
 ;; GetScreenToWorld2D(Vector2 position, Camera2D camera) -> Vector2
+;; GetWorldToScreen2D(Vector2 position, Camera2D camera) -> Vector2
 ;; ============================================================
 
 (define get-screen-to-world-2d
   (let ([f (get-ffi-obj "GetScreenToWorld2D" T:lib
+             (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
+    (λ (position camera)
+      (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
+
+(define get-world-to-screen-2d
+  (let ([f (get-ffi-obj "GetWorldToScreen2D" T:lib
              (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
     (λ (position camera)
       (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
@@ -368,7 +375,7 @@
 
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height
- get-screen-to-world-2d
+ get-screen-to-world-2d get-world-to-screen-2d
 
  ;; 3D 网格 / rlgl 矩阵操作
  draw-grid
