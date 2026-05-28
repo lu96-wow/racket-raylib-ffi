@@ -59,6 +59,34 @@
 (define (set-rectangle-h! r v) (ptr-set! r _float 3 (exact->inexact v)))
 
 ;; ============================================================
+;; 辅助: 创建 Camera2D 指针
+;; ============================================================
+
+(define (camera2d target-x target-y offset-x offset-y rotation zoom)
+  (let ([cam (malloc T:_Camera2D 'atomic)])
+    (ptr-set! cam _float 0 (exact->inexact offset-x))  ;; off-x
+    (ptr-set! cam _float 1 (exact->inexact offset-y))  ;; off-y
+    (ptr-set! cam _float 2 (exact->inexact target-x))  ;; tar-x
+    (ptr-set! cam _float 3 (exact->inexact target-y))  ;; tar-y
+    (ptr-set! cam _float 4 (exact->inexact rotation))   ;; rotation
+    (ptr-set! cam _float 5 (exact->inexact zoom))       ;; zoom
+    cam))
+
+(define (camera2d-offset-x cam) (ptr-ref cam _float 0))
+(define (camera2d-offset-y cam) (ptr-ref cam _float 1))
+(define (camera2d-target-x cam) (ptr-ref cam _float 2))
+(define (camera2d-target-y cam) (ptr-ref cam _float 3))
+(define (camera2d-rotation cam) (ptr-ref cam _float 4))
+(define (camera2d-zoom cam)     (ptr-ref cam _float 5))
+
+(define (set-camera2d-offset-x! cam v) (ptr-set! cam _float 0 (exact->inexact v)))
+(define (set-camera2d-offset-y! cam v) (ptr-set! cam _float 1 (exact->inexact v)))
+(define (set-camera2d-target-x! cam v) (ptr-set! cam _float 2 (exact->inexact v)))
+(define (set-camera2d-target-y! cam v) (ptr-set! cam _float 3 (exact->inexact v)))
+(define (set-camera2d-rotation! cam v) (ptr-set! cam _float 4 (exact->inexact v)))
+(define (set-camera2d-zoom! cam v)     (ptr-set! cam _float 5 (exact->inexact v)))
+
+;; ============================================================
 ;; 预定义颜色
 ;; ============================================================
 
@@ -229,6 +257,13 @@
  make-color vector2 vector2-x vector2-y set-vector2-x! set-vector2-y!
  rectangle rectangle-x rectangle-y rectangle-w rectangle-h
  set-rectangle-x! set-rectangle-y! set-rectangle-w! set-rectangle-h!
+ camera2d
+ camera2d-offset-x camera2d-offset-y
+ camera2d-target-x camera2d-target-y
+ camera2d-rotation camera2d-zoom
+ set-camera2d-offset-x! set-camera2d-offset-y!
+ set-camera2d-target-x! set-camera2d-target-y!
+ set-camera2d-rotation! set-camera2d-zoom!
  RAYWHITE LIGHTGRAY GRAY DARKGRAY YELLOW GOLD ORANGE
  PINK RED MAROON GREEN LIME DARKGREEN SKYBLUE
  BLUE DARKBLUE PURPLE VIOLET DARKPURPLE

@@ -53,6 +53,19 @@
    [width _float]
    [height _float]))
 
+;; Camera2D (raylib.h:338)
+;;   Vector2 offset;    // offset.x @ _float 0, offset.y @ _float 1
+;;   Vector2 target;    // target.x @ _float 2, target.y @ _float 3
+;;   float rotation;    // @ _float 4
+;;   float zoom;        // @ _float 5
+(define-cstruct _Camera2D
+  ([off-x _float]
+   [off-y _float]
+   [tar-x _float]
+   [tar-y _float]
+   [rotation _float]
+   [zoom _float]))
+
 ;; ============================================================
 ;; 导出
 ;; ============================================================
@@ -70,5 +83,13 @@
  ;; Rectangle
  _Rectangle Rectangle? make-Rectangle
  Rectangle-x Rectangle-y Rectangle-width Rectangle-height
- set-Rectangle-x! set-Rectangle-y! set-Rectangle-width! set-Rectangle-height!)
+ set-Rectangle-x! set-Rectangle-y! set-Rectangle-width! set-Rectangle-height!
+ ;; Camera2D
+ _Camera2D Camera2D? make-Camera2D
+ Camera2D-off-x Camera2D-off-y
+ Camera2D-tar-x Camera2D-tar-y
+ Camera2D-rotation Camera2D-zoom
+ set-Camera2D-off-x! set-Camera2D-off-y!
+ set-Camera2D-tar-x! set-Camera2D-tar-y!
+ set-Camera2D-rotation! set-Camera2D-zoom!)
 

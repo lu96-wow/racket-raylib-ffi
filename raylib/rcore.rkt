@@ -68,6 +68,49 @@
     v))
 
 ;; ============================================================
+;; Camera2D 传值辅助
+;; ============================================================
+
+(define _camera2d-bytes
+  (_list-struct _float _float _float _float _float _float))
+
+(define (camera2d->bytes cam)
+  (list (ptr-ref cam _float 0)   ;; off-x
+        (ptr-ref cam _float 1)   ;; off-y
+        (ptr-ref cam _float 2)   ;; tar-x
+        (ptr-ref cam _float 3)   ;; tar-y
+        (ptr-ref cam _float 4)   ;; rotation
+        (ptr-ref cam _float 5))) ;; zoom
+
+;; ============================================================
+;; 2D 相机 (core_2d_camera.c)
+;; ============================================================
+
+(def-ffi/unwrap begin-mode-2d "BeginMode2D"
+  (_fun (c : _camera2d-bytes) -> _void)
+  camera2d->bytes)
+
+(def-ffi end-mode-2d "EndMode2D" (_fun -> _void))
+
+;; ============================================================
+;; 绘制 — 2D 线条 (core_2d_camera.c)
+;; DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
+;; ============================================================
+
+(define draw-line
+  (let ([f (get-ffi-obj "DrawLine" T:lib
+             (_fun _int _int _int _int (c : _color-bytes) -> _void))])
+    (λ (start-x start-y end-x end-y color)
+      (f start-x start-y end-x end-y (color->bytes color)))))
+
+;; ============================================================
+;; 随机 (core_2d_camera.c)
+;; GetRandomValue(int min, int max) -> int
+;; ============================================================
+
+(def-ffi get-random-value "GetRandomValue" (_fun _int _int -> _int))
+
+;; ============================================================
 ;; 窗口管理 (core_basic_window.c)
 ;; ============================================================
 
@@ -277,13 +320,20 @@
  _color-bytes color->bytes
  _vec2-bytes vec2->bytes vec2-bytes->vec2
  _rect-bytes rect->bytes rect-bytes->rect
+ _camera2d-bytes camera2d->bytes
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
 
  ;; 绘制
  begin-drawing end-drawing
- clear-background draw-text
+ clear-background draw-text draw-line
+
+ ;; 2D 相机
+ begin-mode-2d end-mode-2d
+
+ ;; 随机
+ get-random-value
 
  ;; 计时
  get-frame-time get-fps get-mouse-wheel-move draw-fps
