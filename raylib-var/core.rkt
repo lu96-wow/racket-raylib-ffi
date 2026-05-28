@@ -37,6 +37,28 @@
   (ptr-set! v _float 1 (exact->inexact y)))
 
 ;; ============================================================
+;; 辅助: 创建 Rectangle 指针
+;; ============================================================
+
+(define (rectangle x y w h)
+  (let ([r (malloc T:_Rectangle 'atomic)])
+    (ptr-set! r _float 0 (exact->inexact x))
+    (ptr-set! r _float 1 (exact->inexact y))
+    (ptr-set! r _float 2 (exact->inexact w))
+    (ptr-set! r _float 3 (exact->inexact h))
+    r))
+
+(define (rectangle-x r)   (ptr-ref r _float 0))
+(define (rectangle-y r)   (ptr-ref r _float 1))
+(define (rectangle-w r)   (ptr-ref r _float 2))
+(define (rectangle-h r)   (ptr-ref r _float 3))
+
+(define (set-rectangle-x! r v) (ptr-set! r _float 0 (exact->inexact v)))
+(define (set-rectangle-y! r v) (ptr-set! r _float 1 (exact->inexact v)))
+(define (set-rectangle-w! r v) (ptr-set! r _float 2 (exact->inexact v)))
+(define (set-rectangle-h! r v) (ptr-set! r _float 3 (exact->inexact v)))
+
+;; ============================================================
 ;; 预定义颜色
 ;; ============================================================
 
@@ -205,6 +227,8 @@
 
 (provide
  make-color vector2 vector2-x vector2-y set-vector2-x! set-vector2-y!
+ rectangle rectangle-x rectangle-y rectangle-w rectangle-h
+ set-rectangle-x! set-rectangle-y! set-rectangle-w! set-rectangle-h!
  RAYWHITE LIGHTGRAY GRAY DARKGRAY YELLOW GOLD ORANGE
  PINK RED MAROON GREEN LIME DARKGREEN SKYBLUE
  BLUE DARKBLUE PURPLE VIOLET DARKPURPLE

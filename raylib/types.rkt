@@ -45,6 +45,13 @@
   ([x _float]
    [y _float]))
 
+;; Rectangle (raylib.h:256)
+(define-cstruct _Rectangle
+  ([x _float]
+   [y _float]
+   [width _float]
+   [height _float]))
+
 ;; ============================================================
 ;; 导出
 ;; ============================================================
@@ -58,5 +65,9 @@
  ;; Vector2
  _Vector2 Vector2? make-Vector2
  Vector2-x Vector2-y
- set-Vector2-x! set-Vector2-y!)
+ set-Vector2-x! set-Vector2-y!
+ ;; Rectangle
+ _Rectangle Rectangle? make-Rectangle
+ Rectangle-x Rectangle-y Rectangle-width Rectangle-height
+ set-Rectangle-x! set-Rectangle-y! set-Rectangle-width! set-Rectangle-height!)
 

@@ -211,3 +211,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_input_keys | rcore, rshapes, raylib-var | is-key-down, draw-rectangle, use existing KEY-LEFT/RIGHT/UP/DOWN, draw-circle-v |
 | core_input_mouse | rcore, rshapes, raylib-var | is-mouse-button-pressed, get-mouse-position, is-cursor-hidden?, show-cursor, hide-cursor, get-mouse-x/y |
 | core_input_mouse_wheel | rcore, rshapes, raylib-var | get-mouse-wheel-move (existing), draw-rectangle |
+| core_input_gamepad | rcore, rshapes, rtextures, raylib-var | set-config-flags, is-gamepad-available?, get-gamepad-name, is-gamepad-button-down, get-gamepad-axis-count, get-gamepad-axis-movement, set-gamepad-vibration, get-gamepad-button-pressed, load-texture, unload-texture, draw-texture, draw-circle, draw-rectangle-rounded, draw-triangle, check-collision-point-rec, Rectangle |
+| core_input_multitouch | rcore, raylib-var | get-touch-point-count, get-touch-position, get-touch-x/y, get-touch-point-id |
+| core_input_gestures | rcore, rshapes, raylib-var | get-gesture-detected, fade, draw-rectangle-rec, draw-rectangle-lines, check-collision-point-rec, get-touch-position |
+| core_input_gestures_testbed | rcore, rshapes, raylib-var | draw-line-ex, draw-ring, get-gesture-drag-angle, get-gesture-pinch-angle, is-mouse-button-released, all gestures functions |

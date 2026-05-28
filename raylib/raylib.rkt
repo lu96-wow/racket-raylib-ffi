@@ -26,8 +26,9 @@
 (require "rcore.rkt"
          "types.rkt"
          "rshapes.rkt"
+         "rtextures.rkt"
          "../raylib-var/var.rkt")
 
 ;; 统一导出所有子模块内容
-(provide (all-from-out "rcore.rkt" "types.rkt" "rshapes.rkt" "../raylib-var/var.rkt"))
+(provide (all-from-out "rcore.rkt" "types.rkt" "rshapes.rkt" "rtextures.rkt" "../raylib-var/var.rkt"))
 

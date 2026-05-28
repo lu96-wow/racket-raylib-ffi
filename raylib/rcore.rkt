@@ -170,6 +170,101 @@
 (def-ffi poll-input-events "PollInputEvents" (_fun -> _void))
 
 ;; ============================================================
+;; 配置 (core_input_gamepad.c)
+;; ============================================================
+
+(def-ffi set-config-flags "SetConfigFlags" (_fun _uint -> _void))
+
+;; ============================================================
+;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
+;; ============================================================
+
+(def-ffi is-gamepad-available?    "IsGamepadAvailable"    (_fun _int -> _bool))
+(def-ffi get-gamepad-name         "GetGamepadName"        (_fun _int -> _string))
+(def-ffi is-gamepad-button-pressed "IsGamepadButtonPressed" (_fun _int _int -> _bool))
+(def-ffi is-gamepad-button-down   "IsGamepadButtonDown"   (_fun _int _int -> _bool))
+(def-ffi is-gamepad-button-released "IsGamepadButtonReleased" (_fun _int _int -> _bool))
+(def-ffi is-gamepad-button-up     "IsGamepadButtonUp"     (_fun _int _int -> _bool))
+(def-ffi get-gamepad-button-pressed "GetGamepadButtonPressed" (_fun -> _int))
+(def-ffi get-gamepad-axis-count   "GetGamepadAxisCount"   (_fun _int -> _int))
+(def-ffi get-gamepad-axis-movement "GetGamepadAxisMovement" (_fun _int _int -> _float))
+(def-ffi set-gamepad-mappings     "SetGamepadMappings"    (_fun _string -> _int))
+(def-ffi set-gamepad-vibration    "SetGamepadVibration"   (_fun _int _float _float _float -> _void))
+
+;; ============================================================
+;; 输入 — 触摸 (core_input_multitouch.c, core_input_gestures.c)
+;; ============================================================
+
+(def-ffi get-touch-x          "GetTouchX"          (_fun -> _int))
+(def-ffi get-touch-y          "GetTouchY"          (_fun -> _int))
+(def-ffi get-touch-point-id   "GetTouchPointId"    (_fun _int -> _int))
+(def-ffi get-touch-point-count "GetTouchPointCount" (_fun -> _int))
+
+(define get-touch-position
+  (let ([f (get-ffi-obj "GetTouchPosition" T:lib
+             (_fun _int -> (v : _vec2-bytes)))])
+    (λ (index) (vec2-bytes->vec2 (f index)))))
+
+;; ============================================================
+;; 颜色工具 (core_input_gestures.c)
+;; Fade(Color color, float alpha) -> Color
+;; ============================================================
+
+(define fade
+  (let ([f (get-ffi-obj "Fade" T:lib
+             (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
+    (λ (color alpha)
+      (let ([lst (f (color->bytes color) alpha)])
+        (let ([c (malloc T:_Color 'atomic)])
+          (ptr-set! c _ubyte 0 (car lst))
+          (ptr-set! c _ubyte 1 (cadr lst))
+          (ptr-set! c _ubyte 2 (caddr lst))
+          (ptr-set! c _ubyte 3 (cadddr lst))
+          c)))))
+
+;; ============================================================
+;; 输入 — 手势 (core_input_gestures.c)
+;; ============================================================
+
+(def-ffi set-gestures-enabled    "SetGesturesEnabled"    (_fun _uint -> _void))
+(def-ffi is-gesture-detected?    "IsGestureDetected"     (_fun _uint -> _bool))
+(def-ffi get-gesture-detected    "GetGestureDetected"    (_fun -> _int))
+(def-ffi get-gesture-hold-duration "GetGestureHoldDuration" (_fun -> _float))
+(def-ffi get-gesture-drag-angle  "GetGestureDragAngle"   (_fun -> _float))
+(def-ffi get-gesture-pinch-angle "GetGesturePinchAngle"  (_fun -> _float))
+
+(define get-gesture-drag-vector
+  (let ([f (get-ffi-obj "GetGestureDragVector" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+(define get-gesture-pinch-vector
+  (let ([f (get-ffi-obj "GetGesturePinchVector" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+;; ============================================================
+;; Rectangle 传值/返回值辅助
+;; ============================================================
+
+(define _rect-bytes
+  (_list-struct _float _float _float _float))
+
+(define (rect->bytes r)
+  (list (ptr-ref r _float 0)
+        (ptr-ref r _float 1)
+        (ptr-ref r _float 2)
+        (ptr-ref r _float 3)))
+
+(define (rect-bytes->rect lst)
+  (let ([r (malloc T:_Rectangle 'atomic)])
+    (ptr-set! r _float 0 (car lst))
+    (ptr-set! r _float 1 (cadr lst))
+    (ptr-set! r _float 2 (caddr lst))
+    (ptr-set! r _float 3 (cadddr lst))
+    r))
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -180,6 +275,7 @@
  ;; 传值辅助（供其他模块用）
  _color-bytes color->bytes
  _vec2-bytes vec2->bytes vec2-bytes->vec2
+ _rect-bytes rect->bytes rect-bytes->rect
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -208,4 +304,28 @@
  enable-cursor disable-cursor is-cursor-on-screen?
 
  ;; 输入 — 事件轮询
- poll-input-events)
+ poll-input-events
+
+ ;; 配置
+ set-config-flags
+
+ ;; 输入 — 手柄
+ is-gamepad-available? get-gamepad-name
+ is-gamepad-button-pressed is-gamepad-button-down
+ is-gamepad-button-released is-gamepad-button-up
+ get-gamepad-button-pressed
+ get-gamepad-axis-count get-gamepad-axis-movement
+ set-gamepad-mappings set-gamepad-vibration
+
+ ;; 输入 — 触摸
+ get-touch-x get-touch-y
+ get-touch-point-id get-touch-point-count
+ get-touch-position
+
+ ;; 颜色工具
+ fade
+
+ ;; 输入 — 手势
+ set-gestures-enabled is-gesture-detected? get-gesture-detected
+ get-gesture-hold-duration get-gesture-drag-vector get-gesture-drag-angle
+ get-gesture-pinch-vector get-gesture-pinch-angle)
