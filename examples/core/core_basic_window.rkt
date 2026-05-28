@@ -1,29 +1,35 @@
-#lang racket
+#lang racket/base
 
-;; raylib [core] example - basic window
-;; Translated from C to Racket
-;; 尽量保持与 C 原版结构一致
+;; raylib [core] example - basic window (Racket FFI 翻译)
+;;
+;; 对应 C: examples/core/core_basic_window.c
 
-(require "../../raylib/main.rkt")
+(require "../../raylib/raylib.rkt")
 
-;; === 初始化 ===
-(define screen-width 800)
-(define screen-height 450)
+;; ============================================================
+;; 初始化
+;; ============================================================
 
-(init-window screen-width screen-height
-  "raylib [core] example - basic window")
+(init-window 800 450 "raylib [core] example - basic window")
 
 (set-target-fps 60)
 
-;; === 主循环 ===
+;; ============================================================
+;; 主循环
+;; ============================================================
+
 (let loop ()
   (unless (window-should-close?)
+    ;; 绘制
     (begin-drawing)
     (clear-background RAYWHITE)
-    (draw-text "Congrats! You created your first window!"
-               190 200 20 LIGHTGRAY)
+    (draw-text "Congrats! You created your first window!" 190 200 20 LIGHTGRAY)
     (end-drawing)
+
     (loop)))
 
-;; === 销毁 ===
+;; ============================================================
+;; 清理
+;; ============================================================
+
 (close-window)
