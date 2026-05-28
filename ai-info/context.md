@@ -1,0 +1,210 @@
+# raylib Racket FFI 绑定 — 项目上下文
+
+## 项目结构
+
+```
+racket-bind/
+├── raylib/                  # FFI 绑定（纯函数绑定 + 结构体类型）
+│   ├── raylib.rkt           # 主入口，re-export 所有子模块 + raylib-var
+│   ├── types.rkt            # 结构体定义（_Color, _Vector2, 等）
+│   ├── rcore.rkt            # core 函数绑定 + def-ffi 宏
+│   ├── rshapes.rkt          # shapes 函数绑定
+│   ├── rtextures.rkt        # (骨架)
+│   ├── rtext.rkt            # (骨架)
+│   ├── rmodels.rkt          # (骨架)
+│   ├── raudio.rkt           # (骨架)
+│   └── rcamera.rkt          # (骨架)
+│
+├── raylib-var/              # 预定义常量（与 FFI 绑定分离）
+│   ├── var.rkt              # 主入口
+│   └── core.rkt             # 颜色、键盘键值、窗口标志等所有常量
+│
+├── examples/core/           # core 示例的 Racket 翻译
+│   ├── core_basic_window.rkt
+│   └── core_delta_time.rkt
+│
+├── work/core/               # 分析工作区
+│   ├── total.txt            # 全量去重结构体 + 来源对照表
+│   ├── SUMMARY_deduplicated_structs.txt
+│   └── core_*.txt           # 49 个示例各自的结构体分析
+│
+└── ai-info/
+    └── context.md           # 本文件
+```
+
+## 设计原则
+
+### 1. 结构体统一用 malloc 分配，Racket 持裸指针
+
+所有结构体在 Racket 侧通过 `(malloc _Type 'atomic)` 分配，返回裸 `cpointer`（不是 `define-cstruct` 的 tagged pointer）。
+
+```racket
+;; ✅ 正确: raylib-var/core.rkt 中的辅助函数
+(define (vector2 x y)
+  (let ([v (malloc T:_Vector2 'atomic)])
+    (ptr-set! v _float 0 (exact->inexact x))
+    (ptr-set! v _float 1 (exact->inexact y))
+    v))
+```
+
+为什么不用 `define-cstruct` 的 `make-Color` / `make-Vector2`？
+- 它们返回 tagged pointer，`Color?` / `Vector2?` 有契约检查
+- 跨模块使用时访问器契约会拒绝裸 `cpointer`
+- 统一用 malloc 避免二义性
+
+### 2. 传值和传指针分离
+
+在 `raylib/rcore.rkt` 中定义了两个宏：
+
+```racket
+;; 直接传，无包装 — 用于基础类型、指针参数
+(def-ffi fn-name "CName" (_fun _int _int -> _void))
+
+;; 自动解引用指针传值 — 用于小结构体传值参数
+(def-ffi/unwrap fn-name "CName"
+  (_fun (c : _xxx-bytes) -> _void)
+  xxx->bytes)
+```
+
+`def-ffi/unwrap` 展开为：
+```racket
+(define fn-name
+  (let ([f (get-ffi-obj "CName" lib (_fun (c : _xxx-bytes) -> _void))])
+    (λ (x) (f (unwrap x)))))
+```
+
+### 3. 常量与绑定分离
+
+- `raylib/` 下只放函数绑定和结构体类型定义
+- `raylib-var/` 下放所有固定值（颜色、键值、标志等）
+- `raylib-var/core.rkt` 中定义 `make-color`、`vector2` 等辅助构造器
+- 用户通过 `(require "raylib/raylib.rkt")` 同时拿到绑定和常量
+
+### 4. 按需绑定
+
+不预先绑定全部 API。从 core 示例开始，用到哪个函数就绑哪个。
+每绑一个函数都要有对应的示例可以运行验证。
+
+## 坑和注意事项
+
+### ⚠️ ptr-ref / ptr-set! 的偏移量是元素索引，不是字节
+
+这是最容易出错的坑。`(ptr-ref ptr _float 4)` 读的是**第 4 个 float**（字节 16），不是"字节 4 处的 float"！
+
+```racket
+_Vector2 布局: [float x (4B)] [float y (4B)]
+                                ^
+                        字节 0       字节 4
+
+;; 正确:
+(ptr-ref v _float 0)   ;; 第 0 个 float → x  ✅
+(ptr-ref v _float 1)   ;; 第 1 个 float → y  ✅
+
+;; 错误:
+(ptr-ref v _float 4)   ;; 第 4 个 float → 越界 ❌
+```
+
+同理 `ptr-set!`：
+```racket
+(ptr-set! v _float 0 100.0)  ;; 写 x ✅
+(ptr-set! v _float 1 200.0)  ;; 写 y ✅
+(ptr-set! v _float 4 200.0)  ;; 写到字节 16 去了 ❌
+```
+
+对于 `_ubyte`（1 字节），元素索引 = 字节偏移，所以 `(ptr-ref c _ubyte 0)` 到 `(ptr-ref c _ubyte 3)` 是正确的。
+
+### ⚠️ define-cstruct 的访问器/构造器有契约检查
+
+`define-cstruct` 生成的 `Color-r`、`set-Color-r!`、`make-Color` 等函数有契约检查——它们只接受/返回 tagged pointer（满足 `Color?` 谓词）。
+
+但我们用 `(malloc _Color 'atomic)` 返回的是裸 `cpointer`，不满足 `Color?`。所以必须用 `ptr-ref` / `ptr-set!`。
+
+```racket
+;; ❌ 不工作: Color-r 要求 Color? 标签
+(T:Color-r c)
+
+;; ✅ 工作: ptr-ref 接受裸 cpointer
+(ptr-ref c _ubyte 0)
+
+;; ❌ 不工作: set-Color-r! 要求 Color? 标签
+(T:set-Color-r! c 255)
+
+;; ✅ 工作: ptr-set! 接受裸 cpointer
+(ptr-set! c _ubyte 0 255)
+```
+
+### ⚠️ _list-struct 不能用于 make-ctype
+
+`(_list-struct _ubyte _ubyte _ubyte _ubyte)` 返回的值可以作为 `_fun` 的参数类型，但不是 `ctype?`，不能传给 `make-ctype`。
+
+正确的做法：定义 `_xxx-bytes` 作为底层传值类型，再用 λ 包装做转换。
+
+### ⚠️ malloc 'atomic 不是 C malloc
+
+`(malloc _Color 'atomic)` 用的是 Chez Scheme 的 GC 协作分配器，不是 C 的 `malloc`。比 C malloc 更快，且 GC 自动释放。
+
+文档参考：`'raw`（真 C malloc）最慢，`'atomic`（GC 协作、pinned）中等，Chez 原生分配器最快。这里用 `'atomic` 是因为需要 pinned 内存（可安全传 C 指针）。
+
+### ⚠️ 跨模块前缀 require
+
+`raylib/rcore.rkt` 用 `(prefix-in T: "types.rkt")`，所以引用 types.rkt 的导出时加 `T:` 前缀：
+
+```racket
+(define _color-bytes (_list-struct _ubyte _ubyte _ubyte _ubyte))
+;; _list-struct 来自 ffi/unsafe，不需要 T: 前缀
+```
+
+`raylib-var/core.rkt` 也用 `(prefix-in T: "../raylib/types.rkt")`。
+
+`raylib/rshapes.rkt` 同时引用 types.rkt 和 rcore.rkt：
+```racket
+(require (prefix-in T: "types.rkt")
+         (prefix-in C: "rcore.rkt"))
+;; 使用时: T:make-Color, C:color->bytes
+```
+
+## 如何实现新绑定
+
+### 步骤
+
+1. 看要翻译的 C 示例 → 确定需要用哪些 C 函数
+2. 如果是新结构体 → 在 `types.rkt` 加 `define-cstruct`
+3. 如果是新常量（颜色、键值等）→ `raylib-var/core.rkt`
+4. 函数绑定：
+
+```racket
+;; 简单情况（基础类型参数）:
+(def-ffi fn-name "CFunctionName" (_fun _int _float -> _void))
+
+;; 结构体传值（需要 _xxx-bytes + xxx->bytes）:
+;;   先在模块中定义 _xxx-bytes 和 xxx->bytes
+;;   然后用 def-ffi/unwrap 或手动 λ 包装
+
+;; 手动 λ 包装（多参数混搭）:
+(define fn-name
+  (let ([f (get-ffi-obj "CFunctionName" T:lib
+             (_fun _string _int (c : _color-bytes) -> _void))])
+    (λ (a b c) (f a b (color->bytes c)))))
+```
+
+5. 在对应模块的 `provide` 列表加新导出
+6. 在 `raylib.rkt` 加 `(require ...)` 和 `(all-from-out ...)`
+7. 创建示例翻译并验证运行
+
+### 查找 C 函数签名
+
+所有 C 函数声明在 `src/raylib.h`。用 `grep -n "RLAPI.*FunctionName" /home/debian/raylib/src/raylib.h` 查找。
+
+### 运行测试
+
+```bash
+cd /home/debian/raylib/racket-bind
+timeout 3 racket examples/core/core_xxx.rkt
+```
+
+## 已完成示例
+
+| 示例 | 涉及模块 | 新增函数/类型 |
+|------|---------|-------------|
+| core_basic_window | types, rcore, raylib-var | Color, init-window, close-window, window-should-close?, set-target-fps, begin-drawing, end-drawing, clear-background, draw-text, 26 colors |
+| core_delta_time | rcore, rshapes, raylib-var | Vector2, get-frame-time, get-fps, get-mouse-wheel-move, draw-fps, is-key-pressed, draw-circle-v, vector2/x/y/set-x!/set-y! |

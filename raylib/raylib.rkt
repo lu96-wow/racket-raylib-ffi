@@ -23,5 +23,11 @@
 ;;   - 从 core 示例开始，用到哪个函数/结构体就绑哪个
 ;;   - 不预先绑定全部 API，避免无法测试的裸露 FFI
 
-(provide)
+(require "rcore.rkt"
+         "types.rkt"
+         "rshapes.rkt"
+         "../raylib-var/var.rkt")
+
+;; 统一导出所有子模块内容
+(provide (all-from-out "rcore.rkt" "types.rkt" "rshapes.rkt" "../raylib-var/var.rkt"))
 
