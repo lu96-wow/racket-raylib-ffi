@@ -93,6 +93,33 @@
 (def-ffi end-mode-2d "EndMode2D" (_fun -> _void))
 
 ;; ============================================================
+;; 屏幕坐标 ↔ 世界坐标转换 (core_2d_camera_mouse_zoom.c)
+;; GetScreenToWorld2D(Vector2 position, Camera2D camera) -> Vector2
+;; ============================================================
+
+(define get-screen-to-world-2d
+  (let ([f (get-ffi-obj "GetScreenToWorld2D" T:lib
+             (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
+    (λ (position camera)
+      (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
+
+;; ============================================================
+;; 3D 网格绘制 (core_2d_camera_mouse_zoom.c)
+;; DrawGrid(int slices, float spacing)
+;; ============================================================
+
+(def-ffi draw-grid "DrawGrid" (_fun _int _float -> _void))
+
+;; ============================================================
+;; rlgl 矩阵操作 (core_2d_camera_mouse_zoom.c)
+;; ============================================================
+
+(def-ffi rl-push-matrix  "rlPushMatrix"  (_fun -> _void))
+(def-ffi rl-pop-matrix   "rlPopMatrix"   (_fun -> _void))
+(def-ffi rl-translate-f  "rlTranslatef"  (_fun _float _float _float -> _void))
+(def-ffi rl-rotate-f     "rlRotatef"     (_fun _float _float _float _float -> _void))
+
+;; ============================================================
 ;; 绘制 — 2D 线条 (core_2d_camera.c)
 ;; DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 ;; ============================================================
@@ -188,6 +215,13 @@
 (def-ffi set-mouse-position "SetMousePosition" (_fun _int _int -> _void))
 (def-ffi set-mouse-offset   "SetMouseOffset"   (_fun _int _int -> _void))
 (def-ffi set-mouse-scale    "SetMouseScale"    (_fun _float _float -> _void))
+
+;; ============================================================
+;; 屏幕信息 (core_2d_camera_mouse_zoom.c)
+;; ============================================================
+
+(def-ffi get-screen-width  "GetScreenWidth"  (_fun -> _int))
+(def-ffi get-screen-height "GetScreenHeight" (_fun -> _int))
 
 (define get-mouse-wheel-move-v
   (let ([f (get-ffi-obj "GetMouseWheelMoveV" T:lib
@@ -331,6 +365,14 @@
 
  ;; 2D 相机
  begin-mode-2d end-mode-2d
+
+ ;; 屏幕信息 / 坐标转换
+ get-screen-width get-screen-height
+ get-screen-to-world-2d
+
+ ;; 3D 网格 / rlgl 矩阵操作
+ draw-grid
+ rl-push-matrix rl-pop-matrix rl-translate-f rl-rotate-f
 
  ;; 随机
  get-random-value

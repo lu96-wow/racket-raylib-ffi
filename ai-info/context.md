@@ -215,3 +215,4 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_input_multitouch | rcore, raylib-var | get-touch-point-count, get-touch-position, get-touch-x/y, get-touch-point-id |
 | core_input_gestures | rcore, rshapes, raylib-var | get-gesture-detected, fade, draw-rectangle-rec, draw-rectangle-lines, check-collision-point-rec, get-touch-position |
 | core_input_gestures_testbed | rcore, rshapes, raylib-var | draw-line-ex, draw-ring, get-gesture-drag-angle, get-gesture-pinch-angle, is-mouse-button-released, all gestures functions |
+| core_2d_camera_mouse_zoom | rcore, raylib-var | Camera2D (already defined), get-screen-width, get-screen-height, get-screen-to-world-2d, draw-grid, rl-push-matrix, rl-pop-matrix, rl-translate-f, rl-rotate-f |
