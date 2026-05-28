@@ -1,0 +1,4 @@
+文件: core_highdpi_testbed.c
+使用结构体:
+  Vector2    — src/raylib.h:216
+  Rectangle  — src/raylib.h:256

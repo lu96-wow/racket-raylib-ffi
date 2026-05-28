@@ -1,0 +1,9 @@
+文件: core_undo_redo.c
+使用结构体:
+  Rectangle — src/raylib.h:256
+  Vector2   — src/raylib.h:216
+  Color     — src/raylib.h:248
+
+自定义结构体:
+  Point         — 文件中自定义 { int x; int y; }
+  PlayerState   — 文件中自定义 { Point cell; Color color; }

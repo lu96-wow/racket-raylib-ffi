@@ -1,0 +1,8 @@
+文件: core_smooth_pixelperfect.c
+使用结构体:
+  Camera2D          — src/raylib.h:338
+  RenderTexture2D   — src/raylib.h:294 (typedef RenderTexture)
+  RenderTexture     — src/raylib.h:288
+  Texture           — src/raylib.h:273 (通过 target.texture)
+  Rectangle         — src/raylib.h:256
+  Vector2           — src/raylib.h:216

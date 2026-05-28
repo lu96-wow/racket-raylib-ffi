@@ -1,0 +1,13 @@
+文件: core_automation_events.c
+使用结构体:
+  Rectangle            — src/raylib.h:256
+  Vector2              — src/raylib.h:216
+  Camera2D             — src/raylib.h:338
+  Color                — src/raylib.h:248
+  AutomationEventList  — src/raylib.h:543
+  AutomationEvent      — src/raylib.h:536 (通过 aelist.events[])
+  FilePathList         — src/raylib.h:530
+
+自定义结构体:
+  Player               — 文件中自定义 { Vector2 position; float speed; bool canJump; }
+  EnvElement           — 文件中自定义 { Rectangle rect; int blocking; Color color; }

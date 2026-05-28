@@ -1,0 +1,7 @@
+文件: core_3d_picking.c
+使用结构体:
+  Camera3D/Camera — src/raylib.h:327
+  Vector3         — src/raylib.h:222
+  Ray             — src/raylib.h:445
+  RayCollision    — src/raylib.h:451
+  BoundingBox     — src/raylib.h:459

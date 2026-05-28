@@ -1,0 +1,12 @@
+文件: core_vr_simulator.c
+使用结构体:
+  VrDeviceInfo     — src/raylib.h:505
+  VrStereoConfig   — src/raylib.h:518
+  Shader           — src/raylib.h:375
+  RenderTexture2D  — src/raylib.h:294 (typedef RenderTexture)
+  RenderTexture    — src/raylib.h:288
+  Rectangle        — src/raylib.h:256
+  Texture          — src/raylib.h:273 (通过 target.texture)
+  Camera3D/Camera  — src/raylib.h:327
+  Vector3          — src/raylib.h:222
+  Vector2          — src/raylib.h:216

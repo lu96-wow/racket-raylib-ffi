@@ -1,0 +1,319 @@
+================================================================================
+  raylib [core] examples — 全量去重结构体 + 来源对照表
+================================================================================
+  生成方式: 逐一分析 49 个 core/*.c 示例文件
+           → 提取使用的结构体 → 去重 → 标注来源(raylib.h 行号)
+  结构体来源: src/raylib.h (raylib v6.1-dev)
+  自定义结构体: 示例文件中自行定义的 struct/typedef
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+一、raylib 正式结构体（按使用频率降序）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Vector2 ────────────────────────────────────────────
+   定义: src/raylib.h:216
+   字段: float x; float y;
+   频率: 31 / 49 个示例
+   来源:
+     core_2d_camera, core_2d_camera_mouse_zoom, core_2d_camera_platformer,
+     core_2d_camera_split_screen, core_3d_camera_first_person, core_3d_camera_fps,
+     core_3d_camera_split_screen, core_3d_picking, core_automation_events,
+     core_delta_time, core_highdpi_demo, core_highdpi_testbed, core_input_actions,
+     core_input_gamepad, core_input_gestures, core_input_gestures_testbed,
+     core_input_keys, core_input_mouse, core_input_multitouch,
+     core_input_virtual_controls, core_monitor_detector, core_render_texture,
+     core_screen_recording, core_smooth_pixelperfect, core_text_file_loading,
+     core_undo_redo, core_viewport_scaling, core_vr_simulator, core_window_flags,
+     core_window_letterbox, core_world_screen
+
+2. Rectangle ──────────────────────────────────────────
+   定义: src/raylib.h:256
+   字段: float x; float y; float width; float height;
+   频率: 24 / 49 个示例
+   来源:
+     core_2d_camera, core_2d_camera_platformer, core_2d_camera_split_screen,
+     core_3d_camera_split_screen, core_automation_events, core_clipboard_text,
+     core_compute_hash, core_directory_files, core_highdpi_testbed,
+     core_input_gamepad, core_input_gestures, core_input_gestures_testbed,
+     core_keyboard_testbed, core_monitor_detector, core_random_sequence,
+     core_render_texture, core_scissor_test, core_smooth_pixelperfect,
+     core_text_file_loading, core_undo_redo, core_viewport_scaling,
+     core_vr_simulator, core_window_flags, core_window_letterbox
+
+3. Color ──────────────────────────────────────────────
+   定义: src/raylib.h:248
+   字段: unsigned char r; unsigned char g; unsigned char b; unsigned char a;
+   频率: 14 / 49 个示例
+   来源:
+     core_2d_camera, core_2d_camera_platformer, core_3d_camera_first_person,
+     core_3d_camera_fps, core_automation_events, core_drop_files,
+     core_highdpi_demo, core_input_gamepad, core_input_gestures_testbed,
+     core_input_mouse, core_input_virtual_controls, core_random_sequence,
+     core_undo_redo, core_window_letterbox
+
+5. Camera3D / Camera ──────────────────────────────────
+   定义: src/raylib.h:327
+   字段: Vector3 position; Vector3 target; Vector3 up; float fovy; int projection;
+   别名: Camera = Camera3D (raylib.h:335)
+   频率: 8 / 49 个示例
+   来源:
+     core_3d_camera_first_person (Camera), core_3d_camera_fps (Camera),
+     core_3d_camera_free (Camera3D), core_3d_camera_mode (Camera3D),
+     core_3d_camera_split_screen (Camera), core_3d_picking (Camera),
+     core_vr_simulator (Camera), core_world_screen (Camera)
+
+6. Texture / Texture2D ────────────────────────────────
+   定义: src/raylib.h:273
+   字段: unsigned int id; int width; int height; int mipmaps; int format;
+   别名: Texture2D = Texture (raylib.h:282); TextureCubemap = Texture (raylib.h:285)
+   频率: 8 / 49 个示例
+   来源:
+     core_2d_camera_split_screen (经 RenderTexture.texture),
+     core_3d_camera_split_screen (经 RenderTexture.texture),
+     core_input_gamepad (Texture2D, LoadTexture),
+     core_render_texture (经 RenderTexture.texture),
+     core_smooth_pixelperfect (经 RenderTexture.texture),
+     core_viewport_scaling (经 RenderTexture.texture),
+     core_vr_simulator (经 RenderTexture.texture),
+     core_window_letterbox (经 RenderTexture.texture)
+
+7. Camera2D ──────────────────────────────────────────
+   定义: src/raylib.h:338
+   字段: Vector2 offset; Vector2 target; float rotation; float zoom;
+   频率: 7 / 49 个示例
+   来源:
+     core_2d_camera, core_2d_camera_mouse_zoom, core_2d_camera_platformer,
+     core_2d_camera_split_screen, core_automation_events,
+     core_smooth_pixelperfect, core_text_file_loading
+
+8. RenderTexture / RenderTexture2D ────────────────────
+   定义: src/raylib.h:288
+   字段: unsigned int id; Texture texture; Texture depth;
+   别名: RenderTexture2D = RenderTexture (raylib.h:295)
+   频率: 7 / 49 个示例
+   来源:
+     core_2d_camera_split_screen (RenderTexture),
+     core_3d_camera_split_screen (RenderTexture),
+     core_render_texture (RenderTexture2D),
+     core_smooth_pixelperfect (RenderTexture2D),
+     core_viewport_scaling (RenderTexture2D),
+     core_vr_simulator (RenderTexture2D),
+     core_window_letterbox (RenderTexture2D)
+
+9. FilePathList ──────────────────────────────────────
+   定义: src/raylib.h:530
+   字段: unsigned int count; char **paths;
+   频率: 3 / 49 个示例
+   来源:
+     core_automation_events, core_directory_files, core_drop_files
+
+10. Ray ────────────────────────────────────────────────
+    定义: src/raylib.h:445
+    字段: Vector3 position; Vector3 direction;
+    频率: 1 / 49 个示例
+    来源: core_3d_picking
+
+11. RayCollision ──────────────────────────────────────
+    定义: src/raylib.h:451
+    字段: bool hit; float distance; Vector3 point; Vector3 normal;
+    频率: 1 / 49 个示例
+    来源: core_3d_picking
+
+12. BoundingBox ───────────────────────────────────────
+    定义: src/raylib.h:459
+    字段: Vector3 min; Vector3 max;
+    频率: 1 / 49 个示例
+    来源: core_3d_picking
+
+13. Image ─────────────────────────────────────────────
+    定义: src/raylib.h:264
+    字段: void *data; int width; int height; int mipmaps; int format;
+    频率: 1 / 49 个示例
+    来源: core_screen_recording
+
+14. Font ──────────────────────────────────────────────
+    定义: src/raylib.h:317
+    字段: int baseSize; int glyphCount; int glyphPadding; Texture2D texture;
+          Rectangle *recs; GlyphInfo *glyphs;
+    频率: 1 / 49 个示例
+    来源: core_highdpi_demo (通过 GetFontDefault())
+
+15. Shader ────────────────────────────────────────────
+    定义: src/raylib.h:375
+    字段: unsigned int id; int *locs;
+    频率: 1 / 49 个示例
+    来源: core_vr_simulator
+
+16. VrDeviceInfo ──────────────────────────────────────
+    定义: src/raylib.h:505
+    字段: int hResolution; int vResolution; float hScreenSize; float vScreenSize;
+          float eyeToScreenDistance; float lensSeparationDistance;
+          float interpupillaryDistance; float lensDistortionValues[4];
+          float chromaAbCorrection[4];
+    频率: 1 / 49 个示例
+    来源: core_vr_simulator
+
+17. VrStereoConfig ────────────────────────────────────
+    定义: src/raylib.h:518
+    字段: Matrix projection[2]; Matrix viewOffset[2];
+          float leftLensCenter[2]; float rightLensCenter[2];
+          float leftScreenCenter[2]; float rightScreenCenter[2];
+          float scale[2]; float scaleIn[2];
+    频率: 1 / 49 个示例
+    来源: core_vr_simulator
+
+18. AutomationEvent ───────────────────────────────────
+    定义: src/raylib.h:536
+    字段: unsigned int frame; unsigned int type; int params[4];
+    频率: 1 / 49 个示例
+    来源: core_automation_events
+
+19. AutomationEventList ───────────────────────────────
+    定义: src/raylib.h:543
+    字段: unsigned int capacity; unsigned int count; AutomationEvent *events;
+    频率: 1 / 49 个示例
+    来源: core_automation_events
+
+20. NPatchInfo ─────────────────────────────────────────
+    定义: src/raylib.h:298 | 字段: Rectangle source; int left/top/right/bottom; int layout;
+    频率: 0 (core 未用，shapes/text 用)
+    备注: 备查
+
+21. GlyphInfo ─────────────────────────────────────────
+    定义: src/raylib.h:308 | 字段: int value; int offsetX/Y; int advanceX; Image image;
+    频率: 0 | 备注: Font 内部成员，备查
+
+22. Mesh ──────────────────────────────────────────────
+    定义: src/raylib.h:346 (含顶点/骨骼/OpenGL数据)
+    频率: 0 | 备注: rmodels 使用，备查
+
+23. MaterialMap ───────────────────────────────────────
+    定义: src/raylib.h:381 | 字段: Texture2D texture; Color color; float value;
+    频率: 0 | 备注: 备查
+
+24. Material ──────────────────────────────────────────
+    定义: src/raylib.h:388 | 字段: Shader shader; MaterialMap *maps; float params[4];
+    频率: 0 | 备注: 备查
+
+25. Transform ─────────────────────────────────────────
+    定义: src/raylib.h:395 | 字段: Vector3 translation; Quaternion rotation; Vector3 scale;
+    频率: 0 | 备注: 备查
+
+26. BoneInfo ─────────────────────────────────────────
+    定义: src/raylib.h:405 | 字段: char name[32]; int parent;
+    频率: 0 | 备注: 备查
+
+27. ModelSkeleton ─────────────────────────────────────
+    定义: src/raylib.h:411 | 字段: int boneCount; BoneInfo *bones; ModelAnimPose bindPose;
+    频率: 0 | 备注: 备查
+
+28. Model ─────────────────────────────────────────────
+    定义: src/raylib.h:418 (复杂，含 mesh/material/skeleton/animation)
+    频率: 0 | 备注: 备查
+
+29. ModelAnimation ────────────────────────────────────
+    定义: src/raylib.h:436 | 字段: char name[32]; int boneCount; int keyframeCount; ...
+    频率: 0 | 备注: 备查
+
+30. Wave ──────────────────────────────────────────────
+    定义: src/raylib.h:465 | 字段: unsigned int frameCount/sampleRate/sampleSize/channels; void *data;
+    频率: 0 | 备注: raudio 使用
+
+31. AudioStream ───────────────────────────────────────
+    定义: src/raylib.h:479 | 字段: rAudioBuffer *buffer; rAudioProcessor *processor; ...
+    频率: 0 | 备注: raudio 使用
+
+32. Sound ─────────────────────────────────────────────
+    定义: src/raylib.h:489 | 字段: AudioStream stream; unsigned int frameCount;
+    频率: 0 | 备注: raudio 使用
+
+33. Music ─────────────────────────────────────────────
+    定义: src/raylib.h:495 | 字段: AudioStream stream; unsigned int frameCount; bool looping; ...
+    频率: 0 | 备注: raudio 使用
+
+34. Vector4 / Quaternion ──────────────────────────────
+    定义: src/raylib.h:229; Quaternion = Vector4 (raylib.h:237)
+    字段: float x; float y; float z; float w;
+    频率: 0 | 备注: raymath 内部
+
+35. Matrix ────────────────────────────────────────────
+    定义: src/raylib.h:240 | 字段: float m0..m15 (4x4)
+    频率: 0 | 备注: VrStereoConfig 内含，备查
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+二、示例自定义结构体（含 raylib 结构体字段）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ 1. Player           — core_2d_camera_platformer.c:28
+                       { Vector2 position; float speed; bool canJump; }
+                       也出现于 core_automation_events.c:30 (定义相同)
+
+ 2. EnvItem           — core_2d_camera_platformer.c:34
+                       { Rectangle rect; int blocking; Color color; }
+
+ 3. Body              — core_3d_camera_fps.c:47
+                       { Vector3 position; Vector3 velocity; Vector3 dir; bool isGrounded; }
+
+ 4. EnvElement        — core_automation_events.c:36
+                       { Rectangle rect; int blocking; Color color; }
+                       与 EnvItem 结构一致，命名不同
+
+ 5. ActionInput       — core_input_actions.c:38
+                       { int key; int button; }
+
+ 6. MonitorInfo       — core_monitor_detector.c:23
+                       { Vector2 position; const char *name; int width; int height;
+                         int physicalWidth; int physicalHeight; int refreshRate; }
+
+ 7. ColorRect         — core_random_sequence.c:27
+                       { Color color; Rectangle rect; }
+
+ 8. Point             — core_undo_redo.c:33
+                       { int x; int y; }
+
+ 9. PlayerState       — core_undo_redo.c:40
+                       { Point cell; Color color; }
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+三、无需结构体的示例（仅基本类型 + 颜色宏）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   core_basic_window.c
+   core_basic_screen_manager.c
+   core_custom_frame_control.c
+   core_custom_logging.c
+   core_input_mouse_wheel.c
+   core_random_values.c
+   core_storage_values.c
+   core_window_should_close.c
+   core_window_web.c
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+四、绑定优先级建议
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Tier 1（核心必绑，覆盖 90% 示例）:
+     Vector2, Rectangle, Color, Vector3,
+     Camera3D/Camera, Texture/Texture2D,
+     Camera2D, RenderTexture/RenderTexture2D
+
+   Tier 2（常用）:
+     FilePathList
+
+   Tier 3（特定场景，按需绑定）:
+     Ray, RayCollision, BoundingBox, Image, Font, Shader,
+     VrDeviceInfo, VrStereoConfig,
+     AutomationEvent, AutomationEventList
+
+   Tier 4（core 未使用，备查）:
+     NPatchInfo, GlyphInfo, Mesh, MaterialMap, Material,
+     Transform, BoneInfo, ModelSkeleton, Model, ModelAnimation,
+     Wave, AudioStream, Sound, Music,
+     Vector4/Quaternion, Matrix
+
+================================================================================
+

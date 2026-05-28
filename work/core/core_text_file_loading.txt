@@ -1,0 +1,5 @@
+文件: core_text_file_loading.c
+使用结构体:
+  Camera2D  — src/raylib.h:338
+  Rectangle — src/raylib.h:256
+  Vector2   — src/raylib.h:216

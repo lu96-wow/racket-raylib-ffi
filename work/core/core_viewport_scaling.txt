@@ -1,0 +1,7 @@
+文件: core_viewport_scaling.c
+使用结构体:
+  Rectangle        — src/raylib.h:256
+  Vector2          — src/raylib.h:216
+  RenderTexture2D  — src/raylib.h:294 (typedef RenderTexture)
+  RenderTexture    — src/raylib.h:288
+  Texture          — src/raylib.h:273 (通过 target.texture)

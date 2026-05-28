@@ -1,0 +1,4 @@
+文件: core_screen_recording.c
+使用结构体:
+  Vector2 — src/raylib.h:216
+  Image   — src/raylib.h:264

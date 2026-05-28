@@ -1,0 +1,4 @@
+文件: core_3d_camera_mode.c
+使用结构体:
+  Camera3D     — src/raylib.h:327
+  Vector3      — src/raylib.h:222

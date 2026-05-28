@@ -1,0 +1,7 @@
+文件: core_random_sequence.c
+使用结构体:
+  Color     — src/raylib.h:248
+  Rectangle — src/raylib.h:256
+
+自定义结构体:
+  ColorRect — 文件中自定义 { Color color; Rectangle rect; }
