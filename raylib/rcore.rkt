@@ -8,9 +8,10 @@
 ;;   结构体在 Racket 侧通过 boxed 指针持有,
 ;;   对 C 侧传值的小结构体, 由 _xxx-pass 类型自动解包.
 
-(require ffi/unsafe
+(require (except-in ffi/unsafe _bool)
          (for-syntax racket/base)
-         (prefix-in T: "types.rkt"))
+         (prefix-in T: "types.rkt")
+         (only-in "types.rkt" _bool))
 
 ;; ============================================================
 ;; 宏: def-ffi     — 直接传指针 / 基础类型（无包装）

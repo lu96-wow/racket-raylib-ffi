@@ -4,9 +4,10 @@
 ;;
 ;; 对应 C: rshapes.c / raylib.h "Module: shapes"
 
-(require ffi/unsafe
+(require (except-in ffi/unsafe _bool)
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt"))
+         (prefix-in C: "rcore.rkt")
+         (only-in "types.rkt" _bool))
 
 ;; ============================================================
 ;; 圆形绘制 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)

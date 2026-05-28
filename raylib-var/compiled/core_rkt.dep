@@ -1,1 +1,0 @@
-("9.1" ta6le ("11622d0ab0295da4462400793ae8499130a0a610" . "842e83e3a81715e64f5b54e3904949ae6eedc961") #"/home/debian/raylib/racket-bind/raylib-var/../raylib/types.rkt" (collects #"ffi" #"unsafe.rkt") (collects #"racket" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))

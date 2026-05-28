@@ -22,13 +22,14 @@
   (ffi-lib "/home/debian/raylib/build/raylib/libraylib.so"))
 
 ;; ============================================================
-;; 基础类型 — _bool 跨平台兼容
+;; 基础类型 — bool 类型
+;; ffi/unsafe 提供两个布尔类型：
+;;   _stdbool → 1 字节，匹配 C99 的 _Bool（raylib 使用 <stdbool.h>）
+;;   _bool    → 4 字节，匹配 C 的 int（不匹配 raylib！）
+;; 这里让 _bool 指向 _stdbool，确保所有 FFI 绑定使用正确的 1 字节版
 ;; ============================================================
 
-(define _bool
-  (if (eq? (system-type 'so-mode) 'big-endian)
-      _int8
-      _int32))
+(define _bool _stdbool)
 
 ;; ============================================================
 ;; Color (raylib.h:248) — 4 字节小结构体
