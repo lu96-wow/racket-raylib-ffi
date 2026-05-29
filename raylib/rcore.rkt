@@ -211,6 +211,19 @@
 (def-ffi set-target-fps "SetTargetFPS" (_fun _int -> _void))
 
 ;; ============================================================
+;; 窗口状态 / 标志管理 (core_window_flags.c)
+;; ============================================================
+
+(def-ffi toggle-fullscreen          "ToggleFullscreen"          (_fun -> _void))
+(def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed"  (_fun -> _void))
+(def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _bool))
+(def-ffi set-window-state           "SetWindowState"            (_fun _uint -> _void))
+(def-ffi clear-window-state         "ClearWindowState"          (_fun _uint -> _void))
+(def-ffi minimize-window            "MinimizeWindow"            (_fun -> _void))
+(def-ffi maximize-window            "MaximizeWindow"            (_fun -> _void))
+(def-ffi restore-window             "RestoreWindow"             (_fun -> _void))
+
+;; ============================================================
 ;; 绘制上下文 (core_basic_window.c)
 ;;
 ;; def-ffi       — 直接传，无包装
@@ -443,6 +456,18 @@
 
 (def-ffi measure-text "MeasureText" (_fun _string _int -> _int))
 
+
+;; ============================================================
+;; GetWorldToScreen (core_world_screen.c)
+;; Vector2 GetWorldToScreen(Vector3 position, Camera camera)
+;; ============================================================
+
+(define get-world-to-screen
+  (let ([f (get-ffi-obj "GetWorldToScreen" T:lib
+             (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) -> (v : _vec2-bytes)))])
+    (λ (position camera)
+      (vec2-bytes->vec2 (f (vec3->bytes position) (camera3d->bytes camera))))))
+
 (define _bounding-box-bytes
   (_list-struct _float _float _float _float _float _float))
 
@@ -474,6 +499,9 @@
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
+ toggle-fullscreen toggle-borderless-windowed
+ is-window-state? set-window-state clear-window-state
+ minimize-window maximize-window restore-window
 
  ;; 绘制
  begin-drawing end-drawing
@@ -488,7 +516,7 @@
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height
  get-screen-to-world-2d get-world-to-screen-2d
- get-screen-to-world-ray measure-text
+ get-screen-to-world-ray get-world-to-screen measure-text
 
  ;; 3D 网格 / rlgl 矩阵操作
  draw-grid

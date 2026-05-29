@@ -102,6 +102,19 @@
       (f posX posY width height (C:color->bytes color)))))
 
 ;; ============================================================
+;; 矩形边框绘制 (扩展版, core_window_flags.c)
+;; DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
+;; ============================================================
+
+(define draw-rectangle-lines-ex
+  (let ([f (get-ffi-obj "DrawRectangleLinesEx" T:lib
+             (_fun (r : C:_rect-bytes) _float (col : C:_color-bytes) -> _void))])
+    (λ (rec line-thick color)
+      (f (C:rect->bytes rec) line-thick (C:color->bytes color)))))
+
+;; ============================================================
+;; 线段绘制 (core_input_gestures_testbed.c)
+;; ============================================================
 ;; 线段绘制 (core_input_gestures_testbed.c)
 ;; DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ;; ============================================================
@@ -151,6 +164,7 @@
  check-collision-point-rec
  draw-rectangle-rec
  draw-rectangle-lines
+ draw-rectangle-lines-ex
  draw-line-ex
  draw-line-v
  draw-ring)

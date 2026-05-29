@@ -225,6 +225,12 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_3d_camera_fps | types, rcore, rshapes, rtextures, rmodels, rcamera, raymath, raylib-var | draw-cube-v, draw-cube-wires-v, draw-sphere, raymath (clamp/lerp/vec2-length/vec2-normalize/vec3-add/vec3-scale/vec3-cross-product/vec3-length/vec3-dot-product/vec3-angle/vec3-negate/vec3-normalize/vec3-rotate-by-axis-angle/vec3-lerp) |
 | core_3d_camera_fps | types, rcore, rshapes, rtextures, rmodels, rcamera, raymath, raylib-var | draw-cube-v, draw-cube-wires-v, draw-sphere, raymath (clamp/lerp/vec2-length/vec2-normalize/vec3-add/vec3-scale/vec3-cross-product/vec3-length/vec3-dot-product/vec3-angle/vec3-negate/vec3-normalize/vec3-rotate-by-axis-angle/vec3-lerp) |
 | core_3d_picking | types, rcore, rshapes, rmodels, raylib-var | Ray, BoundingBox, RayCollision, get-screen-to-world-ray, get-ray-collision-box, draw-ray, measure-text |
+| core_world_screen | types, rcore, rmodels, raylib-var | get-world-to-screen（仅此一个新增） |
+| core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
+
+| core_world_screen | types, rcore, rmodels, raylib-var | get-world-to-screen（仅此一个新增） |
+
+| core_3d_picking | types, rcore, rshapes, rmodels, raylib-var | Ray, BoundingBox, RayCollision, get-screen-to-world-ray, get-ray-collision-box, draw-ray, measure-text |
 
 
 
