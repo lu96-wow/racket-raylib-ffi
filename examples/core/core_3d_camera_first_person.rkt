@@ -12,7 +12,7 @@
 ;;   鼠标/方向键 - 视角
 ;;   Space/Left-Ctrl - 上/下
 ;;
-;; WARNING: 此环境 (llvmpipe + GLFW X11) 启用 GLFW_RAW_MOUSE_MOTION 后,
+;; WARNING: 如果环境 (llvmpipe + GLFW X11) 启用 GLFW_RAW_MOUSE_MOTION 后,
 ;; GetMouseDelta() 返回 ~25000 量级的原始硬件 counts, 而非正常像素差值 (~1-10)。
 ;; raylib UpdateCamera() 用固定灵敏度 0.003f 计算:
 ;;   angle = 25000 x 0.003 = 75 rad -> 一次打满 CameraPitch 极限
@@ -50,13 +50,13 @@
   (let ([h (exact->inexact (get-random-value 1 12))])
     (vector-set! heights i h)
     (vector-set! positions i
-      (vector3 (exact->inexact (get-random-value -15 15))
-               (/ h 2.0)
-               (exact->inexact (get-random-value -15 15))))
+                 (vector3 (exact->inexact (get-random-value -15 15))
+                          (/ h 2.0)
+                          (exact->inexact (get-random-value -15 15))))
     (vector-set! colors i
-      (make-color (get-random-value 20 255)
-                  (get-random-value 10 55)
-                  30))))
+                 (make-color (get-random-value 20 255)
+                             (get-random-value 10 55)
+                             30))))
 
 (disable-cursor)
 (set-target-fps 60)
@@ -84,30 +84,30 @@
 
     (when (is-key-pressed KEY-P)
       (if (= (camera3d-proj camera) CAMERA-PERSPECTIVE)
-        (begin
-          (set-box! camera-mode CAMERA-THIRD-PERSON)
-          (set-camera3d-pos-x! camera 0.0)
-          (set-camera3d-pos-y! camera 2.0)
-          (set-camera3d-pos-z! camera -100.0)
-          (set-camera3d-tar-x! camera 0.0)
-          (set-camera3d-tar-y! camera 2.0)
-          (set-camera3d-tar-z! camera 0.0)
-          (reset-camera-up!)
-          (set-camera3d-proj! camera CAMERA-ORTHOGRAPHIC)
-          (set-camera3d-fovy! camera 20.0)
-          (camera-yaw camera (* -135 DEG2RAD) #t)
-          (camera-pitch camera (* -45 DEG2RAD) #t #t #f))
-        (begin
-          (set-box! camera-mode CAMERA-THIRD-PERSON)
-          (set-camera3d-pos-x! camera 0.0)
-          (set-camera3d-pos-y! camera 2.0)
-          (set-camera3d-pos-z! camera 10.0)
-          (set-camera3d-tar-x! camera 0.0)
-          (set-camera3d-tar-y! camera 2.0)
-          (set-camera3d-tar-z! camera 0.0)
-          (reset-camera-up!)
-          (set-camera3d-proj! camera CAMERA-PERSPECTIVE)
-          (set-camera3d-fovy! camera 60.0))))
+          (begin
+            (set-box! camera-mode CAMERA-THIRD-PERSON)
+            (set-camera3d-pos-x! camera 0.0)
+            (set-camera3d-pos-y! camera 2.0)
+            (set-camera3d-pos-z! camera -100.0)
+            (set-camera3d-tar-x! camera 0.0)
+            (set-camera3d-tar-y! camera 2.0)
+            (set-camera3d-tar-z! camera 0.0)
+            (reset-camera-up!)
+            (set-camera3d-proj! camera CAMERA-ORTHOGRAPHIC)
+            (set-camera3d-fovy! camera 20.0)
+            (camera-yaw camera (* -135 DEG2RAD) #t)
+            (camera-pitch camera (* -45 DEG2RAD) #t #t #f))
+          (begin
+            (set-box! camera-mode CAMERA-THIRD-PERSON)
+            (set-camera3d-pos-x! camera 0.0)
+            (set-camera3d-pos-y! camera 2.0)
+            (set-camera3d-pos-z! camera 10.0)
+            (set-camera3d-tar-x! camera 0.0)
+            (set-camera3d-tar-y! camera 2.0)
+            (set-camera3d-tar-z! camera 0.0)
+            (reset-camera-up!)
+            (set-camera3d-proj! camera CAMERA-PERSPECTIVE)
+            (set-camera3d-fovy! camera 60.0))))
 
     (update-camera camera (unbox camera-mode))
 
@@ -157,7 +157,7 @@
       (draw-text (format "- Mode: ~a" mode-str) 610 30 10 BLACK))
 
     (let ([proj-str (if (= (camera3d-proj camera) CAMERA-PERSPECTIVE)
-                      "PERSPECTIVE" "ORTHOGRAPHIC")])
+                        "PERSPECTIVE" "ORTHOGRAPHIC")])
       (draw-text (format "- Projection: ~a" proj-str) 610 45 10 BLACK))
 
     (draw-text (format "- Position: (~a, ~a, ~a)"

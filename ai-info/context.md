@@ -222,4 +222,6 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_3d_camera_free | types, rcore, rmodels, raylib-var | update-camera, disable-cursor (已有), 复用 core_3d_camera_mode 全部绑定 |
 | core_3d_camera_first_person | types, rcore, rmodels, rcamera, raylib-var | draw-plane, camera-yaw, camera-pitch, 复用全部已有绑定 |
 | core_3d_camera_split_screen | types, rcore, rshapes, rtextures, rmodels, raylib-var | 复用全部已有绑定（无需新增） |
+| core_3d_camera_fps | types, rcore, rshapes, rtextures, rmodels, rcamera, raymath, raylib-var | draw-cube-v, draw-cube-wires-v, draw-sphere, raymath (clamp/lerp/vec2-length/vec2-normalize/vec3-add/vec3-scale/vec3-cross-product/vec3-length/vec3-dot-product/vec3-angle/vec3-negate/vec3-normalize/vec3-rotate-by-axis-angle/vec3-lerp) |
+
 

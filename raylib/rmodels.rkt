@@ -45,11 +45,47 @@
       (f (C:vec3->bytes center-pos) (C:vec2->bytes size) (C:color->bytes color)))))
 
 ;; ============================================================
+;; DrawCubeV(Vector3 position, Vector3 size, Color color)
+;; 3D 方块绘制 (Vector 版, core_3d_camera_fps.c)
+;; ============================================================
+
+(define draw-cube-v
+  (let ([f (get-ffi-obj "DrawCubeV" T:lib
+             (_fun (pos : C:_vec3-bytes) (size : C:_vec3-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (position size color)
+      (f (C:vec3->bytes position) (C:vec3->bytes size) (C:color->bytes color)))))
+
+;; ============================================================
+;; DrawCubeWiresV(Vector3 position, Vector3 size, Color color)
+;; 3D 方块线框绘制 (Vector 版, core_3d_camera_fps.c)
+;; ============================================================
+
+(define draw-cube-wires-v
+  (let ([f (get-ffi-obj "DrawCubeWiresV" T:lib
+             (_fun (pos : C:_vec3-bytes) (size : C:_vec3-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (position size color)
+      (f (C:vec3->bytes position) (C:vec3->bytes size) (C:color->bytes color)))))
+
+;; ============================================================
+;; DrawSphere(Vector3 centerPos, float radius, Color color)
+;; 3D 球体绘制 (core_3d_camera_fps.c)
+;; ============================================================
+
+(define draw-sphere
+  (let ([f (get-ffi-obj "DrawSphere" T:lib
+             (_fun (pos : C:_vec3-bytes) _float (col : C:_color-bytes) -> _void))])
+    (λ (center-pos radius color)
+      (f (C:vec3->bytes center-pos) radius (C:color->bytes color)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
 (provide
  draw-cube
  draw-cube-wires
- draw-plane)
+ draw-plane
+ draw-cube-v
+ draw-cube-wires-v
+ draw-sphere)
 
