@@ -232,6 +232,8 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
 | core_custom_logging | types, rcore, raylib-var | set-trace-log-callback, vsnprintf（需 ffi/unsafe 的 function-ptr 创建回调） |
 | core_drop_files | rcore, raylib-var | _filepathlist-bytes, is-file-dropped, load-dropped-files（自动读取 C 字符串并释放内存，返回 Racket 字符串列表） |
+| core_random_values | rcore, raylib-var | set-random-seed（TextFormat 用 format 替代，不绑定 C 变参函数） |
+| core_storage_values | rcore, raylib-var | 无需新增绑定（LoadFileData/SaveFileData 用 Racket file I/O 替代） |
 
 | core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
 

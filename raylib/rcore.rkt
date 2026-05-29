@@ -201,6 +201,8 @@
 
 (def-ffi get-random-value "GetRandomValue" (_fun _int _int -> _int))
 
+(def-ffi set-random-seed "SetRandomSeed" (_fun _uint -> _void))
+
 ;; ============================================================
 ;; 窗口管理 (core_basic_window.c)
 ;; ============================================================
@@ -614,7 +616,7 @@
  rl-push-matrix rl-pop-matrix rl-translate-f rl-rotate-f
 
  ;; 随机
- get-random-value
+ get-random-value set-random-seed
 
  ;; 计时
  get-frame-time get-fps get-mouse-wheel-move draw-fps
