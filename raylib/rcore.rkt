@@ -217,6 +217,22 @@
 (def-ffi set-window-min-size "SetWindowMinSize" (_fun _int _int -> _void))
 
 ;; ============================================================
+;; ============================================================
+;; 自定义日志回调 (core_custom_logging.c)
+;; SetTraceLogCallback(TraceLogCallback callback)
+;; TraceLogCallback = void (*)(int logLevel, const char *text, va_list args)
+;; ============================================================
+
+(define set-trace-log-callback
+  (get-ffi-obj "SetTraceLogCallback" T:lib
+    (_fun _pointer -> _void)))
+
+;; C 标准库 vsnprintf — 展开 va_list 到字符串缓冲区
+;; int vsnprintf(char *str, size_t size, const char *format, va_list ap);
+(define vsnprintf
+  (get-ffi-obj "vsnprintf" #f
+    (_fun _pointer _int _string _pointer -> _int)))
+
 ;; 显示器/窗口信息 (core_monitor_detector.c)
 ;; ============================================================
 
@@ -533,6 +549,9 @@
  get-monitor-width get-monitor-height
  get-monitor-physical-width get-monitor-physical-height
  get-monitor-refresh-rate set-window-monitor get-window-position
+ set-trace-log-callback vsnprintf
+
+
 
  ;; 绘制
  begin-drawing end-drawing
