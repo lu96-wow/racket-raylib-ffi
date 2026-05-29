@@ -34,10 +34,22 @@
       (f (C:vec3->bytes position) width height length (C:color->bytes color)))))
 
 ;; ============================================================
+;; 平面绘制 (core_3d_camera_first_person.c)
+;; DrawPlane(Vector3 centerPos, Vector2 size, Color color)
+;; ============================================================
+
+(define draw-plane
+  (let ([f (get-ffi-obj "DrawPlane" T:lib
+             (_fun (pos : C:_vec3-bytes) (size : C:_vec2-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (center-pos size color)
+      (f (C:vec3->bytes center-pos) (C:vec2->bytes size) (C:color->bytes color)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
 (provide
  draw-cube
- draw-cube-wires)
+ draw-cube-wires
+ draw-plane)
 
