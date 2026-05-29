@@ -228,6 +228,9 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_world_screen | types, rcore, rmodels, raylib-var | get-world-to-screen（仅此一个新增） |
 | core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
 | core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
+| core_window_should_close | types, rcore, rshapes, raylib-var | 无需新增绑定 (set-exit-key, KEY-NULL 均已存在) |
+
+| core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
 
 | core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
 
