@@ -383,6 +383,14 @@
 (def-ffi end-scissor-mode "EndScissorMode" (_fun -> _void))
 
 ;; ============================================================
+;; 帧控制 / 时间 (core_custom_frame_control.c)
+;; ============================================================
+
+(def-ffi get-time "GetTime" (_fun -> _double))
+(def-ffi swap-screen-buffer "SwapScreenBuffer" (_fun -> _void))
+(def-ffi wait-time "WaitTime" (_fun _double -> _void))
+
+;; ============================================================
 ;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
 ;; ============================================================
 
@@ -781,6 +789,9 @@
 
  ;; Scissor mode
  begin-scissor-mode end-scissor-mode
+
+ ;; 帧控制 / 时间
+ get-time swap-screen-buffer wait-time
 
  ;; 输入 — 手柄
  is-gamepad-available? get-gamepad-name
