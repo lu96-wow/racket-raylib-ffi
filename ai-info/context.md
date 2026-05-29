@@ -229,6 +229,9 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
 | core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
 | core_window_should_close | types, rcore, rshapes, raylib-var | 无需新增绑定 (set-exit-key, KEY-NULL 均已存在) |
+| core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
+
+| core_window_should_close | types, rcore, rshapes, raylib-var | 无需新增绑定 (set-exit-key, KEY-NULL 均已存在) |
 
 | core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
 

@@ -216,6 +216,31 @@
 
 (def-ffi set-window-min-size "SetWindowMinSize" (_fun _int _int -> _void))
 
+;; ============================================================
+;; 显示器/窗口信息 (core_monitor_detector.c)
+;; ============================================================
+
+(def-ffi get-monitor-count              "GetMonitorCount"              (_fun -> _int))
+(def-ffi get-current-monitor            "GetCurrentMonitor"            (_fun -> _int))
+(def-ffi get-monitor-width              "GetMonitorWidth"              (_fun _int -> _int))
+(def-ffi get-monitor-height             "GetMonitorHeight"             (_fun _int -> _int))
+(def-ffi get-monitor-physical-width     "GetMonitorPhysicalWidth"      (_fun _int -> _int))
+(def-ffi get-monitor-physical-height    "GetMonitorPhysicalHeight"     (_fun _int -> _int))
+(def-ffi get-monitor-refresh-rate       "GetMonitorRefreshRate"        (_fun _int -> _int))
+(def-ffi get-monitor-name               "GetMonitorName"               (_fun _int -> _string))
+(def-ffi set-window-monitor             "SetWindowMonitor"             (_fun _int -> _void))
+
+(define get-monitor-position
+  (let ([f (get-ffi-obj "GetMonitorPosition" T:lib
+             (_fun _int -> (v : _vec2-bytes)))])
+    (λ (monitor) (vec2-bytes->vec2 (f monitor)))))
+
+(define get-window-position
+  (let ([f (get-ffi-obj "GetWindowPosition" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
+
+
 (def-ffi toggle-fullscreen          "ToggleFullscreen"          (_fun -> _void))
 (def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed"  (_fun -> _void))
 (def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _bool))
@@ -504,6 +529,10 @@
  toggle-fullscreen toggle-borderless-windowed
  is-window-state? set-window-state clear-window-state
  minimize-window maximize-window restore-window set-window-min-size
+ get-monitor-count get-current-monitor get-monitor-position get-monitor-name
+ get-monitor-width get-monitor-height
+ get-monitor-physical-width get-monitor-physical-height
+ get-monitor-refresh-rate set-window-monitor get-window-position
 
  ;; 绘制
  begin-drawing end-drawing

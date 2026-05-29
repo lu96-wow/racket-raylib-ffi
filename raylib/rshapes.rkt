@@ -54,6 +54,17 @@
       (f (C:rect->bytes rec) roundness segments (C:color->bytes color)))))
 
 ;; ============================================================
+;; 矩形绘制 Vector 版 (core_monitor_detector.c)
+;; DrawRectangleV(Vector2 position, Vector2 size, Color color)
+;; ============================================================
+
+(define draw-rectangle-v
+  (let ([f (get-ffi-obj "DrawRectangleV" T:lib
+             (_fun (p : C:_vec2-bytes) (s : C:_vec2-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (position size color)
+      (f (C:vec2->bytes position) (C:vec2->bytes size) (C:color->bytes color)))))
+
+;; ============================================================
 ;; 三角形绘制 (core_input_gamepad.c)
 ;; DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ;; ============================================================
@@ -102,7 +113,7 @@
       (f posX posY width height (C:color->bytes color)))))
 
 ;; ============================================================
-;; 矩形边框绘制 (扩展版, core_window_flags.c)
+;; 矩形边框绘制扩展版 (core_window_flags.c)
 ;; DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
 ;; ============================================================
 
@@ -114,8 +125,6 @@
 
 ;; ============================================================
 ;; 线段绘制 (core_input_gestures_testbed.c)
-;; ============================================================
-;; 线段绘制 (core_input_gestures_testbed.c)
 ;; DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ;; ============================================================
 
@@ -124,8 +133,9 @@
              (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
     (λ (start-pos end-pos thick color)
       (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) thick (C:color->bytes color)))))
+
 ;; ============================================================
-;; 线段绘制 (Vector 版本)
+;; 线段绘制 Vector 版本
 ;; DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 ;; ============================================================
 
@@ -134,8 +144,6 @@
              (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes) (col : C:_color-bytes) -> _void))])
     (λ (start-pos end-pos color)
       (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) (C:color->bytes color)))))
-
-
 
 ;; ============================================================
 ;; 环形绘制 (core_input_gestures_testbed.c)
@@ -160,6 +168,7 @@
  draw-rectangle
  draw-circle
  draw-rectangle-rounded
+ draw-rectangle-v
  draw-triangle
  check-collision-point-rec
  draw-rectangle-rec
@@ -168,4 +177,3 @@
  draw-line-ex
  draw-line-v
  draw-ring)
-
