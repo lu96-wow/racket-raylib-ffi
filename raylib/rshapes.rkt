@@ -160,6 +160,17 @@
          segments (C:color->bytes color)))))
 
 ;; ============================================================
+;; 矩形高级绘制 (core_smooth_pixelperfect.c)
+;; DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
+;; ============================================================
+
+(define draw-rectangle-pro
+  (let ([f (get-ffi-obj "DrawRectanglePro" T:lib
+             (_fun (r : C:_rect-bytes) (o : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
+    (λ (rec origin rotation color)
+      (f (C:rect->bytes rec) (C:vec2->bytes origin) rotation (C:color->bytes color)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -176,4 +187,5 @@
  draw-rectangle-lines-ex
  draw-line-ex
  draw-line-v
- draw-ring)
+ draw-ring
+ draw-rectangle-pro)
