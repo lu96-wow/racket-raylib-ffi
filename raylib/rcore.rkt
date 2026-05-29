@@ -522,6 +522,46 @@
   (_list-struct _bool _float _float _float _float _float _float _float _float _float))
 
 ;; ============================================================
+;; 拖放文件 (core_drop_files.c)
+;;   FilePathList = { unsigned int count; char **paths; }
+;;   IsFileDropped(void) -> bool
+;;   LoadDroppedFiles(void) -> FilePathList (by value)
+;;   UnloadDroppedFiles(FilePathList files) -> void (by value)
+;; ============================================================
+
+;; FilePathList 传值类型: count (uint) + paths (char**, pointer)
+(define _filepathlist-bytes
+  (_list-struct _uint _pointer))
+
+(def-ffi is-file-dropped "IsFileDropped" (_fun -> _bool))
+
+;; load-dropped-files: 内部自动调用 UnloadDroppedFiles
+;; 返回干净的 Racket 字符串列表（无需手动释放 C 内存）
+(define load-dropped-files
+  (let ([load-ffi (get-ffi-obj "LoadDroppedFiles" T:lib
+                    (_fun -> (lst : _filepathlist-bytes)))]
+        [unload-ffi (get-ffi-obj "UnloadDroppedFiles" T:lib
+                      (_fun (lst : _filepathlist-bytes) -> _void))]
+        [tmp (malloc _pointer 'atomic)])  ;; char* -> Racket string temp buffer
+    (lambda ()
+      (let* ([raw (load-ffi)]
+             [count (car raw)]
+             [paths-ptr (cadr raw)]
+             ;; iterate paths array, convert each char* -> Racket string
+             [paths
+              (for/list ([i (in-range count)])
+                (let ([cstr (ptr-ref paths-ptr _pointer i)])
+                  (if cstr
+                      ;; store char* in tmp, read as _string -> Racket string
+                      (begin
+                        (ptr-set! tmp _pointer 0 cstr)
+                        (ptr-ref tmp _string))
+                      "")))])
+        (unload-ffi raw)   ;; free C memory immediately
+        paths))))          ;; return clean Racket string list
+
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -539,6 +579,7 @@
  _ray-bytes ray->bytes
  _bounding-box-bytes bounding-box->bytes
  _ray-collision-bytes
+ _filepathlist-bytes
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -596,6 +637,9 @@
 
  ;; 输入 — 事件轮询
  poll-input-events
+
+ ;; 输入 — 拖放文件
+ is-file-dropped load-dropped-files
 
  ;; 配置
  set-config-flags
