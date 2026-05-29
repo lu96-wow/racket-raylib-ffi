@@ -66,6 +66,26 @@
    [rotation _float]
    [zoom _float]))
 
+;; RenderTexture (raylib.h:288)
+;;   unsigned int id;           // @ _uint 0
+;;   Texture texture (inline):  // Texture → { unsigned int id; int w, h, mip, fmt; }
+;;     unsigned int tex_id;     // @ _uint 1
+;;     int tex_width;           // @ _int 2
+;;     int tex_height;          // @ _int 3
+;;     int tex_mipmaps;         // @ _int 4
+;;     int tex_format;          // @ _int 5
+;;   Texture depth (inline):
+;;     unsigned int dep_id;     // @ _uint 6
+;;     int dep_width;           // @ _int 7
+;;     int dep_height;          // @ _int 8
+;;     int dep_mipmaps;         // @ _int 9
+;;     int dep_format;          // @ _int 10
+;; 总计: 44 字节, 11 个字段
+(define-cstruct _RenderTexture
+  ([id _uint]
+   [tex-id _uint] [tex-width _int] [tex-height _int] [tex-mipmaps _int] [tex-format _int]
+   [dep-id _uint] [dep-width _int] [dep-height _int] [dep-mipmaps _int] [dep-format _int]))
+
 ;; ============================================================
 ;; 导出
 ;; ============================================================
@@ -91,5 +111,15 @@
  Camera2D-rotation Camera2D-zoom
  set-Camera2D-off-x! set-Camera2D-off-y!
  set-Camera2D-tar-x! set-Camera2D-tar-y!
- set-Camera2D-rotation! set-Camera2D-zoom!)
+ set-Camera2D-rotation! set-Camera2D-zoom!
+ ;; RenderTexture
+ _RenderTexture RenderTexture? make-RenderTexture
+ RenderTexture-id RenderTexture-tex-id RenderTexture-tex-width
+ RenderTexture-tex-height RenderTexture-tex-mipmaps RenderTexture-tex-format
+ RenderTexture-dep-id RenderTexture-dep-width
+ RenderTexture-dep-height RenderTexture-dep-mipmaps RenderTexture-dep-format
+ set-RenderTexture-id! set-RenderTexture-tex-id! set-RenderTexture-tex-width!
+ set-RenderTexture-tex-height! set-RenderTexture-tex-mipmaps! set-RenderTexture-tex-format!
+ set-RenderTexture-dep-id! set-RenderTexture-dep-width!
+ set-RenderTexture-dep-height! set-RenderTexture-dep-mipmaps! set-RenderTexture-dep-format!)
 

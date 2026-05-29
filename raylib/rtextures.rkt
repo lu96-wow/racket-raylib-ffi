@@ -3,7 +3,7 @@
 ;; raylib textures 模块 — 纹理/图像加载与绘制
 ;;
 ;; 对应 C: rtextures.c / raylib.h "Module: textures"
-;; 包括: LoadTexture, UnloadTexture, DrawTexture 等
+;; 包括: LoadTexture, UnloadTexture, DrawTexture, LoadRenderTexture 等
 ;;
 ;; Texture / Texture2D 是 20 字节小结构体：
 ;;   unsigned int id;     // _uint   4B
@@ -12,6 +12,12 @@
 ;;   int mipmaps;         // _int    4B
 ;;   int format;          // _int    4B
 ;; 总计: 20B，C 侧传值，Racket 侧以 list 持有
+;;
+;; RenderTexture 是 44 字节小结构体（内嵌两个 Texture）:
+;;   unsigned int id;     // _uint   4B
+;;   Texture texture;     // 20B (内嵌)
+;;   Texture depth;       // 20B (内嵌)
+;; 总计: 44B
 
 (require ffi/unsafe
          (prefix-in T: "types.rkt")
@@ -54,10 +60,78 @@
       (f texture posX posY (C:color->bytes tint)))))
 
 ;; ============================================================
+;; RenderTexture 传值类型
+;; RenderTexture 是 11 字段 flat struct:
+;;   id, tex-id, tex-w, tex-h, tex-mip, tex-fmt, dep-id, dep-w, dep-h, dep-mip, dep-fmt
+;; ============================================================
+
+(define _render-texture-bytes
+  (_list-struct _uint _uint _int _int _int _int _uint _int _int _int _int))
+
+;; ============================================================
+;; LoadRenderTexture(int width, int height) -> RenderTexture
+;; 返回: 11 元素 list (id tex-id tex-w tex-h tex-mip tex-fmt
+;;                      dep-id dep-w dep-h dep-mip dep-fmt)
+;; ============================================================
+
+(define load-render-texture
+  (let ([f (get-ffi-obj "LoadRenderTexture" T:lib
+             (_fun _int _int -> (rt : _render-texture-bytes)))])
+    (λ (width height) (f width height))))
+
+;; ============================================================
+;; UnloadRenderTexture(RenderTexture target) -> void
+;; target 是 load-render-texture 返回的 11 元素 list
+;; ============================================================
+
+(define unload-render-texture
+  (let ([f (get-ffi-obj "UnloadRenderTexture" T:lib
+             (_fun (rt : _render-texture-bytes) -> _void))])
+    (λ (target) (f target))))
+
+;; ============================================================
+;; BeginTextureMode(RenderTexture target) -> void
+;; target 是 load-render-texture 返回的 11 元素 list
+;; ============================================================
+
+(define begin-texture-mode
+  (let ([f (get-ffi-obj "BeginTextureMode" T:lib
+             (_fun (rt : _render-texture-bytes) -> _void))])
+    (λ (target) (f target))))
+
+;; ============================================================
+;; EndTextureMode(void) -> void
+;; Ends drawing to render texture
+;; ============================================================
+
+(define end-texture-mode
+  (get-ffi-obj "EndTextureMode" T:lib (_fun -> _void)))
+
+;; ============================================================
+;; DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint)
+;; Draw a part of a texture defined by a rectangle
+;; ============================================================
+
+(define draw-texture-rec
+  (let ([f (get-ffi-obj "DrawTextureRec" T:lib
+             (_fun (t : _texture-bytes)
+                   (r : C:_rect-bytes)
+                   (p : C:_vec2-bytes)
+                   (c : C:_color-bytes) -> _void))])
+    (λ (texture source position tint)
+      (f texture
+         (C:rect->bytes source)
+         (C:vec2->bytes position)
+         (C:color->bytes tint)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
 (provide
- _texture-bytes
- load-texture unload-texture draw-texture)
+ _texture-bytes _render-texture-bytes
+ load-texture unload-texture draw-texture
+ load-render-texture unload-render-texture
+ begin-texture-mode end-texture-mode
+ draw-texture-rec)
 

@@ -217,3 +217,5 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_input_gestures_testbed | rcore, rshapes, raylib-var | draw-line-ex, draw-ring, get-gesture-drag-angle, get-gesture-pinch-angle, is-mouse-button-released, all gestures functions |
 | core_2d_camera_mouse_zoom | rcore, raylib-var | Camera2D (already defined), get-screen-width, get-screen-height, get-screen-to-world-2d, draw-grid, rl-push-matrix, rl-pop-matrix, rl-translate-f, rl-rotate-f |
 | core_2d_camera_platformer | rcore, raylib-var | get-world-to-screen-2d, 自定义 player/environment struct, 5 种相机跟随模式 (纯 Racket 实现) |
+| core_2d_camera_split_screen | rcore, rshapes, rtextures, raylib-var | draw-line-v, load-render-texture, unload-render-texture, begin-texture-mode, end-texture-mode, draw-texture-rec, RenderTexture |
+

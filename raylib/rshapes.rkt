@@ -111,6 +111,18 @@
              (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
     (λ (start-pos end-pos thick color)
       (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) thick (C:color->bytes color)))))
+;; ============================================================
+;; 线段绘制 (Vector 版本)
+;; DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
+;; ============================================================
+
+(define draw-line-v
+  (let ([f (get-ffi-obj "DrawLineV" T:lib
+             (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (start-pos end-pos color)
+      (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) (C:color->bytes color)))))
+
+
 
 ;; ============================================================
 ;; 环形绘制 (core_input_gestures_testbed.c)
@@ -140,5 +152,6 @@
  draw-rectangle-rec
  draw-rectangle-lines
  draw-line-ex
+ draw-line-v
  draw-ring)
 
