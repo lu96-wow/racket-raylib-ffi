@@ -46,6 +46,12 @@
   ([x _float]
    [y _float]))
 
+;; Vector3 (raylib.h:222) — 12 字节: 3 × float
+(define-cstruct _Vector3
+  ([x _float]
+   [y _float]
+   [z _float]))
+
 ;; Rectangle (raylib.h:256)
 (define-cstruct _Rectangle
   ([x _float]
@@ -65,6 +71,18 @@
    [tar-y _float]
    [rotation _float]
    [zoom _float]))
+
+;; Camera3D (raylib.h:327) — 44 字节
+;;   内嵌 Vector3 position (3 floats), Vector3 target (3 floats), Vector3 up (3 floats),
+;;   float fovy, int projection
+;;   布局: pos-x,y,z @ float 0-2; tar-x,y,z @ float 3-5; up-x,y,z @ float 6-8;
+;;         fovy @ float 9; projection @ int 0 (byte 40)
+(define-cstruct _Camera3D
+  ([pos-x _float] [pos-y _float] [pos-z _float]
+   [tar-x _float] [tar-y _float] [tar-z _float]
+   [up-x _float]  [up-y _float]  [up-z _float]
+   [fovy _float]
+   [projection _int]))
 
 ;; RenderTexture (raylib.h:288)
 ;;   unsigned int id;           // @ _uint 0
@@ -100,6 +118,10 @@
  _Vector2 Vector2? make-Vector2
  Vector2-x Vector2-y
  set-Vector2-x! set-Vector2-y!
+ ;; Vector3
+ _Vector3 Vector3? make-Vector3
+ Vector3-x Vector3-y Vector3-z
+ set-Vector3-x! set-Vector3-y! set-Vector3-z!
  ;; Rectangle
  _Rectangle Rectangle? make-Rectangle
  Rectangle-x Rectangle-y Rectangle-width Rectangle-height
@@ -112,6 +134,16 @@
  set-Camera2D-off-x! set-Camera2D-off-y!
  set-Camera2D-tar-x! set-Camera2D-tar-y!
  set-Camera2D-rotation! set-Camera2D-zoom!
+ ;; Camera3D
+ _Camera3D Camera3D? make-Camera3D
+ Camera3D-pos-x Camera3D-pos-y Camera3D-pos-z
+ Camera3D-tar-x Camera3D-tar-y Camera3D-tar-z
+ Camera3D-up-x Camera3D-up-y Camera3D-up-z
+ Camera3D-fovy Camera3D-projection
+ set-Camera3D-pos-x! set-Camera3D-pos-y! set-Camera3D-pos-z!
+ set-Camera3D-tar-x! set-Camera3D-tar-y! set-Camera3D-tar-z!
+ set-Camera3D-up-x! set-Camera3D-up-y! set-Camera3D-up-z!
+ set-Camera3D-fovy! set-Camera3D-projection!
  ;; RenderTexture
  _RenderTexture RenderTexture? make-RenderTexture
  RenderTexture-id RenderTexture-tex-id RenderTexture-tex-width

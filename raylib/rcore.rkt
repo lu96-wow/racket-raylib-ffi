@@ -111,6 +111,59 @@
       (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
 
 ;; ============================================================
+;; 3D 传值辅助: Vector3
+;; ============================================================
+
+(define _vec3-bytes
+  (_list-struct _float _float _float))
+
+(define (vec3->bytes v)
+  (list (ptr-ref v _float 0)
+        (ptr-ref v _float 1)
+        (ptr-ref v _float 2)))
+
+(define (vec3-bytes->vec3 lst)
+  (let ([v (malloc T:_Vector3 'atomic)])
+    (ptr-set! v _float 0 (car lst))
+    (ptr-set! v _float 1 (cadr lst))
+    (ptr-set! v _float 2 (caddr lst))
+    v))
+
+;; ============================================================
+;; 3D 传值辅助: Camera3D
+;;   10 floats + 1 int = 44 字节
+;;   pos-x/y/z @ float 0-2, tar-x/y/z @ float 3-5,
+;;   up-x/y/z @ float 6-8, fovy @ float 9, projection @ int 0
+;; ============================================================
+
+(define _camera3d-bytes
+  (_list-struct _float _float _float _float _float _float
+                _float _float _float _float _int))
+
+(define (camera3d->bytes cam)
+  (list (ptr-ref cam _float 0)   ;; pos-x
+        (ptr-ref cam _float 1)   ;; pos-y
+        (ptr-ref cam _float 2)   ;; pos-z
+        (ptr-ref cam _float 3)   ;; tar-x
+        (ptr-ref cam _float 4)   ;; tar-y
+        (ptr-ref cam _float 5)   ;; tar-z
+        (ptr-ref cam _float 6)   ;; up-x
+        (ptr-ref cam _float 7)   ;; up-y
+        (ptr-ref cam _float 8)   ;; up-z
+        (ptr-ref cam _float 9)   ;; fovy
+        (ptr-ref cam _int 0)))   ;; projection (first int at byte 40)
+
+;; ============================================================
+;; 3D 相机 (core_3d_camera_mode.c)
+;; ============================================================
+
+(def-ffi/unwrap begin-mode-3d "BeginMode3D"
+  (_fun (c : _camera3d-bytes) -> _void)
+  camera3d->bytes)
+
+(def-ffi end-mode-3d "EndMode3D" (_fun -> _void))
+
+;; ============================================================
 ;; 3D 网格绘制 (core_2d_camera_mouse_zoom.c)
 ;; DrawGrid(int slices, float spacing)
 ;; ============================================================
@@ -362,6 +415,8 @@
  _vec2-bytes vec2->bytes vec2-bytes->vec2
  _rect-bytes rect->bytes rect-bytes->rect
  _camera2d-bytes camera2d->bytes
+ _vec3-bytes vec3->bytes vec3-bytes->vec3
+ _camera3d-bytes camera3d->bytes
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -372,6 +427,9 @@
 
  ;; 2D 相机
  begin-mode-2d end-mode-2d
+
+ ;; 3D 相机
+ begin-mode-3d end-mode-3d
 
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height

@@ -37,6 +37,25 @@
   (ptr-set! v _float 1 (exact->inexact y)))
 
 ;; ============================================================
+;; 辅助: 创建 Vector3 指针
+;; ============================================================
+
+(define (vector3 x y z)
+  (let ([v (malloc T:_Vector3 'atomic)])
+    (ptr-set! v _float 0 (exact->inexact x))
+    (ptr-set! v _float 1 (exact->inexact y))
+    (ptr-set! v _float 2 (exact->inexact z))
+    v))
+
+(define (vector3-x v) (ptr-ref v _float 0))
+(define (vector3-y v) (ptr-ref v _float 1))
+(define (vector3-z v) (ptr-ref v _float 2))
+
+(define (set-vector3-x! v x) (ptr-set! v _float 0 (exact->inexact x)))
+(define (set-vector3-y! v y) (ptr-set! v _float 1 (exact->inexact y)))
+(define (set-vector3-z! v z) (ptr-set! v _float 2 (exact->inexact z)))
+
+;; ============================================================
 ;; 辅助: 创建 Rectangle 指针
 ;; ============================================================
 
@@ -255,6 +274,8 @@
 
 (provide
  make-color vector2 vector2-x vector2-y set-vector2-x! set-vector2-y!
+ vector3 vector3-x vector3-y vector3-z
+ set-vector3-x! set-vector3-y! set-vector3-z!
  rectangle rectangle-x rectangle-y rectangle-w rectangle-h
  set-rectangle-x! set-rectangle-y! set-rectangle-w! set-rectangle-h!
  camera2d
