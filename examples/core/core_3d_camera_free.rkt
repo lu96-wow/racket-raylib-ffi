@@ -2,14 +2,13 @@
 
 ;; raylib [core] example - 3d camera free (WASD 手动控制测试版)
 ;;
-;; 对应 C: examples/core/core_3d_camera_free.c
+;; 对应 C: examples/core/core_3d_camera_free.c 这个为了测试racket Camera做了修改
 ;; 修改为用 WASD 手动控制相机位置, 验证 Camera3D 字段绑定正确性
 ;;   W/S: 沿 target 方向前进/后退
 ;;   A/D: 横向平移 (strafe)
 ;;   Q/E: 上下移动
 
-(require (except-in ffi/unsafe _bool)
-         "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 初始化
@@ -21,26 +20,13 @@
 (init-window screen-width screen-height
              "raylib [core] example - 3d camera free (WASD test)")
 
-;; 定义 3D 相机
+;; 定义 3D 相机 (使用 raylib-var 提供的 camera3d 构造器)
 (define camera
-  (let ([cam (malloc _Camera3D 'atomic)])
-    ;; camera.position = (Vector3){ 10.0f, 10.0f, 10.0f }
-    (ptr-set! cam _float 0 10.0)   ;; pos-x
-    (ptr-set! cam _float 1 10.0)   ;; pos-y
-    (ptr-set! cam _float 2 10.0)   ;; pos-z
-    ;; camera.target = (Vector3){ 0.0f, 0.0f, 0.0f }
-    (ptr-set! cam _float 3 0.0)    ;; tar-x
-    (ptr-set! cam _float 4 0.0)    ;; tar-y
-    (ptr-set! cam _float 5 0.0)    ;; tar-z
-    ;; camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }
-    (ptr-set! cam _float 6 0.0)    ;; up-x
-    (ptr-set! cam _float 7 1.0)    ;; up-y
-    (ptr-set! cam _float 8 0.0)    ;; up-z
-    ;; camera.fovy = 45.0f
-    (ptr-set! cam _float 9 45.0)   ;; fovy
-    ;; camera.projection = CAMERA_PERSPECTIVE
-    (ptr-set! cam _int 10 CAMERA-PERSPECTIVE) ;; projection (10th int at byte 40)
-    cam))
+  (camera3d 10.0 10.0 10.0   ;; position  (10, 10, 10)
+            0.0 0.0 0.0       ;; target   (0, 0, 0)
+            0.0 1.0 0.0       ;; up       (0, 1, 0)
+            45.0              ;; fovy
+            CAMERA-PERSPECTIVE))
 
 ;; 方块位置
 (define cube-position (vector3 0.0 0.0 0.0))
@@ -51,22 +37,6 @@
 (set-target-fps 60)
 
 ;; ============================================================
-;; 辅助: 读取相机字段
-;; ============================================================
-
-(define (cam-pos-x)   (ptr-ref camera _float 0))
-(define (cam-pos-y)   (ptr-ref camera _float 1))
-(define (cam-pos-z)   (ptr-ref camera _float 2))
-(define (cam-tar-x)   (ptr-ref camera _float 3))
-(define (cam-tar-y)   (ptr-ref camera _float 4))
-(define (cam-tar-z)   (ptr-ref camera _float 5))
-(define (cam-up-x)    (ptr-ref camera _float 6))
-(define (cam-up-y)    (ptr-ref camera _float 7))
-(define (cam-up-z)    (ptr-ref camera _float 8))
-(define (cam-fovy)    (ptr-ref camera _float 9))
-(define (cam-proj)    (ptr-ref camera _int 10))
-
-;; ============================================================
 ;; 主循环
 ;; ============================================================
 
@@ -75,59 +45,59 @@
     ;; ---- 手动 WASD 控制 ----
     (when (is-key-down KEY-W)
       ;; 沿视线方向前进
-      (let* ([dx (- (cam-tar-x) (cam-pos-x))]
-             [dy (- (cam-tar-y) (cam-pos-y))]
-             [dz (- (cam-tar-z) (cam-pos-z))]
+      (let* ([dx (- (camera3d-tar-x camera) (camera3d-pos-x camera))]
+             [dy (- (camera3d-tar-y camera) (camera3d-pos-y camera))]
+             [dz (- (camera3d-tar-z camera) (camera3d-pos-z camera))]
              [len (sqrt (+ (* dx dx) (* dy dy) (* dz dz)))])
-        (ptr-set! camera _float 0 (+ (cam-pos-x) (* (/ dx len) move-speed)))
-        (ptr-set! camera _float 1 (+ (cam-pos-y) (* (/ dy len) move-speed)))
-        (ptr-set! camera _float 2 (+ (cam-pos-z) (* (/ dz len) move-speed)))))
+        (set-camera3d-pos-x! camera (+ (camera3d-pos-x camera) (* (/ dx len) move-speed)))
+        (set-camera3d-pos-y! camera (+ (camera3d-pos-y camera) (* (/ dy len) move-speed)))
+        (set-camera3d-pos-z! camera (+ (camera3d-pos-z camera) (* (/ dz len) move-speed)))))
 
     (when (is-key-down KEY-S)
       ;; 沿视线方向后退
-      (let* ([dx (- (cam-tar-x) (cam-pos-x))]
-             [dy (- (cam-tar-y) (cam-pos-y))]
-             [dz (- (cam-tar-z) (cam-pos-z))]
+      (let* ([dx (- (camera3d-tar-x camera) (camera3d-pos-x camera))]
+             [dy (- (camera3d-tar-y camera) (camera3d-pos-y camera))]
+             [dz (- (camera3d-tar-z camera) (camera3d-pos-z camera))]
              [len (sqrt (+ (* dx dx) (* dy dy) (* dz dz)))])
-        (ptr-set! camera _float 0 (- (cam-pos-x) (* (/ dx len) move-speed)))
-        (ptr-set! camera _float 1 (- (cam-pos-y) (* (/ dy len) move-speed)))
-        (ptr-set! camera _float 2 (- (cam-pos-z) (* (/ dz len) move-speed)))))
+        (set-camera3d-pos-x! camera (- (camera3d-pos-x camera) (* (/ dx len) move-speed)))
+        (set-camera3d-pos-y! camera (- (camera3d-pos-y camera) (* (/ dy len) move-speed)))
+        (set-camera3d-pos-z! camera (- (camera3d-pos-z camera) (* (/ dz len) move-speed)))))
 
     (when (is-key-down KEY-A)
       ;; 向左平移 (strafe)
-      (let* ([fx (- (cam-tar-x) (cam-pos-x))]
-             [fy (- (cam-tar-y) (cam-pos-y))]
-             [fz (- (cam-tar-z) (cam-pos-z))]
-             [sx (- (* (cam-up-y) fz) (* (cam-up-z) fy))]
-             [sy (- (* (cam-up-z) fx) (* (cam-up-x) fz))]
-             [sz (- (* (cam-up-x) fy) (* (cam-up-y) fx))]
+      (let* ([fx (- (camera3d-tar-x camera) (camera3d-pos-x camera))]
+             [fy (- (camera3d-tar-y camera) (camera3d-pos-y camera))]
+             [fz (- (camera3d-tar-z camera) (camera3d-pos-z camera))]
+             [sx (- (* (camera3d-up-y camera) fz) (* (camera3d-up-z camera) fy))]
+             [sy (- (* (camera3d-up-z camera) fx) (* (camera3d-up-x camera) fz))]
+             [sz (- (* (camera3d-up-x camera) fy) (* (camera3d-up-y camera) fx))]
              [len (sqrt (+ (* sx sx) (* sy sy) (* sz sz)))])
-        (ptr-set! camera _float 0 (- (cam-pos-x) (* (/ sx len) move-speed)))
-        (ptr-set! camera _float 1 (- (cam-pos-y) (* (/ sy len) move-speed)))
-        (ptr-set! camera _float 2 (- (cam-pos-z) (* (/ sz len) move-speed)))))
+        (set-camera3d-pos-x! camera (- (camera3d-pos-x camera) (* (/ sx len) move-speed)))
+        (set-camera3d-pos-y! camera (- (camera3d-pos-y camera) (* (/ sy len) move-speed)))
+        (set-camera3d-pos-z! camera (- (camera3d-pos-z camera) (* (/ sz len) move-speed)))))
 
     (when (is-key-down KEY-D)
       ;; 向右平移
-      (let* ([fx (- (cam-tar-x) (cam-pos-x))]
-             [fy (- (cam-tar-y) (cam-pos-y))]
-             [fz (- (cam-tar-z) (cam-pos-z))]
-             [sx (- (* (cam-up-y) fz) (* (cam-up-z) fy))]
-             [sy (- (* (cam-up-z) fx) (* (cam-up-x) fz))]
-             [sz (- (* (cam-up-x) fy) (* (cam-up-y) fx))]
+      (let* ([fx (- (camera3d-tar-x camera) (camera3d-pos-x camera))]
+             [fy (- (camera3d-tar-y camera) (camera3d-pos-y camera))]
+             [fz (- (camera3d-tar-z camera) (camera3d-pos-z camera))]
+             [sx (- (* (camera3d-up-y camera) fz) (* (camera3d-up-z camera) fy))]
+             [sy (- (* (camera3d-up-z camera) fx) (* (camera3d-up-x camera) fz))]
+             [sz (- (* (camera3d-up-x camera) fy) (* (camera3d-up-y camera) fx))]
              [len (sqrt (+ (* sx sx) (* sy sy) (* sz sz)))])
-        (ptr-set! camera _float 0 (+ (cam-pos-x) (* (/ sx len) move-speed)))
-        (ptr-set! camera _float 1 (+ (cam-pos-y) (* (/ sy len) move-speed)))
-        (ptr-set! camera _float 2 (+ (cam-pos-z) (* (/ sz len) move-speed)))))
+        (set-camera3d-pos-x! camera (+ (camera3d-pos-x camera) (* (/ sx len) move-speed)))
+        (set-camera3d-pos-y! camera (+ (camera3d-pos-y camera) (* (/ sy len) move-speed)))
+        (set-camera3d-pos-z! camera (+ (camera3d-pos-z camera) (* (/ sz len) move-speed)))))
 
     (when (is-key-down KEY-Q)
       ;; 向下移动
-      (ptr-set! camera _float 1 (- (cam-pos-y) move-speed)))
+      (set-camera3d-pos-y! camera (- (camera3d-pos-y camera) move-speed)))
 
     (when (is-key-down KEY-E)
       ;; 向上移动
-      (ptr-set! camera _float 1 (+ (cam-pos-y) move-speed)))
+      (set-camera3d-pos-y! camera (+ (camera3d-pos-y camera) move-speed)))
 
-    ;; ---- 调试信息: 在左上角显示相机位置 ----
+    ;; ---- 绘制 ----
     (begin-drawing)
 
     (clear-background RAYWHITE)
@@ -142,7 +112,9 @@
     (end-mode-3d)
 
     (draw-text (format "Camera pos: ~a, ~a, ~a"
-                       (cam-pos-x) (cam-pos-y) (cam-pos-z))
+                       (camera3d-pos-x camera)
+                       (camera3d-pos-y camera)
+                       (camera3d-pos-z camera))
                10 10 20 BLACK)
     (draw-text "W/S: forward/back  A/D: strafe  Q/E: up/down"
                10 40 10 DARKGRAY)

@@ -5,8 +5,7 @@
 ;; 对应 C: examples/core/core_3d_camera_mode.c
 ;; 演示: 设置 3D 相机, 在 3D 空间绘制方块和网格
 
-(require (except-in ffi/unsafe _bool)
-         "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 初始化
@@ -19,27 +18,12 @@
              "raylib [core] example - 3d camera mode")
 
 ;; 定义 3D 相机
-;; 用 malloc 创建裸指针 + ptr-set! 写字段
-;; (因为 define-cstruct 生成的 set-Xxx! 有契约检查, 不接受裸 cpointer)
 (define camera
-  (let ([cam (malloc _Camera3D 'atomic)])
-    ;; camera.position = (Vector3){ 0.0f, 10.0f, 10.0f }
-    (ptr-set! cam _float 0 0.0)    ;; pos-x
-    (ptr-set! cam _float 1 10.0)   ;; pos-y
-    (ptr-set! cam _float 2 10.0)   ;; pos-z
-    ;; camera.target = (Vector3){ 0.0f, 0.0f, 0.0f }
-    (ptr-set! cam _float 3 0.0)    ;; tar-x
-    (ptr-set! cam _float 4 0.0)    ;; tar-y
-    (ptr-set! cam _float 5 0.0)    ;; tar-z
-    ;; camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }
-    (ptr-set! cam _float 6 0.0)    ;; up-x
-    (ptr-set! cam _float 7 1.0)    ;; up-y
-    (ptr-set! cam _float 8 0.0)    ;; up-z
-    ;; camera.fovy = 45.0f
-    (ptr-set! cam _float 9 45.0)   ;; fovy
-    ;; camera.projection = CAMERA_PERSPECTIVE
-    (ptr-set! cam _int 10 CAMERA-PERSPECTIVE) ;; projection (10th int at byte 40)
-    cam))
+  (camera3d 0.0 10.0 10.0    ;; position  (0, 10, 10)
+            0.0 0.0 0.0      ;; target   (0, 0, 0)
+            0.0 1.0 0.0      ;; up       (0, 1, 0)
+            45.0             ;; fovy
+            CAMERA-PERSPECTIVE))
 
 ;; 方块位置
 (define cube-position (vector3 0.0 0.0 0.0))

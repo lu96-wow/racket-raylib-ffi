@@ -106,6 +106,54 @@
 (define (set-camera2d-zoom! cam v)     (ptr-set! cam _float 5 (exact->inexact v)))
 
 ;; ============================================================
+;; 辅助: 创建 Camera3D 指针
+;;   layout: pos-x/y/z @ float 0-2, tar-x/y/z @ float 3-5,
+;;           up-x/y/z @ float 6-8, fovy @ float 9, projection @ int 10
+;; ============================================================
+
+(define (camera3d pos-x pos-y pos-z
+                  tar-x tar-y tar-z
+                  up-x up-y up-z
+                  fovy projection)
+  (let ([cam (malloc T:_Camera3D 'atomic)])
+    (ptr-set! cam _float 0 (exact->inexact pos-x))
+    (ptr-set! cam _float 1 (exact->inexact pos-y))
+    (ptr-set! cam _float 2 (exact->inexact pos-z))
+    (ptr-set! cam _float 3 (exact->inexact tar-x))
+    (ptr-set! cam _float 4 (exact->inexact tar-y))
+    (ptr-set! cam _float 5 (exact->inexact tar-z))
+    (ptr-set! cam _float 6 (exact->inexact up-x))
+    (ptr-set! cam _float 7 (exact->inexact up-y))
+    (ptr-set! cam _float 8 (exact->inexact up-z))
+    (ptr-set! cam _float 9 (exact->inexact fovy))
+    (ptr-set! cam _int 10 projection)
+    cam))
+
+(define (camera3d-pos-x cam) (ptr-ref cam _float 0))
+(define (camera3d-pos-y cam) (ptr-ref cam _float 1))
+(define (camera3d-pos-z cam) (ptr-ref cam _float 2))
+(define (camera3d-tar-x cam) (ptr-ref cam _float 3))
+(define (camera3d-tar-y cam) (ptr-ref cam _float 4))
+(define (camera3d-tar-z cam) (ptr-ref cam _float 5))
+(define (camera3d-up-x  cam) (ptr-ref cam _float 6))
+(define (camera3d-up-y  cam) (ptr-ref cam _float 7))
+(define (camera3d-up-z  cam) (ptr-ref cam _float 8))
+(define (camera3d-fovy  cam) (ptr-ref cam _float 9))
+(define (camera3d-proj  cam) (ptr-ref cam _int 10))
+
+(define (set-camera3d-pos-x! cam v) (ptr-set! cam _float 0 (exact->inexact v)))
+(define (set-camera3d-pos-y! cam v) (ptr-set! cam _float 1 (exact->inexact v)))
+(define (set-camera3d-pos-z! cam v) (ptr-set! cam _float 2 (exact->inexact v)))
+(define (set-camera3d-tar-x! cam v) (ptr-set! cam _float 3 (exact->inexact v)))
+(define (set-camera3d-tar-y! cam v) (ptr-set! cam _float 4 (exact->inexact v)))
+(define (set-camera3d-tar-z! cam v) (ptr-set! cam _float 5 (exact->inexact v)))
+(define (set-camera3d-up-x!  cam v) (ptr-set! cam _float 6 (exact->inexact v)))
+(define (set-camera3d-up-y!  cam v) (ptr-set! cam _float 7 (exact->inexact v)))
+(define (set-camera3d-up-z!  cam v) (ptr-set! cam _float 8 (exact->inexact v)))
+(define (set-camera3d-fovy!  cam v) (ptr-set! cam _float 9 (exact->inexact v)))
+(define (set-camera3d-proj!  cam v) (ptr-set! cam _int 10 v))
+
+;; ============================================================
 ;; 预定义颜色
 ;; ============================================================
 
@@ -285,6 +333,15 @@
  set-camera2d-offset-x! set-camera2d-offset-y!
  set-camera2d-target-x! set-camera2d-target-y!
  set-camera2d-rotation! set-camera2d-zoom!
+ camera3d
+ camera3d-pos-x camera3d-pos-y camera3d-pos-z
+ camera3d-tar-x camera3d-tar-y camera3d-tar-z
+ camera3d-up-x camera3d-up-y camera3d-up-z
+ camera3d-fovy camera3d-proj
+ set-camera3d-pos-x! set-camera3d-pos-y! set-camera3d-pos-z!
+ set-camera3d-tar-x! set-camera3d-tar-y! set-camera3d-tar-z!
+ set-camera3d-up-x! set-camera3d-up-y! set-camera3d-up-z!
+ set-camera3d-fovy! set-camera3d-proj!
  RAYWHITE LIGHTGRAY GRAY DARKGRAY YELLOW GOLD ORANGE
  PINK RED MAROON GREEN LIME DARKGREEN SKYBLUE
  BLUE DARKBLUE PURPLE VIOLET DARKPURPLE
