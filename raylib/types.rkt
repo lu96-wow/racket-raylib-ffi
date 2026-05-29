@@ -84,6 +84,28 @@
    [fovy _float]
    [projection _int]))
 
+;; Ray (raylib.h:445) — 24 字节: 2 × Vector3 (position, direction)
+(define-cstruct _Ray
+  ([pos-x _float] [pos-y _float] [pos-z _float]
+   [dir-x _float] [dir-y _float] [dir-z _float]))
+
+;; RayCollision (raylib.h:451)
+;;   bool hit;            // 1B + 3 padding
+;;   float distance;      // 4B
+;;   Vector3 point;       // 12B
+;;   Vector3 normal;      // 12B
+;;   总计: 32B
+(define-cstruct _RayCollision
+  ([hit _bool]
+   [distance _float]
+   [point-x _float] [point-y _float] [point-z _float]
+   [norm-x _float]  [norm-y _float]  [norm-z _float]))
+
+;; BoundingBox (raylib.h:459) — 24 字节: 2 × Vector3 (min, max)
+(define-cstruct _BoundingBox
+  ([min-x _float] [min-y _float] [min-z _float]
+   [max-x _float] [max-y _float] [max-z _float]))
+
 ;; RenderTexture (raylib.h:288)
 ;;   unsigned int id;           // @ _uint 0
 ;;   Texture texture (inline):  // Texture → { unsigned int id; int w, h, mip, fmt; }
@@ -144,6 +166,29 @@
  set-Camera3D-tar-x! set-Camera3D-tar-y! set-Camera3D-tar-z!
  set-Camera3D-up-x! set-Camera3D-up-y! set-Camera3D-up-z!
  set-Camera3D-fovy! set-Camera3D-projection!
+  ;; Ray
+  _Ray Ray? make-Ray
+  Ray-pos-x Ray-pos-y Ray-pos-z
+  Ray-dir-x Ray-dir-y Ray-dir-z
+  set-Ray-pos-x! set-Ray-pos-y! set-Ray-pos-z!
+  set-Ray-dir-x! set-Ray-dir-y! set-Ray-dir-z!
+  ;; RayCollision
+  _RayCollision RayCollision? make-RayCollision
+  RayCollision-hit RayCollision-distance
+  RayCollision-point-x RayCollision-point-y RayCollision-point-z
+  RayCollision-norm-x RayCollision-norm-y RayCollision-norm-z
+  set-RayCollision-hit! set-RayCollision-distance!
+  set-RayCollision-point-x! set-RayCollision-point-y! set-RayCollision-point-z!
+  set-RayCollision-norm-x! set-RayCollision-norm-y! set-RayCollision-norm-z!
+  ;; BoundingBox
+  _BoundingBox BoundingBox? make-BoundingBox
+  BoundingBox-min-x BoundingBox-min-y BoundingBox-min-z
+  BoundingBox-max-x BoundingBox-max-y BoundingBox-max-z
+  set-BoundingBox-min-x! set-BoundingBox-min-y! set-BoundingBox-min-z!
+  set-BoundingBox-max-x! set-BoundingBox-max-y! set-BoundingBox-max-z!
+  ;; RenderTexture
+  _RenderTexture RenderTexture? make-RenderTexture
+
  ;; RenderTexture
  _RenderTexture RenderTexture? make-RenderTexture
  RenderTexture-id RenderTexture-tex-id RenderTexture-tex-width

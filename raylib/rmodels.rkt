@@ -78,6 +78,26 @@
       (f (C:vec3->bytes center-pos) radius (C:color->bytes color)))))
 
 ;; ============================================================
+;; DrawRay(Ray ray, Color color) — 绘制射线 (core_3d_picking.c)
+;; ============================================================
+
+(define draw-ray
+  (let ([f (get-ffi-obj "DrawRay" T:lib
+             (_fun (r : C:_ray-bytes) (col : C:_color-bytes) -> _void))])
+    (λ (ray color)
+      (f (C:ray->bytes ray) (C:color->bytes color)))))
+
+;; ============================================================
+;; GetRayCollisionBox(Ray ray, BoundingBox box) — 射线-盒碰撞 (core_3d_picking.c)
+;; ============================================================
+
+(define get-ray-collision-box
+  (let ([f (get-ffi-obj "GetRayCollisionBox" T:lib
+             (_fun (r : C:_ray-bytes) (bb : C:_bounding-box-bytes) -> (rc : C:_ray-collision-bytes)))])
+    (λ (ray bounding-box)
+      (f (C:ray->bytes ray) (C:bounding-box->bytes bounding-box)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -87,5 +107,7 @@
  draw-plane
  draw-cube-v
  draw-cube-wires-v
- draw-sphere)
+ draw-sphere
+ draw-ray
+ get-ray-collision-box)
 

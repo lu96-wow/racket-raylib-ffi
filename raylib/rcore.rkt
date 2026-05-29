@@ -407,6 +407,53 @@
     r))
 
 ;; ============================================================
+;; Ray / BoundingBox / RayCollision 传值辅助 (core_3d_picking.c)
+;; ============================================================
+
+(define _ray-bytes
+  (_list-struct _float _float _float _float _float _float))
+
+(define (ray->bytes r)
+  (list (ptr-ref r _float 0) (ptr-ref r _float 1) (ptr-ref r _float 2)
+        (ptr-ref r _float 3) (ptr-ref r _float 4) (ptr-ref r _float 5)))
+
+;; ============================================================
+;; GetScreenToWorldRay (core_3d_picking.c)
+;; Ray GetScreenToWorldRay(Vector2 position, Camera camera)
+;; ============================================================
+
+(define get-screen-to-world-ray
+  (let ([f (get-ffi-obj "GetScreenToWorldRay" T:lib
+             (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) -> (r : _ray-bytes)))])
+    (λ (position camera)
+      (let ([lst (f (vec2->bytes position) (camera3d->bytes camera))])
+        (let ([r (malloc T:_Ray 'atomic)])
+          (ptr-set! r _float 0 (car lst))
+          (ptr-set! r _float 1 (cadr lst))
+          (ptr-set! r _float 2 (caddr lst))
+          (ptr-set! r _float 3 (cadddr lst))
+          (ptr-set! r _float 4 (car (cddddr lst)))
+          (ptr-set! r _float 5 (cadr (cddddr lst)))
+          r)))))
+
+;; ============================================================
+;; MeasureText (core_3d_picking.c)
+;; int MeasureText(const char *text, int fontSize)
+;; ============================================================
+
+(def-ffi measure-text "MeasureText" (_fun _string _int -> _int))
+
+(define _bounding-box-bytes
+  (_list-struct _float _float _float _float _float _float))
+
+(define (bounding-box->bytes bb)
+  (list (ptr-ref bb _float 0) (ptr-ref bb _float 1) (ptr-ref bb _float 2)
+        (ptr-ref bb _float 3) (ptr-ref bb _float 4) (ptr-ref bb _float 5)))
+
+(define _ray-collision-bytes
+  (_list-struct _bool _float _float _float _float _float _float _float _float _float))
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -421,6 +468,9 @@
  _camera2d-bytes camera2d->bytes
  _vec3-bytes vec3->bytes vec3-bytes->vec3
  _camera3d-bytes camera3d->bytes
+ _ray-bytes ray->bytes
+ _bounding-box-bytes bounding-box->bytes
+ _ray-collision-bytes
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -438,6 +488,7 @@
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height
  get-screen-to-world-2d get-world-to-screen-2d
+ get-screen-to-world-ray measure-text
 
  ;; 3D 网格 / rlgl 矩阵操作
  draw-grid
