@@ -125,6 +125,34 @@
          (C:color->bytes tint)))))
 
 ;; ============================================================
+;; SetTextureFilter(Texture2D texture, int filter) — 设置纹理缩放过滤 (core_window_letterbox.c)
+;; ============================================================
+
+(define set-texture-filter
+  (let ([f (get-ffi-obj "SetTextureFilter" T:lib
+             (_fun (t : _texture-bytes) _int -> _void))])
+    (λ (texture filter-mode)
+      (f texture filter-mode))))
+
+;; ============================================================
+;; DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest,
+;;                Vector2 origin, float rotation, Color tint)
+;; 高级纹理绘制 (core_window_letterbox.c)
+;; ============================================================
+
+(define draw-texture-pro
+  (let ([f (get-ffi-obj "DrawTexturePro" T:lib
+             (_fun (t : _texture-bytes)
+                   (src : C:_rect-bytes) (dst : C:_rect-bytes)
+                   (org : C:_vec2-bytes) _float
+                   (col : C:_color-bytes) -> _void))])
+    (λ (texture source dest origin rotation tint)
+      (f texture
+         (C:rect->bytes source) (C:rect->bytes dest)
+         (C:vec2->bytes origin) rotation
+         (C:color->bytes tint)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -133,5 +161,7 @@
  load-texture unload-texture draw-texture
  load-render-texture unload-render-texture
  begin-texture-mode end-texture-mode
- draw-texture-rec)
+ draw-texture-rec
+ set-texture-filter
+ draw-texture-pro)
 

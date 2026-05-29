@@ -14,6 +14,12 @@
         [y (ptr-ref v _float 1)])
     (sqrt (+ (* x x) (* y y)))))
 
+(define (vec2-clamp v mn mx)
+  (let ([r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (clamp (ptr-ref v _float 0) (ptr-ref mn _float 0) (ptr-ref mx _float 0)))
+    (ptr-set! r _float 1 (clamp (ptr-ref v _float 1) (ptr-ref mn _float 1) (ptr-ref mx _float 1)))
+    r))
+
 (define (vec2-normalize v)
   (let* ([x (ptr-ref v _float 0)]
          [y (ptr-ref v _float 1)]
@@ -105,7 +111,7 @@
 
 (provide
  clamp lerp
- vec2-length vec2-normalize
+ vec2-length vec2-normalize vec2-clamp
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize
  vec3-rotate-by-axis-angle vec3-lerp)

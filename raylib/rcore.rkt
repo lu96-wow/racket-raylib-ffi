@@ -214,6 +214,8 @@
 ;; 窗口状态 / 标志管理 (core_window_flags.c)
 ;; ============================================================
 
+(def-ffi set-window-min-size "SetWindowMinSize" (_fun _int _int -> _void))
+
 (def-ffi toggle-fullscreen          "ToggleFullscreen"          (_fun -> _void))
 (def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed"  (_fun -> _void))
 (def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _bool))
@@ -501,7 +503,7 @@
  init-window close-window window-should-close? set-target-fps
  toggle-fullscreen toggle-borderless-windowed
  is-window-state? set-window-state clear-window-state
- minimize-window maximize-window restore-window
+ minimize-window maximize-window restore-window set-window-min-size
 
  ;; 绘制
  begin-drawing end-drawing
