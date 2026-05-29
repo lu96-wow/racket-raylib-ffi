@@ -376,6 +376,13 @@
 (def-ffi set-config-flags "SetConfigFlags" (_fun _uint -> _void))
 
 ;; ============================================================
+;; Scissor test (core_scissor_test.c)
+;; ============================================================
+
+(def-ffi begin-scissor-mode "BeginScissorMode" (_fun _int _int _int _int -> _void))
+(def-ffi end-scissor-mode "EndScissorMode" (_fun -> _void))
+
+;; ============================================================
 ;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
 ;; ============================================================
 
@@ -771,6 +778,9 @@
 
  ;; 配置
  set-config-flags
+
+ ;; Scissor mode
+ begin-scissor-mode end-scissor-mode
 
  ;; 输入 — 手柄
  is-gamepad-available? get-gamepad-name
