@@ -1,0 +1,18 @@
+file: core_automation_events.c
+status: SKIPPED — 自动化事件录制/回放
+
+问题记录:
+  1. SetAutomationEventList 需要 AutomationEventList* 持久化指针，
+     C 侧录制时写入 struct->count 和 struct->events[]，
+     struct 和 events 数组必须在稳定内存中。
+  2. 尝试过 ptr-set! 手动填充 struct → 结构体对齐/填充问题导致越界写
+  3. 尝试过 make-AutomationEventList (define-cstruct 构造器) → 录制正常，但
+     export/unload 时传了静态快照 aelist (count=0) 而非实时 aelist-ptr
+  4. 最终方案: Racket 侧 malloc events[16384] + make-AutomationEventList，
+     完全绕过 C 的 calloc/free 循环，录制正常运行 300+ 帧。
+     但随后出现 get-world-to-screen-2d 的 dotted pair / char-numeric? 错误，
+     疑似 _list-struct 返回 2 元素结构体时的 FFI 边界问题，或录制时内存写入
+     干扰了相邻的 Racket 对象（camera 等）。
+
+结论: 自动化事件部分的绑定本身可以工作，但与其他功能的交互（get-world-to-screen-2d
+      传值结构体返回）存在未明确定位的内存干扰。跳过此示例，后续再处理。
