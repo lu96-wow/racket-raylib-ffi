@@ -563,6 +563,119 @@
         paths))))          ;; return clean Racket string list
 
 
+
+;; ============================================================
+;; Shader 模块 — 着色器加载与绘制
+;;   Shader = { unsigned int id; int *locs; }
+;; ============================================================
+
+;; Shader 传值类型: id (_uint) + locs (_pointer)
+(define _shader-bytes
+  (_list-struct _uint _pointer))
+
+(define load-shader
+  (let ([f (get-ffi-obj "LoadShader" T:lib
+             (_fun _string _string -> (s : _shader-bytes)))])
+    (lambda (vs-filename fs-filename) (f vs-filename fs-filename))))
+
+(define unload-shader
+  (let ([f (get-ffi-obj "UnloadShader" T:lib
+             (_fun (s : _shader-bytes) -> _void))])
+    (lambda (shader) (f shader))))
+
+(define get-shader-location
+  (let ([f (get-ffi-obj "GetShaderLocation" T:lib
+             (_fun (s : _shader-bytes) _string -> _int))])
+    (lambda (shader uniform-name) (f shader uniform-name))))
+
+;; SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType)
+;; value 是 void*，需由调用方提供正确类型的数据指针
+(define set-shader-value
+  (let ([f (get-ffi-obj "SetShaderValue" T:lib
+             (_fun (s : _shader-bytes) _int _pointer _int -> _void))])
+    (lambda (shader loc-index value uniform-type)
+      (f shader loc-index value uniform-type))))
+
+(define begin-shader-mode
+  (let ([f (get-ffi-obj "BeginShaderMode" T:lib
+             (_fun (s : _shader-bytes) -> _void))])
+    (lambda (shader) (f shader))))
+
+(define end-shader-mode
+  (get-ffi-obj "EndShaderMode" T:lib (_fun -> _void)))
+
+;; ============================================================
+;; VR 立体渲染 — 模拟器支持
+;;   VrDeviceInfo   = { int hRes, vRes; float hScreen, vScreen, ... }
+;;   VrStereoConfig = { Matrix projection[2], viewOffset[2], ... }
+;; ============================================================
+
+
+;; 辅助: 构造 float[*] 指针（用于 SetShaderValue 的 void* 参数）
+(define (malloc-float-vec2 x y)
+  (let ([buf (malloc _float 2 'atomic)])
+    (ptr-set! buf _float 0 x)
+    (ptr-set! buf _float 1 y)
+    buf))
+
+(define (malloc-float-vec4 a b c d)
+  (let ([buf (malloc _float 4 'atomic)])
+    (ptr-set! buf _float 0 a)
+    (ptr-set! buf _float 1 b)
+    (ptr-set! buf _float 2 c)
+    (ptr-set! buf _float 3 d)
+    buf))
+;; VrDeviceInfo 传值类型: 15 字段 = 60 字节
+;;   int hResolution, vResolution
+;;   float hScreenSize, vScreenSize, eyeToScreenDistance,
+;;         lensSeparationDistance, interpupillaryDistance
+;;   float lensDistortionValues[4], chromaAbCorrection[4]
+(define _vrdeviceinfo-bytes
+  (_list-struct _int _int
+               _float _float _float _float _float
+               _float _float _float _float
+               _float _float _float _float))
+
+;; VrStereoConfig 传值类型: 76 字段 = 304 字节
+;;   2x Matrix (每 Matrix 16 floats) + 6x float[2]
+(define _vrstereoconfig-bytes
+  (_list-struct
+   ;; projection[0]: 16 floats
+   _float _float _float _float _float _float _float _float
+   _float _float _float _float _float _float _float _float
+   ;; projection[1]: 16 floats
+   _float _float _float _float _float _float _float _float
+   _float _float _float _float _float _float _float _float
+   ;; viewOffset[0]: 16 floats
+   _float _float _float _float _float _float _float _float
+   _float _float _float _float _float _float _float _float
+   ;; viewOffset[1]: 16 floats
+   _float _float _float _float _float _float _float _float
+   _float _float _float _float _float _float _float _float
+   ;; leftLensCenter[2], rightLensCenter[2]
+   _float _float _float _float
+   ;; leftScreenCenter[2], rightScreenCenter[2]
+   _float _float _float _float
+   ;; scale[2], scaleIn[2]
+   _float _float _float _float))
+
+(define load-vr-stereo-config
+  (let ([f (get-ffi-obj "LoadVrStereoConfig" T:lib
+             (_fun (dev : _vrdeviceinfo-bytes) -> (cfg : _vrstereoconfig-bytes)))])
+    (lambda (device) (f device))))
+
+(define unload-vr-stereo-config
+  (let ([f (get-ffi-obj "UnloadVrStereoConfig" T:lib
+             (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+    (lambda (config) (f config))))
+
+(define begin-vr-stereo-mode
+  (let ([f (get-ffi-obj "BeginVrStereoMode" T:lib
+             (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+    (lambda (config) (f config))))
+
+(define end-vr-stereo-mode
+  (get-ffi-obj "EndVrStereoMode" T:lib (_fun -> _void)))
 ;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
@@ -582,6 +695,9 @@
  _bounding-box-bytes bounding-box->bytes
  _ray-collision-bytes
  _filepathlist-bytes
+ _shader-bytes
+ _vrdeviceinfo-bytes
+ _vrstereoconfig-bytes
 
  ;; 窗口
  init-window close-window window-should-close? set-target-fps
@@ -642,6 +758,16 @@
 
  ;; 输入 — 拖放文件
  is-file-dropped load-dropped-files
+
+ ;; 着色器
+ load-shader unload-shader
+ get-shader-location set-shader-value
+ begin-shader-mode end-shader-mode
+
+ ;; VR 立体渲染
+ malloc-float-vec2 malloc-float-vec4
+ load-vr-stereo-config unload-vr-stereo-config
+ begin-vr-stereo-mode end-vr-stereo-mode
 
  ;; 配置
  set-config-flags

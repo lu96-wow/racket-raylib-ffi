@@ -319,6 +319,16 @@
 (define CAMERA-ORTHOGRAPHIC    1)
 
 ;; ============================================================
+;; Shader uniform 类型
+;; ============================================================
+
+(define SHADER-UNIFORM-FLOAT   0)
+(define SHADER-UNIFORM-VEC2    1)
+(define SHADER-UNIFORM-VEC3    2)
+(define SHADER-UNIFORM-VEC4    3)
+(define SHADER-UNIFORM-INT     4)
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -404,4 +414,8 @@
  CAMERA-CUSTOM CAMERA-FREE CAMERA-ORBITAL
  CAMERA-FIRST-PERSON CAMERA-THIRD-PERSON
  CAMERA-PERSPECTIVE CAMERA-ORTHOGRAPHIC
- TEXTURE-FILTER-BILINEAR)
+ TEXTURE-FILTER-BILINEAR
+ SHADER-UNIFORM-FLOAT SHADER-UNIFORM-VEC2
+ SHADER-UNIFORM-VEC3 SHADER-UNIFORM-VEC4
+ SHADER-UNIFORM-INT
+)

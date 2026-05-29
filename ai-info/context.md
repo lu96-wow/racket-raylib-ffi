@@ -233,7 +233,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_custom_logging | types, rcore, raylib-var | set-trace-log-callback, vsnprintf（需 ffi/unsafe 的 function-ptr 创建回调） |
 | core_drop_files | rcore, raylib-var | _filepathlist-bytes, is-file-dropped, load-dropped-files（自动读取 C 字符串并释放内存，返回 Racket 字符串列表） |
 | core_random_values | rcore, raylib-var | set-random-seed（TextFormat 用 format 替代，不绑定 C 变参函数） |
-| core_storage_values | rcore, raylib-var | 无需新增绑定（LoadFileData/SaveFileData 用 Racket file I/O 替代） |
+| core_storage_values | rcore, raylib-var | 无需新增绑定（LoadFileData/SaveFileData 用 Racket file I/O 替代） || core_vr_simulator | types, rcore, rtextures, rmodels, raylib-var | _Shader, _vrdeviceinfo-bytes, _vrstereoconfig-bytes, _shader-bytes, load-shader, unload-shader, get-shader-location, set-shader-value, begin-shader-mode, end-shader-mode, load-vr-stereo-config, unload-vr-stereo-config, begin-vr-stereo-mode, end-vr-stereo-mode, malloc-float-vec2, malloc-float-vec4, SHADER-UNIFORM-* |
 
 | core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
 

@@ -126,6 +126,11 @@
    [tex-id _uint] [tex-width _int] [tex-height _int] [tex-mipmaps _int] [tex-format _int]
    [dep-id _uint] [dep-width _int] [dep-height _int] [dep-mipmaps _int] [dep-format _int]))
 
+
+;; Shader (raylib.h:375) — 12 字节: unsigned int id + int* locs
+(define-cstruct _Shader
+  ([id _uint]
+   [locs _pointer]))
 ;; ============================================================
 ;; 导出
 ;; ============================================================
@@ -198,5 +203,9 @@
  set-RenderTexture-id! set-RenderTexture-tex-id! set-RenderTexture-tex-width!
  set-RenderTexture-tex-height! set-RenderTexture-tex-mipmaps! set-RenderTexture-tex-format!
  set-RenderTexture-dep-id! set-RenderTexture-dep-width!
- set-RenderTexture-dep-height! set-RenderTexture-dep-mipmaps! set-RenderTexture-dep-format!)
-
+ set-RenderTexture-dep-height! set-RenderTexture-dep-mipmaps! set-RenderTexture-dep-format!
+ ;; Shader
+ _Shader Shader? make-Shader
+ Shader-id Shader-locs
+ set-Shader-id! set-Shader-locs!
+)
