@@ -151,10 +151,10 @@
         (ptr-ref cam _float 7)   ;; up-y
         (ptr-ref cam _float 8)   ;; up-z
         (ptr-ref cam _float 9)   ;; fovy
-        (ptr-ref cam _int 0)))   ;; projection (first int at byte 40)
+        (ptr-ref cam _int 10)))  ;; projection (10th int at byte 40)
 
 ;; ============================================================
-;; 3D 相机 (core_3d_camera_mode.c)
+;; 3D 相机 (core_3d_camera_mode.c, core_3d_camera_free.c)
 ;; ============================================================
 
 (def-ffi/unwrap begin-mode-3d "BeginMode3D"
@@ -162,6 +162,10 @@
   camera3d->bytes)
 
 (def-ffi end-mode-3d "EndMode3D" (_fun -> _void))
+
+;; UpdateCamera(Camera *camera, int mode) → void
+;; Camera3D 在 Racket 侧已是指针, 直接传 _pointer
+(def-ffi update-camera "UpdateCamera" (_fun _pointer _int -> _void))
 
 ;; ============================================================
 ;; 3D 网格绘制 (core_2d_camera_mouse_zoom.c)
@@ -429,7 +433,7 @@
  begin-mode-2d end-mode-2d
 
  ;; 3D 相机
- begin-mode-3d end-mode-3d
+ begin-mode-3d end-mode-3d update-camera
 
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height

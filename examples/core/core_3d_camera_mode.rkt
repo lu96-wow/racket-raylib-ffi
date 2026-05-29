@@ -38,7 +38,7 @@
     ;; camera.fovy = 45.0f
     (ptr-set! cam _float 9 45.0)   ;; fovy
     ;; camera.projection = CAMERA_PERSPECTIVE
-    (ptr-set! cam _int 0 CAMERA-PERSPECTIVE)  ;; projection (first int)
+    (ptr-set! cam _int 10 CAMERA-PERSPECTIVE) ;; projection (10th int at byte 40)
     cam))
 
 ;; 方块位置
