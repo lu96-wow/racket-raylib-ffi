@@ -233,6 +233,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_scissor_test | rcore, rshapes, raylib-var | begin-scissor-mode, end-scissor-mode (无需新结构体) |
 | core_custom_frame_control | rcore, rshapes, raylib-var | get-time, swap-screen-buffer, wait-time (无需新结构体) |
 | core_smooth_pixelperfect | rcore, rshapes, rtextures, raylib-var | draw-rectangle-pro (新增), 复用 render-texture/texture-pro/camera2d |
+| core_random_sequence | rcore, rshapes, raymath, raylib-var | load-random-sequence (FFI包装), remap (纯Racket) |
 | core_custom_logging | types, rcore, raylib-var | set-trace-log-callback, vsnprintf（需 ffi/unsafe 的 function-ptr 创建回调） |
 | core_drop_files | rcore, raylib-var | _filepathlist-bytes, is-file-dropped, load-dropped-files（自动读取 C 字符串并释放内存，返回 Racket 字符串列表） |
 | core_random_values | rcore, raylib-var | set-random-seed（TextFormat 用 format 替代，不绑定 C 变参函数） |

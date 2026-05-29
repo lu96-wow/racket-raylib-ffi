@@ -391,6 +391,28 @@
 (def-ffi wait-time "WaitTime" (_fun _double -> _void))
 
 ;; ============================================================
+;; 随机序列 (core_random_sequence.c)
+;;   LoadRandomSequence(count, min, max) → int*   (必须手动 Unload)
+;;   UnloadRandomSequence(sequence) → void
+;; 包装: load-random-sequence 自动读取并释放, 返回 Racket 整数列表
+;; ============================================================
+
+(define _load-random-sequence-ffi
+  (get-ffi-obj "LoadRandomSequence" T:lib
+    (_fun _uint _int _int -> _pointer)))
+
+(define _unload-random-sequence-ffi
+  (get-ffi-obj "UnloadRandomSequence" T:lib
+    (_fun _pointer -> _void)))
+
+(define (load-random-sequence count min max)
+  (let* ([ptr (_load-random-sequence-ffi count min max)]
+         [result (for/list ([i (in-range count)])
+                   (ptr-ref ptr _int i))])
+    (_unload-random-sequence-ffi ptr)
+    result))
+
+;; ============================================================
 ;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
 ;; ============================================================
 
@@ -792,6 +814,9 @@
 
  ;; 帧控制 / 时间
  get-time swap-screen-buffer wait-time
+
+ ;; 随机序列
+ load-random-sequence
 
  ;; 输入 — 手柄
  is-gamepad-available? get-gamepad-name

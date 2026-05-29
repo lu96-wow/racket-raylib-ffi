@@ -9,6 +9,13 @@
 (define (lerp start end amount)
   (+ start (* amount (- end start))))
 
+;; Remap(float value, float inputStart, float inputEnd, float outputStart, float outputEnd)
+(define (remap value input-start input-end output-start output-end)
+  (+ output-start
+     (* (- value input-start)
+        (/ (- output-end output-start)
+           (- input-end input-start)))))
+
 (define (vec2-length v)
   (let ([x (ptr-ref v _float 0)]
         [y (ptr-ref v _float 1)])
@@ -110,7 +117,7 @@
     r))
 
 (provide
- clamp lerp
+ clamp lerp remap
  vec2-length vec2-normalize vec2-clamp
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize

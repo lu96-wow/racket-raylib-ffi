@@ -5,3 +5,27 @@
 
 自定义结构体:
   ColorRect — 文件中自定义 { Color color; Rectangle rect; }
+              Racket 版用 vector of (vector color rect)
+
+使用函数:
+  InitWindow / SetTargetFPS / WindowShouldClose / CloseWindow
+  IsKeyPressed(KEY_SPACE / KEY_UP / KEY_DOWN)
+  BeginDrawing / EndDrawing / ClearBackground
+  DrawRectangleRec / DrawText / DrawFPS
+  GetRandomValue (生成随机颜色)
+  LoadRandomSequence / UnloadRandomSequence
+  Remap (raymath.h 内联函数)
+
+新增绑定 (rcore.rkt):
+  load-random-sequence  — 包装 LoadRandomSequence + UnloadRandomSequence
+                         自动读取 C int* 数组, 返回 Racket 整数列表
+
+新增绑定 (raymath.rkt):
+  remap  — 纯 Racket 实现 (C Remap 是 raymath.h 内联函数, 不在 .so 中)
+
+复用绑定:
+  get-random-value / is-key-pressed / draw-fps
+  draw-rectangle-rec / draw-text
+  make-color
+  rectangle / set-rectangle-h! / set-rectangle-y! / rectangle-h / rectangle-y
+  RAYWHITE / BLACK / MAROON
