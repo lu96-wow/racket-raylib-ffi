@@ -270,3 +270,4 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | core_input_actions | rcore, rshapes, raylib-var | 纯 Racket 实现 Action 映射系统 (is-action-pressed?/released?/down?), 无需新增 FFI 绑定 |
 | | | core_directory_files | rcore, rshapes, raylib-var | get-working-directory, get-prev-directory-path, directory-exists?, load-directory-files-ex (4 个新增绑定), 用原生 raylib 绘制替代 raygui |
 | | | core_highdpi_testbed | rcore, rshapes, raylib-var | get-render-width, get-render-height, get-window-scale-dpi (3 个新增绑定) |
+| | | core_screen_recording | rcore, rshapes, raylib-var | _image-bytes, load-image-from-screen, unload-image, get-application-directory, export-image (5 个新增绑定), 用 ExportImage PNG 替代 C 版的 msf_gif GIF |

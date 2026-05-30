@@ -649,6 +649,36 @@
         paths))))
 
 ;; ============================================================
+;; Image 传值类型 (core_screen_recording.c)
+;; Image = { void *data; int width; int height; int mipmaps; int format; }
+;; 24 字节 (64-bit: pointer 8B + 4xint 16B)
+;; ============================================================
+
+(define _image-bytes
+  (_list-struct _pointer _int _int _int _int))
+
+;; LoadImageFromScreen(void) -> Image
+(define load-image-from-screen
+  (let ([f (get-ffi-obj "LoadImageFromScreen" T:lib
+             (_fun -> (img : _image-bytes)))])
+    (lambda () (f))))
+
+;; UnloadImage(Image image) -> void
+(define unload-image
+  (let ([f (get-ffi-obj "UnloadImage" T:lib
+             (_fun (img : _image-bytes) -> _void))])
+    (lambda (img) (f img))))
+
+;; GetApplicationDirectory(void) -> const char *
+(def-ffi get-application-directory "GetApplicationDirectory" (_fun -> _string))
+
+;; ExportImage(Image image, const char *fileName) -> bool
+(define export-image
+  (let ([f (get-ffi-obj "ExportImage" T:lib
+             (_fun (i : _image-bytes) _string -> _stdbool))])
+    (lambda (img filename) (f img filename))))
+
+;; ============================================================
 ;; Shader 模块 — 着色器加载与绘制
 ;;   Shader = { unsigned int id; int *locs; }
 ;; ============================================================
@@ -796,6 +826,7 @@
  _bounding-box-bytes bounding-box->bytes
  _ray-collision-bytes
  _filepathlist-bytes
+ _image-bytes
  _shader-bytes
  _vrdeviceinfo-bytes
  _vrstereoconfig-bytes
@@ -865,6 +896,9 @@
  ;; 文件系统
  get-working-directory get-prev-directory-path directory-exists?
  load-directory-files-ex
+
+ ;; 图像/截图
+ load-image-from-screen unload-image get-application-directory export-image
 
  ;; 着色器
  load-shader unload-shader
