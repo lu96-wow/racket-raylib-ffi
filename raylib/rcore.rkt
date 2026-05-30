@@ -243,6 +243,14 @@
     (_fun _pointer _int _string _pointer -> _int)))
 
 ;; ============================================================
+;; ============================================================
+;; 剪贴板 (core_clipboard_text.c)
+;; ============================================================
+
+(def-ffi set-clipboard-text "SetClipboardText" (_fun _string -> _void))
+(def-ffi get-clipboard-text "GetClipboardText" (_fun -> _string))
+
+
 ;; 文件系统 (core_directory_files.c, core_drop_files.c)
 ;; ============================================================
 
@@ -889,6 +897,9 @@
 
  ;; 输入 — 事件轮询
  poll-input-events
+
+ ;; 输入 — 剪贴板
+ set-clipboard-text get-clipboard-text
 
  ;; 输入 — 拖放文件
  is-file-dropped load-dropped-files
