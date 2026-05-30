@@ -713,6 +713,21 @@
 
 (define end-vr-stereo-mode
   (get-ffi-obj "EndVrStereoMode" T:lib (_fun -> _void)))
+
+;; ============================================================
+;; AutomationEvent 传值类型 + 回放 FFI
+;;   C: PlayAutomationEvent(AutomationEvent event) → void
+;;   传值调用，24 字节压栈，无指针问题
+;; ============================================================
+
+(define _automation-event-bytes
+  (_list-struct _uint _uint _int _int _int _int))
+
+;; play-automation-event: 原始 FFI，接受 (list frame type p0 p1 p2 p3)
+;; raylib-racket/automation.rkt 中有对应的 struct 包装版本
+(define play-automation-event
+  (get-ffi-obj "PlayAutomationEvent" T:lib
+    (_fun (evt : _automation-event-bytes) -> _void)))
 ;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
@@ -725,6 +740,8 @@
  _color-bytes color->bytes
  _vec2-bytes vec2->bytes vec2-bytes->vec2
  _rect-bytes rect->bytes rect-bytes->rect
+  _vrstereoconfig-bytes
+  _automation-event-bytes
  _camera2d-bytes camera2d->bytes
  _vec3-bytes vec3->bytes vec3-bytes->vec3
  _camera3d-bytes camera3d->bytes
@@ -837,4 +854,6 @@
  ;; 输入 — 手势
  set-gestures-enabled is-gesture-detected? get-gesture-detected
  get-gesture-hold-duration get-gesture-drag-vector get-gesture-drag-angle
- get-gesture-pinch-vector get-gesture-pinch-angle)
+ get-gesture-pinch-vector get-gesture-pinch-angle
+
+)

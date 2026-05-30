@@ -1,18 +1,29 @@
 file: core_automation_events.c
-status: SKIPPED — 自动化事件录制/回放
+status: 已实现 — 纯 Racket 录制 + 单 FFI 回放
 
-问题记录:
-  1. SetAutomationEventList 需要 AutomationEventList* 持久化指针，
-     C 侧录制时写入 struct->count 和 struct->events[]，
-     struct 和 events 数组必须在稳定内存中。
-  2. 尝试过 ptr-set! 手动填充 struct → 结构体对齐/填充问题导致越界写
-  3. 尝试过 make-AutomationEventList (define-cstruct 构造器) → 录制正常，但
-     export/unload 时传了静态快照 aelist (count=0) 而非实时 aelist-ptr
-  4. 最终方案: Racket 侧 malloc events[16384] + make-AutomationEventList，
-     完全绕过 C 的 calloc/free 循环，录制正常运行 300+ 帧。
-     但随后出现 get-world-to-screen-2d 的 dotted pair / char-numeric? 错误，
-     疑似 _list-struct 返回 2 元素结构体时的 FFI 边界问题，或录制时内存写入
-     干扰了相邻的 Racket 对象（camera 等）。
+绑定方案:
+  raylib/rcore.rkt:
+    _automation-event-bytes   — AutomationEvent 传值类型 (24B, _list-struct)
+    play-automation-event     — 原始 FFI, 接受 (list frame type p0 p1 p2 p3)
 
-结论: 自动化事件部分的绑定本身可以工作，但与其他功能的交互（get-world-to-screen-2d
-      传值结构体返回）存在未明确定位的内存干扰。跳过此示例，后续再处理。
+  raylib-racket/automation.rkt （纯 Racket 兼容实现层）:
+    automation-event struct   — 事件结构体 {frame, type, params}
+    play-automation-event     — 对 rcore.rkt 原始 FFI 的结构体包装
+    export-automation-events  — 纯 Racket 导出 .rae 文件
+    load-automation-events    — 纯 Racket 加载 .rae 文件
+    recorder / make-recorder  — 帧间状态追踪
+    record-frame!             — 每帧录制输入变化
+    EVENT-NONE ~ ACTION-SETTARGETFPS  — 23 个事件类型常量
+
+设计说明:
+  C 的 RecordAutomationEvent() 录制逻辑完全由纯 Racket 替代:
+    - 每帧通过已有 FFI (is-key-down, get-mouse-position 等) 查询输入状态
+    - 对比上一帧状态, 差异构造成 automation-event 追加到列表
+    - 按 S 停止时, reverse 列表得到正确的时序, 导出 .rae 文件
+    - 回放时遍历 events[i], 调用 play-automation-event 传给 C
+  FFI 只有 PlayAutomationEvent 一个函数 (传值, 24B 压栈, 无指针问题)
+  不再有 SetAutomationEventList / 'raw malloc / C 持指针等复杂机制
+
+使用方式:
+  (require "../../raylib/raylib.rkt"           ;; FFI 绑定 + 常量
+           "../../raylib-racket/automation.rkt")  ;; 纯 Racket 自动化层

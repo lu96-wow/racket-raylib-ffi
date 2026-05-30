@@ -15,10 +15,17 @@ racket-bind/
 │   ├── raudio.rkt           # (骨架)
 │   └── rcamera.rkt          # (骨架)
 │
+ ├── raylib-var/              # 预定义常量（与 FFI 绑定分离）
 ├── raylib-var/              # 预定义常量（与 FFI 绑定分离）
 │   ├── var.rkt              # 主入口
 │   └── core.rkt             # 颜色、键盘键值、窗口标志等所有常量
 │
+ │   └── core.rkt             # 颜色、键盘键值、窗口标志等所有常量
+ │
+ ├── raylib-racket/            # 纯 Racket 兼容实现层
+ │   └── automation.rkt       # Automation Events 录制/导出/加载（纯 Racket）
+ │                            # FFI 只有 play-automation-event 在 raylib/rcore.rkt 中
+ │
 ├── examples/core/           # core 示例的 Racket 翻译
 │   ├── core_basic_window.rkt
 │   └── core_delta_time.rkt
@@ -252,4 +259,5 @@ timeout 3 racket examples/core/core_xxx.rkt
 | core_3d_picking | types, rcore, rshapes, rmodels, raylib-var | Ray, BoundingBox, RayCollision, get-screen-to-world-ray, get-ray-collision-box, draw-ray, measure-text |
 
 
+| core_automation_events | raylib-racket/automation.rkt, rcore、rshapes、raylib-var | automation-event struct, play-automation-event (FFI), export/load-automation-events, recorder, record-frame!, 23 type constants, 完全纯 Racket 录制，无 C 持指针 |
 
