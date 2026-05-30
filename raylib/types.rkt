@@ -167,29 +167,26 @@
  set-Camera3D-tar-x! set-Camera3D-tar-y! set-Camera3D-tar-z!
  set-Camera3D-up-x! set-Camera3D-up-y! set-Camera3D-up-z!
  set-Camera3D-fovy! set-Camera3D-projection!
-  ;; Ray
-  _Ray Ray? make-Ray
-  Ray-pos-x Ray-pos-y Ray-pos-z
-  Ray-dir-x Ray-dir-y Ray-dir-z
-  set-Ray-pos-x! set-Ray-pos-y! set-Ray-pos-z!
-  set-Ray-dir-x! set-Ray-dir-y! set-Ray-dir-z!
-  ;; RayCollision
-  _RayCollision RayCollision? make-RayCollision
-  RayCollision-hit RayCollision-distance
-  RayCollision-point-x RayCollision-point-y RayCollision-point-z
-  RayCollision-norm-x RayCollision-norm-y RayCollision-norm-z
-  set-RayCollision-hit! set-RayCollision-distance!
-  set-RayCollision-point-x! set-RayCollision-point-y! set-RayCollision-point-z!
-  set-RayCollision-norm-x! set-RayCollision-norm-y! set-RayCollision-norm-z!
-  ;; BoundingBox
-  _BoundingBox BoundingBox? make-BoundingBox
-  BoundingBox-min-x BoundingBox-min-y BoundingBox-min-z
-  BoundingBox-max-x BoundingBox-max-y BoundingBox-max-z
-  set-BoundingBox-min-x! set-BoundingBox-min-y! set-BoundingBox-min-z!
-  set-BoundingBox-max-x! set-BoundingBox-max-y! set-BoundingBox-max-z!
-  ;; RenderTexture
-  _RenderTexture RenderTexture? make-RenderTexture
-
+ ;; Ray
+ _Ray Ray? make-Ray
+ Ray-pos-x Ray-pos-y Ray-pos-z
+ Ray-dir-x Ray-dir-y Ray-dir-z
+ set-Ray-pos-x! set-Ray-pos-y! set-Ray-pos-z!
+ set-Ray-dir-x! set-Ray-dir-y! set-Ray-dir-z!
+ ;; RayCollision
+ _RayCollision RayCollision? make-RayCollision
+ RayCollision-hit RayCollision-distance
+ RayCollision-point-x RayCollision-point-y RayCollision-point-z
+ RayCollision-norm-x RayCollision-norm-y RayCollision-norm-z
+ set-RayCollision-hit! set-RayCollision-distance!
+ set-RayCollision-point-x! set-RayCollision-point-y! set-RayCollision-point-z!
+ set-RayCollision-norm-x! set-RayCollision-norm-y! set-RayCollision-norm-z!
+ ;; BoundingBox
+ _BoundingBox BoundingBox? make-BoundingBox
+ BoundingBox-min-x BoundingBox-min-y BoundingBox-min-z
+ BoundingBox-max-x BoundingBox-max-y BoundingBox-max-z
+ set-BoundingBox-min-x! set-BoundingBox-min-y! set-BoundingBox-min-z!
+ set-BoundingBox-max-x! set-BoundingBox-max-y! set-BoundingBox-max-z!
  ;; RenderTexture
  _RenderTexture RenderTexture? make-RenderTexture
  RenderTexture-id RenderTexture-tex-id RenderTexture-tex-width

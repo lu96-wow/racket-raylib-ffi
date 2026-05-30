@@ -29,7 +29,7 @@
 ;; 文本文件路径（相对 racket-bind/ 工作目录）
 ;; ============================================================
 
-(define file-name "../examples/core/resources/text_file.txt")
+(define file-name "core_text_file_loading.rkt")
 
 ;; ============================================================
 ;; 自动换行 — 纯 Racket 实现
@@ -68,7 +68,7 @@
 (define (main)
   ;; 初始化
   (init-window screen-width screen-height
-    "raylib [core] example - text file loading")
+               "raylib [core] example - text file loading")
 
   ;; 加载文本文件
   (printf "Loading file: ~a...~n" file-name)
@@ -102,7 +102,7 @@
   ;; 滚动条
   (define scroll-bar-h (inexact->exact
                         (floor (* screen-height 100.0
-                                 (/ (max 1 (- text-height screen-height)))))))
+                                  (/ (max 1 (- text-height screen-height)))))))
   (define scroll-bar (rectangle (- screen-width 5) 0 5 (inexact->exact scroll-bar-h)))
 
   (set-target-fps 60)
@@ -113,13 +113,13 @@
       ;; === 更新 ===
       (let ([scroll (get-mouse-wheel-move)])
         (set-camera2d-target-y! cam
-          (max 0.0
-               (- (camera2d-target-y cam) (* scroll font-size 1.5))))
+                                (max 0.0
+                                     (- (camera2d-target-y cam) (* scroll font-size 1.5))))
         ;; 限制不超过文本底部
         (when (> (camera2d-target-y cam)
                  (- text-height screen-height text-top))
           (set-camera2d-target-y! cam
-            (exact->inexact (- text-height screen-height text-top)))))
+                                  (exact->inexact (- text-height screen-height text-top)))))
 
       ;; 滚动条位置
       (let* ([cam-y (camera2d-target-y cam)]

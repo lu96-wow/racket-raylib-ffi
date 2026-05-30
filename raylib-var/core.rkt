@@ -139,7 +139,7 @@
 (define (camera3d-up-y  cam) (ptr-ref cam _float 7))
 (define (camera3d-up-z  cam) (ptr-ref cam _float 8))
 (define (camera3d-fovy  cam) (ptr-ref cam _float 9))
-(define (camera3d-proj  cam) (ptr-ref cam _int 10))
+(define (camera3d-projection  cam) (ptr-ref cam _int 10))
 
 (define (set-camera3d-pos-x! cam v) (ptr-set! cam _float 0 (exact->inexact v)))
 (define (set-camera3d-pos-y! cam v) (ptr-set! cam _float 1 (exact->inexact v)))
@@ -151,7 +151,7 @@
 (define (set-camera3d-up-y!  cam v) (ptr-set! cam _float 7 (exact->inexact v)))
 (define (set-camera3d-up-z!  cam v) (ptr-set! cam _float 8 (exact->inexact v)))
 (define (set-camera3d-fovy!  cam v) (ptr-set! cam _float 9 (exact->inexact v)))
-(define (set-camera3d-proj!  cam v) (ptr-set! cam _int 10 v))
+(define (set-camera3d-projection!  cam v) (ptr-set! cam _int 10 v))
 
 ;; ============================================================
 ;; 预定义颜色
@@ -349,11 +349,11 @@
  camera3d-pos-x camera3d-pos-y camera3d-pos-z
  camera3d-tar-x camera3d-tar-y camera3d-tar-z
  camera3d-up-x camera3d-up-y camera3d-up-z
- camera3d-fovy camera3d-proj
+ camera3d-fovy camera3d-projection
  set-camera3d-pos-x! set-camera3d-pos-y! set-camera3d-pos-z!
  set-camera3d-tar-x! set-camera3d-tar-y! set-camera3d-tar-z!
  set-camera3d-up-x! set-camera3d-up-y! set-camera3d-up-z!
- set-camera3d-fovy! set-camera3d-proj!
+ set-camera3d-fovy! set-camera3d-projection!
  RAYWHITE LIGHTGRAY GRAY DARKGRAY YELLOW GOLD ORANGE
  PINK RED MAROON GREEN LIME DARKGREEN SKYBLUE
  BLUE DARKBLUE PURPLE VIOLET DARKPURPLE

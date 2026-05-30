@@ -83,7 +83,7 @@
        (set-box! camera-mode CAMERA-ORBITAL) (reset-camera-up!)])
 
     (when (is-key-pressed KEY-P)
-      (if (= (camera3d-proj camera) CAMERA-PERSPECTIVE)
+      (if (= (camera3d-projection camera) CAMERA-PERSPECTIVE)
           (begin
             (set-box! camera-mode CAMERA-THIRD-PERSON)
             (set-camera3d-pos-x! camera 0.0)
@@ -93,7 +93,7 @@
             (set-camera3d-tar-y! camera 2.0)
             (set-camera3d-tar-z! camera 0.0)
             (reset-camera-up!)
-            (set-camera3d-proj! camera CAMERA-ORTHOGRAPHIC)
+            (set-camera3d-projection! camera CAMERA-ORTHOGRAPHIC)
             (set-camera3d-fovy! camera 20.0)
             (camera-yaw camera (* -135 DEG2RAD) #t)
             (camera-pitch camera (* -45 DEG2RAD) #t #t #f))
@@ -106,7 +106,7 @@
             (set-camera3d-tar-y! camera 2.0)
             (set-camera3d-tar-z! camera 0.0)
             (reset-camera-up!)
-            (set-camera3d-proj! camera CAMERA-PERSPECTIVE)
+            (set-camera3d-projection! camera CAMERA-PERSPECTIVE)
             (set-camera3d-fovy! camera 60.0))))
 
     (update-camera camera (unbox camera-mode))
@@ -156,7 +156,7 @@
                           [else "CUSTOM"])])
       (draw-text (format "- Mode: ~a" mode-str) 610 30 10 BLACK))
 
-    (let ([proj-str (if (= (camera3d-proj camera) CAMERA-PERSPECTIVE)
+    (let ([proj-str (if (= (camera3d-projection camera) CAMERA-PERSPECTIVE)
                         "PERSPECTIVE" "ORTHOGRAPHIC")])
       (draw-text (format "- Projection: ~a" proj-str) 610 45 10 BLACK))
 

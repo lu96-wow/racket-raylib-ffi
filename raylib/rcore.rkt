@@ -226,7 +226,6 @@
 (def-ffi is-window-resized? "IsWindowResized" (_fun -> _stdbool))
 
 ;; ============================================================
-;; ============================================================
 ;; 自定义日志回调 (core_custom_logging.c)
 ;; SetTraceLogCallback(TraceLogCallback callback)
 ;; TraceLogCallback = void (*)(int logLevel, const char *text, va_list args)
@@ -242,7 +241,6 @@
   (get-ffi-obj "vsnprintf" #f
     (_fun _pointer _int _string _pointer -> _int)))
 
-;; ============================================================
 ;; ============================================================
 ;; 剪贴板 (core_clipboard_text.c)
 ;; ============================================================
@@ -944,8 +942,7 @@
  _color-bytes color->bytes
  _vec2-bytes vec2->bytes vec2-bytes->vec2
  _rect-bytes rect->bytes rect-bytes->rect
-  _vrstereoconfig-bytes
-  _automation-event-bytes
+ _automation-event-bytes
  _camera2d-bytes camera2d->bytes
  _vec3-bytes vec3->bytes vec3-bytes->vec3
  _camera3d-bytes camera3d->bytes
