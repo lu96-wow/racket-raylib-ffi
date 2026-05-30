@@ -814,6 +814,73 @@
   (get-ffi-obj "PlayAutomationEvent" T:lib
     (_fun (evt : _automation-event-bytes) -> _void)))
 ;; ============================================================
+;; Hash 计算 (core_compute_hash.c)
+;;   ComputeCRC32(data, dataSize) → unsigned int
+;;   ComputeMD5(data, dataSize) → unsigned int* (static, 4 ints)
+;;   ComputeSHA1(data, dataSize) → unsigned int* (static, 5 ints)
+;;   ComputeSHA256(data, dataSize) → unsigned int* (static, 8 ints)
+;;   EncodeDataBase64(data, dataSize, *outputSize) → char* (malloc'd, MemFree)
+;;   MemFree(ptr) → void
+;; ============================================================
+
+(def-ffi compute-crc32 "ComputeCRC32" (_fun _bytes _int -> _uint))
+
+;; compute-md5: 用 _bytes 接收数据，返回 4 个 unsigned int 的列表 (16 bytes)
+(define compute-md5
+  (let ([f (get-ffi-obj "ComputeMD5" T:lib (_fun _bytes _int -> _pointer))])
+    (λ (data data-size)
+      (let ([ptr (f data data-size)])
+        (if (not ptr)
+            #f
+            (list (ptr-ref ptr _uint 0) (ptr-ref ptr _uint 1)
+                  (ptr-ref ptr _uint 2) (ptr-ref ptr _uint 3)))))))
+
+;; compute-sha1: 用 _bytes 接收数据，返回 5 个 unsigned int 的列表 (20 bytes)
+(define compute-sha1
+  (let ([f (get-ffi-obj "ComputeSHA1" T:lib (_fun _bytes _int -> _pointer))])
+    (λ (data data-size)
+      (let ([ptr (f data data-size)])
+        (if (not ptr)
+            #f
+            (list (ptr-ref ptr _uint 0) (ptr-ref ptr _uint 1)
+                  (ptr-ref ptr _uint 2) (ptr-ref ptr _uint 3)
+                  (ptr-ref ptr _uint 4)))))))
+
+;; compute-sha256: 用 _bytes 接收数据，返回 8 个 unsigned int 的列表 (32 bytes)
+(define compute-sha256
+  (let ([f (get-ffi-obj "ComputeSHA256" T:lib (_fun _bytes _int -> _pointer))])
+    (λ (data data-size)
+      (let ([ptr (f data data-size)])
+        (if (not ptr)
+            #f
+            (list (ptr-ref ptr _uint 0) (ptr-ref ptr _uint 1)
+                  (ptr-ref ptr _uint 2) (ptr-ref ptr _uint 3)
+                  (ptr-ref ptr _uint 4) (ptr-ref ptr _uint 5)
+                  (ptr-ref ptr _uint 6) (ptr-ref ptr _uint 7)))))))
+
+;; encode-data-base64: 用 _pointer 接收返回值，手动转字符串再释放
+(define %encode-data-base64-raw
+  (get-ffi-obj "EncodeDataBase64" T:lib
+    (_fun _bytes _int _pointer -> _pointer)))
+
+(define (encode-data-base64 data data-size)
+  (let ([out-size-buf (malloc _int 1 'atomic)]
+        [tmp (malloc _pointer 1 'atomic)])
+    (ptr-set! out-size-buf _int 0 0)
+    (let ([cstr (%encode-data-base64-raw data data-size out-size-buf)])
+      (if (not cstr)
+          ""
+          (begin
+            ;; 将 C string 转为 Racket string
+            (ptr-set! tmp _pointer 0 cstr)
+            (let ([racket-str (ptr-ref tmp _string)])
+              ;; 释放 C 内存
+              (let ([mem-free (get-ffi-obj "MemFree" T:lib
+                                (_fun _pointer -> _void))])
+                (mem-free cstr))
+              racket-str))))))
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -953,5 +1020,9 @@
  set-gestures-enabled is-gesture-detected? get-gesture-detected
  get-gesture-hold-duration get-gesture-drag-vector get-gesture-drag-angle
  get-gesture-pinch-vector get-gesture-pinch-angle
+
+ ;; 数据编码 / Hash
+ compute-crc32 compute-md5 compute-sha1 compute-sha256
+ encode-data-base64
 
 )

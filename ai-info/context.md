@@ -273,4 +273,5 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | core_screen_recording | rcore, rshapes, raylib-var | _image-bytes, load-image-from-screen, unload-image, get-application-directory, export-image (5 个新增绑定), 用 ExportImage PNG 替代 C 版的 msf_gif GIF |
 | | | core_clipboard_text | rcore, rshapes, raylib-var | set-clipboard-text, get-clipboard-text (2 个新增绑定), 用原生 raylib 绘制替代 raygui |
 | | | | core_keyboard_testbed | rcore, rshapes, raylib-var | 无需新增绑定。get-key-text 纯 Racket 实现, TraceLog 用 printf 替代 |
+| | | | core_compute_hash | rcore, raylib-var | compute-crc32, compute-md5, compute-sha1, compute-sha256, encode-data-base64 (5 个新增绑定), 用原生 raylib 绘制替代 raygui |
 
