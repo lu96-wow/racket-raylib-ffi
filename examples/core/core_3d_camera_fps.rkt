@@ -150,7 +150,7 @@
   (define right (vec3-normalize (vec3-cross-product yaw up)))
   (define pitch-angle (- (- (unbox look-rot-y)) (unbox lean-y)))
   (define pitch-angle-clamped
-    (clamp pitch-angle (- (/ PI 2) 0.0001) (- (/ PI 2) 0.0001)))
+    (clamp pitch-angle (- 0.0001 (/ PI 2)) (- (/ PI 2) 0.0001)))
   (define pitch (vec3-rotate-by-axis-angle yaw right pitch-angle-clamped))
   (define head-sin (sin (* (unbox head-timer) PI)))
   (define head-cos (cos (* (unbox head-timer) PI)))
