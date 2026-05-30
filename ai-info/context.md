@@ -261,3 +261,4 @@ timeout 3 racket examples/core/core_xxx.rkt
 
 | core_automation_events | raylib-racket/automation.rkt, rcore、rshapes、raylib-var | automation-event struct, play-automation-event (FFI), export/load-automation-events, recorder, record-frame!, 23 type constants, 完全纯 Racket 录制，无 C 持指针 |
 
+| | core_render_texture | types, rcore, rshapes, rtextures, raylib-var | 无需新增绑定（全部函数已绑定；rt->texture 辅助函数已在分屏示例定义） |\n
