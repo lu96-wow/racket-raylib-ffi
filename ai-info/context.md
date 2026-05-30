@@ -265,3 +265,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | core_undo_redo | types, rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现环状缓冲区 Undo/Redo 系统（color=? 辅助函数） |
 | | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
 
+
+| | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
+| | | core_input_actions | rcore, rshapes, raylib-var | 纯 Racket 实现 Action 映射系统 (is-action-pressed?/released?/down?), 无需新增 FFI 绑定 |
+| | | core_directory_files | rcore, rshapes, raylib-var | get-working-directory, get-prev-directory-path, directory-exists?, load-directory-files-ex (4 个新增绑定), 用原生 raylib 绘制替代 raygui |

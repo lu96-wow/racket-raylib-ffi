@@ -242,6 +242,14 @@
   (get-ffi-obj "vsnprintf" #f
     (_fun _pointer _int _string _pointer -> _int)))
 
+;; ============================================================
+;; 文件系统 (core_directory_files.c, core_drop_files.c)
+;; ============================================================
+
+(def-ffi get-working-directory   "GetWorkingDirectory"   (_fun -> _string))
+(def-ffi get-prev-directory-path "GetPrevDirectoryPath"  (_fun _string -> _string))
+(def-ffi directory-exists?       "DirectoryExists"       (_fun _string -> _stdbool))
+
 ;; 显示器/窗口信息 (core_monitor_detector.c)
 ;; ============================================================
 
@@ -606,7 +614,32 @@
         (unload-ffi raw)   ;; free C memory immediately
         paths))))          ;; return clean Racket string list
 
+;; ============================================================
+;; LoadDirectoryFilesEx (core_directory_files.c)
+;; FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs)
+;; 自动释放 C 内存，返回 Racket 字符串列表
+;; ============================================================
 
+(define load-directory-files-ex
+  (let ([load-ffi (get-ffi-obj "LoadDirectoryFilesEx" T:lib
+                    (_fun _string _string _stdbool -> (lst : _filepathlist-bytes)))]
+        [unload-ffi (get-ffi-obj "UnloadDirectoryFiles" T:lib
+                      (_fun (lst : _filepathlist-bytes) -> _void))]
+        [tmp (malloc _pointer 'atomic)])
+    (lambda (base-path filter scan-subdirs?)
+      (let* ([raw (load-ffi base-path filter scan-subdirs?)]
+             [count (car raw)]
+             [paths-ptr (cadr raw)]
+             [paths
+              (for/list ([i (in-range count)])
+                (let ([cstr (ptr-ref paths-ptr _pointer i)])
+                  (if cstr
+                      (begin
+                        (ptr-set! tmp _pointer 0 cstr)
+                        (ptr-ref tmp _string))
+                      "")))])
+        (unload-ffi raw)
+        paths))))
 
 ;; ============================================================
 ;; Shader 模块 — 着色器加载与绘制
@@ -820,6 +853,10 @@
 
  ;; 输入 — 拖放文件
  is-file-dropped load-dropped-files
+
+ ;; 文件系统
+ get-working-directory get-prev-directory-path directory-exists?
+ load-directory-files-ex
 
  ;; 着色器
  load-shader unload-shader

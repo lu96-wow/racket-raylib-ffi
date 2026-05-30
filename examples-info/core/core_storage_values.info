@@ -1,0 +1,40 @@
+;; core_storage_values — 设计要点
+;;
+;; 对应 C: examples/core/core_storage_values.c
+;; 功能:  演示持久化存储 (保存/加载整数键值对)
+;;
+;; ============================================================
+;; 核心问题: C 用 LoadFileData/SaveFileData, Racket 无需
+;; ============================================================
+;;
+;; C 原版使用:
+;;   SaveStorageValue(key, value)  → 内部调 SaveFileData()
+;;   LoadStorageValue(key)         → 内部调 LoadFileData()
+;;
+;; Racket 不需要绑定这些函数, 因为:
+;;   1. Racket 标准库自带完善的 file I/O
+;;   2. 存储格式只是一个 4 字节整数的二进制文件, 读写简单
+;;   3. 无需处理 C 的内存管理 (malloc/free)
+;;
+;; 使用 Racket 的:
+;;   with-output-to-file / read-bytes!  — 二进制文件读写
+;;   (let ([out (open-output-file ...)]) (write-byte ...) (close-output-port))
+;;
+;; ============================================================
+;; 新增 FFI 绑定
+;; ============================================================
+;;
+;; 无 — 全部用已有绑定。
+;;
+;; ============================================================
+;; 已有绑定复用
+;; ============================================================
+;;
+;; init-window close-window window-should-close?
+;; set-target-fps
+;; begin-drawing end-drawing clear-background
+;; draw-text draw-rectangle draw-rectangle-lines
+;; is-key-pressed
+;; get-screen-width get-screen-height
+;; KEY-UP KEY-DOWN
+;; (make-color ...) WHITE BLACK GRAY LIGHTGRAY
