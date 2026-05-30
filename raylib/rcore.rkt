@@ -47,6 +47,13 @@
         (ptr-ref c _ubyte 2)
         (ptr-ref c _ubyte 3)))
 
+;; Color 按值比较 — 供用户直接使用，无需自行处理 ptr-ref
+(define (color=? a b)
+  (and (= (ptr-ref a _ubyte 0) (ptr-ref b _ubyte 0))
+       (= (ptr-ref a _ubyte 1) (ptr-ref b _ubyte 1))
+       (= (ptr-ref a _ubyte 2) (ptr-ref b _ubyte 2))
+       (= (ptr-ref a _ubyte 3) (ptr-ref b _ubyte 3))))
+
 ;; (预定义颜色已移入 raylib-var/core.rkt)
 
 ;; ============================================================
@@ -849,7 +856,7 @@
  get-touch-position
 
  ;; 颜色工具
- fade
+ fade color=?
 
  ;; 输入 — 手势
  set-gestures-enabled is-gesture-detected? get-gesture-detected
