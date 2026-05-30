@@ -223,6 +223,7 @@
 ;; ============================================================
 
 (def-ffi set-window-min-size "SetWindowMinSize" (_fun _int _int -> _void))
+(def-ffi is-window-resized? "IsWindowResized" (_fun -> _stdbool))
 
 ;; ============================================================
 ;; ============================================================
@@ -764,6 +765,7 @@
  toggle-fullscreen toggle-borderless-windowed
  is-window-state? set-window-state clear-window-state
  minimize-window maximize-window restore-window set-window-min-size
+ is-window-resized?
  get-monitor-count get-current-monitor get-monitor-position get-monitor-name
  get-monitor-width get-monitor-height
  get-monitor-physical-width get-monitor-physical-height

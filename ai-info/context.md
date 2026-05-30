@@ -263,3 +263,5 @@ timeout 3 racket examples/core/core_xxx.rkt
 
 | | core_render_texture | types, rcore, rshapes, rtextures, raylib-var | 无需新增绑定（全部函数已绑定；rt->texture 辅助函数已在分屏示例定义） |
 | | core_undo_redo | types, rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现环状缓冲区 Undo/Redo 系统（color=? 辅助函数） |
+| | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
+
