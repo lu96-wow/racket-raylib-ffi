@@ -33,10 +33,12 @@
 
          "../raylib-var/var.rkt"
 
-         ;; 供用户低层指针操作，避免外部再 require ffi/unsafe 导致 _bool 冲突
-         (only-in (except-in ffi/unsafe _bool) ptr-ref ptr-set!))
+         ;; 提供常用低层操作，方便用户读写结构体字段
+         (only-in ffi/unsafe ptr-ref ptr-set!
+                  _ubyte _float _int _uint _pointer _bool))
 
 ;; 统一导出所有子模块内容
 (provide (all-from-out "rcore.rkt" "types.rkt" "rshapes.rkt" "rtextures.rkt" "rmodels.rkt" "rcamera.rkt" "raymath.rkt" "../raylib-var/var.rkt")
-         ptr-ref ptr-set!)
+         ptr-ref ptr-set!
+         _ubyte _float _int _uint _pointer _bool)
 

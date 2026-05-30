@@ -22,14 +22,10 @@
   (ffi-lib "/home/debian/raylib/build/raylib/libraylib.so"))
 
 ;; ============================================================
-;; 基础类型 — bool 类型
-;; ffi/unsafe 提供两个布尔类型：
-;;   _stdbool → 1 字节，匹配 C99 的 _Bool（raylib 使用 <stdbool.h>）
-;;   _bool    → 4 字节，匹配 C 的 int（不匹配 raylib！）
-;; 这里让 _bool 指向 _stdbool，确保所有 FFI 绑定使用正确的 1 字节版
+;; 基础类型
+;; raylib 使用 C99 的 _Bool（1 字节），FFI 签名中统一用 _stdbool。
+;; 不覆盖 _bool（4 字节），避免与 ffi/unsafe 冲突。
 ;; ============================================================
-
-(define _bool _stdbool)
 
 ;; ============================================================
 ;; Color (raylib.h:248) — 4 字节小结构体
@@ -96,7 +92,7 @@
 ;;   Vector3 normal;      // 12B
 ;;   总计: 32B
 (define-cstruct _RayCollision
-  ([hit _bool]
+  ([hit _stdbool]
    [distance _float]
    [point-x _float] [point-y _float] [point-z _float]
    [norm-x _float]  [norm-y _float]  [norm-z _float]))
@@ -136,7 +132,7 @@
 ;; ============================================================
 
 (provide
- lib _bool
+ lib
  ;; Color
  _Color Color? make-Color
  Color-r Color-g Color-b Color-a

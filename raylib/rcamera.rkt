@@ -5,9 +5,8 @@
 ;; 对应 C: rcamera.h
 ;; 包括: UpdateCamera, UpdateCameraPro, CameraYaw, CameraPitch 等
 
-(require (except-in ffi/unsafe _bool)
-         (prefix-in T: "types.rkt")
-         (only-in "types.rkt" _bool))
+(require ffi/unsafe
+         (prefix-in T: "types.rkt"))
 
 ;; ============================================================
 ;; CameraYaw(Camera *camera, float angle, bool rotateAroundTarget)
@@ -18,7 +17,7 @@
 
 (define camera-yaw
   (get-ffi-obj "CameraYaw" T:lib
-    (_fun _pointer _float _bool -> _void)))
+    (_fun _pointer _float _stdbool -> _void)))
 
 ;; ============================================================
 ;; CameraPitch(Camera *camera, float angle, bool lockView,
@@ -27,7 +26,7 @@
 
 (define camera-pitch
   (get-ffi-obj "CameraPitch" T:lib
-    (_fun _pointer _float _bool _bool _bool -> _void)))
+    (_fun _pointer _float _stdbool _stdbool _stdbool -> _void)))
 
 (provide
  camera-yaw

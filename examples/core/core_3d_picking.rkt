@@ -3,7 +3,7 @@
 ;; raylib [core] example - 3d picking (Racket FFI 翻译)
 
 (require "../../raylib/raylib.rkt"
-         (except-in ffi/unsafe _bool))
+         ffi/unsafe)
 
 (define SCREEN-WIDTH 800)
 (define SCREEN-HEIGHT 450)

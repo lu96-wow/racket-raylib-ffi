@@ -8,10 +8,9 @@
 ;;   结构体在 Racket 侧通过 boxed 指针持有,
 ;;   对 C 侧传值的小结构体, 由 _xxx-pass 类型自动解包.
 
-(require (except-in ffi/unsafe _bool)
+(require ffi/unsafe
          (for-syntax racket/base)
-         (prefix-in T: "types.rkt")
-         (only-in "types.rkt" _bool))
+         (prefix-in T: "types.rkt"))
 
 ;; ============================================================
 ;; 宏: def-ffi     — 直接传指针 / 基础类型（无包装）
@@ -216,7 +215,7 @@
 
 (def-ffi init-window "InitWindow" (_fun _int _int _string -> _void))
 (def-ffi close-window "CloseWindow" (_fun -> _void))
-(def-ffi window-should-close? "WindowShouldClose" (_fun -> _bool))
+(def-ffi window-should-close? "WindowShouldClose" (_fun -> _stdbool))
 (def-ffi set-target-fps "SetTargetFPS" (_fun _int -> _void))
 
 ;; ============================================================
@@ -268,7 +267,7 @@
 
 (def-ffi toggle-fullscreen          "ToggleFullscreen"          (_fun -> _void))
 (def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed"  (_fun -> _void))
-(def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _bool))
+(def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _stdbool))
 (def-ffi set-window-state           "SetWindowState"            (_fun _uint -> _void))
 (def-ffi clear-window-state         "ClearWindowState"          (_fun _uint -> _void))
 (def-ffi minimize-window            "MinimizeWindow"            (_fun -> _void))
@@ -308,11 +307,11 @@
 ;; 输入 — 键盘 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
 ;; ============================================================
 
-(def-ffi is-key-pressed        "IsKeyPressed"        (_fun _int -> _bool))
-(def-ffi is-key-down           "IsKeyDown"           (_fun _int -> _bool))
-(def-ffi is-key-pressed-repeat "IsKeyPressedRepeat"  (_fun _int -> _bool))
-(def-ffi is-key-released       "IsKeyReleased"       (_fun _int -> _bool))
-(def-ffi is-key-up             "IsKeyUp"             (_fun _int -> _bool))
+(def-ffi is-key-pressed        "IsKeyPressed"        (_fun _int -> _stdbool))
+(def-ffi is-key-down           "IsKeyDown"           (_fun _int -> _stdbool))
+(def-ffi is-key-pressed-repeat "IsKeyPressedRepeat"  (_fun _int -> _stdbool))
+(def-ffi is-key-released       "IsKeyReleased"       (_fun _int -> _stdbool))
+(def-ffi is-key-up             "IsKeyUp"             (_fun _int -> _stdbool))
 
 (def-ffi get-key-pressed       "GetKeyPressed"       (_fun -> _int))
 (def-ffi get-char-pressed      "GetCharPressed"      (_fun -> _int))
@@ -323,10 +322,10 @@
 ;; 输入 — 鼠标 (core_input_mouse.c, core_input_mouse_wheel.c)
 ;; ============================================================
 
-(def-ffi is-mouse-button-pressed  "IsMouseButtonPressed"  (_fun _int -> _bool))
-(def-ffi is-mouse-button-down     "IsMouseButtonDown"     (_fun _int -> _bool))
-(def-ffi is-mouse-button-released "IsMouseButtonReleased" (_fun _int -> _bool))
-(def-ffi is-mouse-button-up       "IsMouseButtonUp"       (_fun _int -> _bool))
+(def-ffi is-mouse-button-pressed  "IsMouseButtonPressed"  (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-down     "IsMouseButtonDown"     (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-released "IsMouseButtonReleased" (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-up       "IsMouseButtonUp"       (_fun _int -> _stdbool))
 
 (def-ffi get-mouse-x  "GetMouseX"  (_fun -> _int))
 (def-ffi get-mouse-y  "GetMouseY"  (_fun -> _int))
@@ -363,12 +362,12 @@
 ;; 输入 — cursor 可见性 (core_input_mouse.c)
 ;; ============================================================
 
-(def-ffi is-cursor-hidden?  "IsCursorHidden"  (_fun -> _bool))
+(def-ffi is-cursor-hidden?  "IsCursorHidden"  (_fun -> _stdbool))
 (def-ffi show-cursor        "ShowCursor"      (_fun -> _void))
 (def-ffi hide-cursor        "HideCursor"      (_fun -> _void))
 (def-ffi enable-cursor      "EnableCursor"    (_fun -> _void))
 (def-ffi disable-cursor     "DisableCursor"   (_fun -> _void))
-(def-ffi is-cursor-on-screen? "IsCursorOnScreen" (_fun -> _bool))
+(def-ffi is-cursor-on-screen? "IsCursorOnScreen" (_fun -> _stdbool))
 
 ;; ============================================================
 ;; 输入 — 事件轮询
@@ -423,12 +422,12 @@
 ;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
 ;; ============================================================
 
-(def-ffi is-gamepad-available?    "IsGamepadAvailable"    (_fun _int -> _bool))
+(def-ffi is-gamepad-available?    "IsGamepadAvailable"    (_fun _int -> _stdbool))
 (def-ffi get-gamepad-name         "GetGamepadName"        (_fun _int -> _string))
-(def-ffi is-gamepad-button-pressed "IsGamepadButtonPressed" (_fun _int _int -> _bool))
-(def-ffi is-gamepad-button-down   "IsGamepadButtonDown"   (_fun _int _int -> _bool))
-(def-ffi is-gamepad-button-released "IsGamepadButtonReleased" (_fun _int _int -> _bool))
-(def-ffi is-gamepad-button-up     "IsGamepadButtonUp"     (_fun _int _int -> _bool))
+(def-ffi is-gamepad-button-pressed "IsGamepadButtonPressed" (_fun _int _int -> _stdbool))
+(def-ffi is-gamepad-button-down   "IsGamepadButtonDown"   (_fun _int _int -> _stdbool))
+(def-ffi is-gamepad-button-released "IsGamepadButtonReleased" (_fun _int _int -> _stdbool))
+(def-ffi is-gamepad-button-up     "IsGamepadButtonUp"     (_fun _int _int -> _stdbool))
 (def-ffi get-gamepad-button-pressed "GetGamepadButtonPressed" (_fun -> _int))
 (def-ffi get-gamepad-axis-count   "GetGamepadAxisCount"   (_fun _int -> _int))
 (def-ffi get-gamepad-axis-movement "GetGamepadAxisMovement" (_fun _int _int -> _float))
@@ -471,7 +470,7 @@
 ;; ============================================================
 
 (def-ffi set-gestures-enabled    "SetGesturesEnabled"    (_fun _uint -> _void))
-(def-ffi is-gesture-detected?    "IsGestureDetected"     (_fun _uint -> _bool))
+(def-ffi is-gesture-detected?    "IsGestureDetected"     (_fun _uint -> _stdbool))
 (def-ffi get-gesture-detected    "GetGestureDetected"    (_fun -> _int))
 (def-ffi get-gesture-hold-duration "GetGestureHoldDuration" (_fun -> _float))
 (def-ffi get-gesture-drag-angle  "GetGestureDragAngle"   (_fun -> _float))
@@ -565,12 +564,12 @@
         (ptr-ref bb _float 3) (ptr-ref bb _float 4) (ptr-ref bb _float 5)))
 
 (define _ray-collision-bytes
-  (_list-struct _bool _float _float _float _float _float _float _float _float _float))
+  (_list-struct _stdbool _float _float _float _float _float _float _float _float _float))
 
 ;; ============================================================
 ;; 拖放文件 (core_drop_files.c)
 ;;   FilePathList = { unsigned int count; char **paths; }
-;;   IsFileDropped(void) -> bool
+;;   IsFileDropped(void) -> stdbool
 ;;   LoadDroppedFiles(void) -> FilePathList (by value)
 ;;   UnloadDroppedFiles(FilePathList files) -> void (by value)
 ;; ============================================================
@@ -579,7 +578,7 @@
 (define _filepathlist-bytes
   (_list-struct _uint _pointer))
 
-(def-ffi is-file-dropped "IsFileDropped" (_fun -> _bool))
+(def-ffi is-file-dropped "IsFileDropped" (_fun -> _stdbool))
 
 ;; load-dropped-files: 内部自动调用 UnloadDroppedFiles
 ;; 返回干净的 Racket 字符串列表（无需手动释放 C 内存）

@@ -12,7 +12,7 @@
 (require racket/match
          racket/file
          racket/string
-         (except-in ffi/unsafe _bool)
+         ffi/unsafe
          (prefix-in T: "../raylib/types.rkt"))
 
 ;; ============================================================

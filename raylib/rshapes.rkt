@@ -4,10 +4,9 @@
 ;;
 ;; 对应 C: rshapes.c / raylib.h "Module: shapes"
 
-(require (except-in ffi/unsafe _bool)
+(require ffi/unsafe
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt")
-         (only-in "types.rkt" _bool))
+         (prefix-in C: "rcore.rkt"))
 
 ;; ============================================================
 ;; 圆形绘制 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
@@ -86,7 +85,7 @@
 
 (define check-collision-point-rec
   (let ([f (get-ffi-obj "CheckCollisionPointRec" T:lib
-             (_fun (p : C:_vec2-bytes) (r : C:_rect-bytes) -> _bool))])
+             (_fun (p : C:_vec2-bytes) (r : C:_rect-bytes) -> _stdbool))])
     (λ (point rec)
       (f (C:vec2->bytes point) (C:rect->bytes rec)))))
 

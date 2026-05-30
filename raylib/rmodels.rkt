@@ -6,10 +6,9 @@
 ;; 包括: DrawCube, DrawGrid, DrawPlane, DrawSphere,
 ;;       LoadModel, DrawModel 等
 
-(require (except-in ffi/unsafe _bool)
+(require ffi/unsafe
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt")
-         (only-in "types.rkt" _bool))
+         (prefix-in C: "rcore.rkt"))
 
 ;; ============================================================
 ;; 3D 方块绘制 (core_3d_camera_mode.c)
