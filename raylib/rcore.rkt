@@ -359,6 +359,13 @@
 
 (def-ffi get-screen-width  "GetScreenWidth"  (_fun -> _int))
 (def-ffi get-screen-height "GetScreenHeight" (_fun -> _int))
+(def-ffi get-render-width  "GetRenderWidth"  (_fun -> _int))
+(def-ffi get-render-height "GetRenderHeight" (_fun -> _int))
+
+(define get-window-scale-dpi
+  (let ([f (get-ffi-obj "GetWindowScaleDPI" T:lib
+             (_fun -> (v : _vec2-bytes)))])
+    (λ () (vec2-bytes->vec2 (f)))))
 
 (define get-mouse-wheel-move-v
   (let ([f (get-ffi-obj "GetMouseWheelMoveV" T:lib
@@ -819,6 +826,7 @@
 
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height
+ get-render-width get-render-height get-window-scale-dpi
  get-screen-to-world-2d get-world-to-screen-2d
  get-screen-to-world-ray get-world-to-screen measure-text
 
