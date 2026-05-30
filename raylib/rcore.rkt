@@ -881,6 +881,58 @@
               racket-str))))))
 
 ;; ============================================================
+;; Font 传值类型 (core_text_file_loading.c)
+;;   Font = { int baseSize, glyphCount, glyphPadding;
+;;            Texture2D texture (uint id, int w, h, mip, fmt);
+;;            Rectangle *recs; GlyphInfo *glyphs; }
+;;   48 字节 (64-bit): 3 int + 1 uint + 4 int + 2 pointer
+;; ============================================================
+
+(define _font-bytes
+  (_list-struct _int _int _int
+                _uint _int _int _int _int
+                _pointer _pointer))
+
+;; ============================================================
+;; 文件文本加载 (core_text_file_loading.c)
+;;   LoadFileText(fileName) → char* (malloc'd, 需 UnloadFileText)
+;;   包装: 自动读取并释放, 返回 Racket 字符串
+;; ============================================================
+
+(define %load-file-text-raw
+  (get-ffi-obj "LoadFileText" T:lib (_fun _string -> _pointer)))
+
+(define (load-file-text filename)
+  (let* ([tmp (malloc _pointer 1 'atomic)]
+         [cstr (%load-file-text-raw filename)]
+         [unload (get-ffi-obj "UnloadFileText" T:lib (_fun _pointer -> _void))])
+    (if (not cstr)
+        #f
+        (begin
+          (ptr-set! tmp _pointer 0 cstr)
+          (let ([result (ptr-ref tmp _string)])
+            (unload cstr)
+            result)))))
+
+;; ============================================================
+;; 字体/文本测量 (core_text_file_loading.c)
+;;   GetFontDefault() → Font (by value)
+;;   MeasureTextEx(Font, text, fontSize, spacing) → Vector2
+;; ============================================================
+
+(define get-font-default
+  (let ([f (get-ffi-obj "GetFontDefault" T:lib
+             (_fun -> (font : _font-bytes)))])
+    (λ () (f))))
+
+(define measure-text-ex
+  (let ([f (get-ffi-obj "MeasureTextEx" T:lib
+             (_fun (font : _font-bytes) _string _float _float
+                   -> (v : _vec2-bytes)))])
+    (λ (font text font-size spacing)
+      (vec2-bytes->vec2 (f font text font-size spacing)))))
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -1024,5 +1076,12 @@
  ;; 数据编码 / Hash
  compute-crc32 compute-md5 compute-sha1 compute-sha256
  encode-data-base64
+
+ ;; 文本 / 字体
+ _font-bytes
+ get-font-default measure-text-ex
+
+ ;; 文件文本加载
+ load-file-text
 
 )

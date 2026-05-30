@@ -275,4 +275,6 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | | core_keyboard_testbed | rcore, rshapes, raylib-var | 无需新增绑定。get-key-text 纯 Racket 实现, TraceLog 用 printf 替代 |
 | | | | core_compute_hash | rcore, raylib-var | compute-crc32, compute-md5, compute-sha1, compute-sha256, encode-data-base64 (5 个新增绑定), 用原生 raylib 绘制替代 raygui |
 | | | | core_window_web | rcore, raylib-var | 无需新增绑定。纯翻译，展示 Web/Desktop 兼容结构 |
+| | | | | core_text_file_loading | rcore, raylib-var | _font-bytes, load-file-text(自动释放), get-font-default, measure-text-ex (4 个新增绑定), LoadTextLines 用 string-split 替代, TextFormat 用 format 替代 |
+
 
