@@ -203,6 +203,34 @@
          segments (C:color->bytes color)))))
 
 ;; ============================================================
+;; 环形边框绘制 (shapes_ring_drawing.c)
+;; DrawRingLines(Vector2 center, float innerRadius, float outerRadius,
+;;               float startAngle, float endAngle, int segments, Color color)
+;; ============================================================
+
+(define draw-ring-lines
+  (let ([f (get-ffi-obj "DrawRingLines" T:lib
+             (_fun (c : C:_vec2-bytes) _float _float _float _float _int
+                   (col : C:_color-bytes) -> _void))])
+    (λ (center inner-radius outer-radius start-angle end-angle segments color)
+      (f (C:vec2->bytes center) inner-radius outer-radius start-angle end-angle
+         segments (C:color->bytes color)))))
+
+;; ============================================================
+;; 扇形边框绘制 (shapes_ring_drawing.c, shapes_circle_sector_drawing.c)
+;; DrawCircleSectorLines(Vector2 center, float radius,
+;;                       float startAngle, float endAngle, int segments, Color color)
+;; ============================================================
+
+(define draw-circle-sector-lines
+  (let ([f (get-ffi-obj "DrawCircleSectorLines" T:lib
+             (_fun (c : C:_vec2-bytes) _float _float _float _int
+                   (col : C:_color-bytes) -> _void))])
+    (λ (center radius start-angle end-angle segments color)
+      (f (C:vec2->bytes center) radius start-angle end-angle
+         segments (C:color->bytes color)))))
+
+;; ============================================================
 ;; 渐变圆绘制 (shapes_basic_shapes.c)
 ;; DrawCircleGradient(Vector2 center, float radius, Color inner, Color outer)
 ;; ============================================================
@@ -359,4 +387,6 @@
  check-collision-recs
  get-collision-rec
  draw-ring
+ draw-ring-lines
+ draw-circle-sector-lines
  draw-rectangle-pro)
