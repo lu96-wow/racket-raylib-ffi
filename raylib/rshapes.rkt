@@ -181,6 +181,17 @@
       (f centerX centerY radius (C:color->bytes color)))))
 
 ;; ============================================================
+;; 空心圆绘制 Vector 版 (shapes_bullet_hell.c)
+;; DrawCircleLinesV(Vector2 center, float radius, Color color)
+;; ============================================================
+
+(define draw-circle-lines-v
+  (let ([f (get-ffi-obj "DrawCircleLinesV" T:lib
+             (_fun (c : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
+    (λ (center radius color)
+      (f (C:vec2->bytes center) radius (C:color->bytes color)))))
+
+;; ============================================================
 ;; 椭圆绘制 (shapes_basic_shapes.c)
 ;; DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color)
 ;; ============================================================
@@ -282,6 +293,7 @@
  draw-circle
  draw-circle-gradient
  draw-circle-lines
+ draw-circle-lines-v
  draw-ellipse
  draw-ellipse-lines
  draw-rectangle-rounded

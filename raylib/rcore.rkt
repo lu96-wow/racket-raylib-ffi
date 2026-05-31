@@ -913,6 +913,13 @@
             result)))))
 
 ;; ============================================================
+;; 文本子串提取 (shapes_logo_raylib_anim.c)
+;;   TextSubtext(const char *text, int position, int length) → const char *
+;; ============================================================
+
+(def-ffi text-subtext "TextSubtext" (_fun _string _int _int -> _string))
+
+;; ============================================================
 ;; 字体/文本测量 (core_text_file_loading.c)
 ;;   GetFontDefault() → Font (by value)
 ;;   MeasureTextEx(Font, text, fontSize, spacing) → Vector2
@@ -1076,7 +1083,7 @@
 
  ;; 文本 / 字体
  _font-bytes
- get-font-default measure-text-ex
+ get-font-default measure-text-ex text-subtext
 
  ;; 文件文本加载
  load-file-text

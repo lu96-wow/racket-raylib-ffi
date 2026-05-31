@@ -286,5 +286,10 @@ timeout 3 racket examples/core/core_xxx.rkt
 |------|---------|-------------|
 | shapes_basic_shapes | rcore, rshapes, raylib-var | draw-circle-gradient, draw-circle-lines, draw-ellipse, draw-ellipse-lines, draw-rectangle-gradient-h, draw-triangle-lines, draw-poly, draw-poly-lines, draw-poly-lines-ex (9 个新绑定) |
 | shapes_bouncing_ball | rcore, rshapes, raylib-var | 无需新增绑定（全部函数/常量已存在） |
+| shapes_bullet_hell | rcore, rshapes, rtextures, raylib-var | draw-circle-lines-v (1 个新绑定), rt->texture 辅助函数, 纯 Racket Bullet 结构体, 使用 racket/math (cos/sin/pi) |
+| shapes_colors_palette | rcore, rshapes, raylib-var | 无需新增绑定（全部函数/颜色常量已存在） |
+| shapes_logo_raylib | rcore, rshapes, raylib-var | 无需新增绑定 |
+| shapes_logo_raylib_anim | rcore, rshapes, raylib-var | text-subtext (1 个新增绑定) |
+| shapes_rectangle_scaling | rcore, rshapes, raylib-var | 无需新增绑定 |
 
 
