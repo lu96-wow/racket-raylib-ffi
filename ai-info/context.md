@@ -278,3 +278,13 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | | | core_text_file_loading | rcore, raylib-var | _font-bytes, load-file-text(自动释放), get-font-default, measure-text-ex (4 个新增绑定), LoadTextLines 用 string-split 替代, TextFormat 用 format 替代 |
 
 
+
+
+## shapes 模块
+
+| 示例 | 涉及模块 | 新增函数/类型 |
+|------|---------|-------------|
+| shapes_basic_shapes | rcore, rshapes, raylib-var | draw-circle-gradient, draw-circle-lines, draw-ellipse, draw-ellipse-lines, draw-rectangle-gradient-h, draw-triangle-lines, draw-poly, draw-poly-lines, draw-poly-lines-ex (9 个新绑定) |
+| shapes_bouncing_ball | rcore, rshapes, raylib-var | 无需新增绑定（全部函数/常量已存在） |
+
+
