@@ -295,5 +295,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | shapes_collision_area | rcore, rshapes, raylib-var | check-collision-recs, get-collision-rec (2 个新增绑定) |
 | shapes_following_eyes | rcore, rshapes, raylib-var | 无需新增绑定（check-collision-point-circle 已绑定，cos/sin/atan 来自 racket/math） |
 | shapes_easings_ball | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-cubic-out, ease-elastic-in, ease-elastic-out（对应 reasings.h） |
+| shapes_easings_box | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-elastic-out, ease-bounce-out, ease-quad-out, ease-circ-out, ease-sine-out |
+| shapes_easings_rectangles | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-circ-out, ease-linear-in |
 
 
