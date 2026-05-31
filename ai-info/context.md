@@ -291,5 +291,6 @@ timeout 3 racket examples/core/core_xxx.rkt
 | shapes_logo_raylib | rcore, rshapes, raylib-var | 无需新增绑定 |
 | shapes_logo_raylib_anim | rcore, rshapes, raylib-var | text-subtext (1 个新增绑定) |
 | shapes_rectangle_scaling | rcore, rshapes, raylib-var | 无需新增绑定 |
+| shapes_lines_bezier | rcore, rshapes, raylib-var | draw-line-bezier, check-collision-point-circle (2 个新增绑定) |
 
 

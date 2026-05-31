@@ -145,6 +145,28 @@
       (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) (C:color->bytes color)))))
 
 ;; ============================================================
+;; 贝塞尔曲线绘制 (shapes_lines_bezier.c)
+;; DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
+;; ============================================================
+
+(define draw-line-bezier
+  (let ([f (get-ffi-obj "DrawLineBezier" T:lib
+             (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
+    (λ (start-pos end-pos thick color)
+      (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) thick (C:color->bytes color)))))
+
+;; ============================================================
+;; 点与圆碰撞检测 (shapes_lines_bezier.c)
+;; CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius) -> bool
+;; ============================================================
+
+(define check-collision-point-circle
+  (let ([f (get-ffi-obj "CheckCollisionPointCircle" T:lib
+             (_fun (p : C:_vec2-bytes) (c : C:_vec2-bytes) _float -> _stdbool))])
+    (λ (point center radius)
+      (f (C:vec2->bytes point) (C:vec2->bytes center) radius))))
+
+;; ============================================================
 ;; 环形绘制 (core_input_gestures_testbed.c)
 ;; DrawRing(Vector2 center, float innerRadius, float outerRadius,
 ;;          float startAngle, float endAngle, int segments, Color color)
@@ -310,5 +332,7 @@
  draw-rectangle-lines-ex
  draw-line-ex
  draw-line-v
+ draw-line-bezier
+ check-collision-point-circle
  draw-ring
  draw-rectangle-pro)
