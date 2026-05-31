@@ -53,6 +53,18 @@
       (f (C:rect->bytes rec) roundness segments (C:color->bytes color)))))
 
 ;; ============================================================
+;; 圆角矩形边框绘制 (shapes_rounded_rectangle_drawing.c)
+;; DrawRectangleRoundedLinesEx(Rectangle rec, float roundness,
+;;                              int segments, float lineThick, Color color)
+;; ============================================================
+
+(define draw-rectangle-rounded-lines-ex
+  (let ([f (get-ffi-obj "DrawRectangleRoundedLinesEx" T:lib
+             (_fun (r : C:_rect-bytes) _float _int _float (col : C:_color-bytes) -> _void))])
+    (λ (rec roundness segments line-thick color)
+      (f (C:rect->bytes rec) roundness segments line-thick (C:color->bytes color)))))
+
+;; ============================================================
 ;; 矩形绘制 Vector 版 (core_monitor_detector.c)
 ;; DrawRectangleV(Vector2 position, Vector2 size, Color color)
 ;; ============================================================
@@ -383,6 +395,7 @@
  draw-ellipse
  draw-ellipse-lines
  draw-rectangle-rounded
+ draw-rectangle-rounded-lines-ex
  draw-rectangle-v
  draw-rectangle-gradient-h
  draw-triangle
