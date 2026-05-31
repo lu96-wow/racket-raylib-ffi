@@ -217,6 +217,20 @@
          segments (C:color->bytes color)))))
 
 ;; ============================================================
+;; 扇形填充绘制 (shapes_circle_sector_drawing.c)
+;; DrawCircleSector(Vector2 center, float radius,
+;;                  float startAngle, float endAngle, int segments, Color color)
+;; ============================================================
+
+(define draw-circle-sector
+  (let ([f (get-ffi-obj "DrawCircleSector" T:lib
+             (_fun (c : C:_vec2-bytes) _float _float _float _int
+                   (col : C:_color-bytes) -> _void))])
+    (λ (center radius start-angle end-angle segments color)
+      (f (C:vec2->bytes center) radius start-angle end-angle
+         segments (C:color->bytes color)))))
+
+;; ============================================================
 ;; 扇形边框绘制 (shapes_ring_drawing.c, shapes_circle_sector_drawing.c)
 ;; DrawCircleSectorLines(Vector2 center, float radius,
 ;;                       float startAngle, float endAngle, int segments, Color color)
@@ -388,5 +402,6 @@
  get-collision-rec
  draw-ring
  draw-ring-lines
+ draw-circle-sector
  draw-circle-sector-lines
  draw-rectangle-pro)
