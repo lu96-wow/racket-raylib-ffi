@@ -167,6 +167,28 @@
       (f (C:vec2->bytes point) (C:vec2->bytes center) radius))))
 
 ;; ============================================================
+;; 矩形碰撞检测 (shapes_collision_area.c)
+;; CheckCollisionRecs(Rectangle rec1, Rectangle rec2) -> bool
+;; ============================================================
+
+(define check-collision-recs
+  (let ([f (get-ffi-obj "CheckCollisionRecs" T:lib
+             (_fun (r1 : C:_rect-bytes) (r2 : C:_rect-bytes) -> _stdbool))])
+    (λ (rec1 rec2)
+      (f (C:rect->bytes rec1) (C:rect->bytes rec2)))))
+
+;; ============================================================
+;; 获取碰撞矩形 (shapes_collision_area.c)
+;; GetCollisionRec(Rectangle rec1, Rectangle rec2) -> Rectangle
+;; ============================================================
+
+(define get-collision-rec
+  (let ([f (get-ffi-obj "GetCollisionRec" T:lib
+             (_fun (r1 : C:_rect-bytes) (r2 : C:_rect-bytes) -> (r : C:_rect-bytes)))])
+    (λ (rec1 rec2)
+      (C:rect-bytes->rect (f (C:rect->bytes rec1) (C:rect->bytes rec2))))))
+
+;; ============================================================
 ;; 环形绘制 (core_input_gestures_testbed.c)
 ;; DrawRing(Vector2 center, float innerRadius, float outerRadius,
 ;;          float startAngle, float endAngle, int segments, Color color)
@@ -334,5 +356,7 @@
  draw-line-v
  draw-line-bezier
  check-collision-point-circle
+ check-collision-recs
+ get-collision-rec
  draw-ring
  draw-rectangle-pro)
