@@ -955,6 +955,23 @@
           c)))))
 
 ;; ============================================================
+;; HSV 转 Color (shapes_triangle_strip.c)
+;; ColorFromHSV(float hue, float saturation, float value) -> Color
+;; ============================================================
+
+(define color-from-hsv
+  (let ([f (get-ffi-obj "ColorFromHSV" T:lib
+             (_fun _float _float _float -> (v : _color-bytes)))])
+    (λ (hue saturation value)
+      (let ([lst (f hue saturation value)])
+        (let ([c (malloc T:_Color 'atomic)])
+          (ptr-set! c _ubyte 0 (car lst))
+          (ptr-set! c _ubyte 1 (cadr lst))
+          (ptr-set! c _ubyte 2 (caddr lst))
+          (ptr-set! c _ubyte 3 (cadddr lst))
+          c)))))
+
+;; ============================================================
 ;; rlgl 函数 (shapes_top_down_lights.c)
 ;; rlSetBlendMode(int mode) / rlSetBlendFactors(int sf, int df, int eq)
 ;; rlDrawRenderBatchActive(void)
@@ -1100,7 +1117,7 @@
  get-touch-position
 
  ;; 颜色工具
- fade color-alpha color=?
+ fade color-alpha color-from-hsv color=?
 
  ;; 输入 — 手势
  set-gestures-enabled is-gesture-detected? get-gesture-detected
