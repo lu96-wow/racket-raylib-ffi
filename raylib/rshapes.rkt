@@ -170,6 +170,19 @@
       (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos) thick (C:color->bytes color)))))
 
 ;; ============================================================
+;; 虚线绘制 (shapes_dashed_line.c)
+;; DrawLineDashed(Vector2 startPos, Vector2 endPos, int dashSize, int spaceSize, Color color)
+;; ============================================================
+
+(define draw-line-dashed
+  (let ([f (get-ffi-obj "DrawLineDashed" T:lib
+             (_fun (s : C:_vec2-bytes) (e : C:_vec2-bytes)
+                   _int _int (col : C:_color-bytes) -> _void))])
+    (λ (start-pos end-pos dash-size space-size color)
+      (f (C:vec2->bytes start-pos) (C:vec2->bytes end-pos)
+         dash-size space-size (C:color->bytes color)))))
+
+;; ============================================================
 ;; 点与圆碰撞检测 (shapes_lines_bezier.c)
 ;; CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius) -> bool
 ;; ============================================================
@@ -771,6 +784,7 @@
  draw-line-ex
  draw-line-v
  draw-line-bezier
+ draw-line-dashed
  check-collision-point-circle
  check-collision-recs
  get-collision-rec
