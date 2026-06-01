@@ -1,0 +1,73 @@
+;; shapes_top_down_lights — 设计要点
+;;
+;; 对应 C: examples/shapes/shapes_top_down_lights.c
+;; 功能:  2D 光照 + 阴影投射系统
+
+;; ============================================================
+;; 核心差异: CUSTOM blend + RT + texture 组合不生效
+;; ============================================================
+;;
+;; 这是一个已知的 Racket FFI 绑定的限制:
+;;   draw-texture-rec / draw-texture-pro + rlSetBlendMode(BLEND_CUSTOM)
+;;   + RenderTexture (FBO) 的组合在 raylib 内部 batch 系统下
+;;   没有达到预期效果。其他组合均正常:
+;;
+;;   CUSTOM blend + shapes + RT                ✅ 正常
+;;   CUSTOM blend + texture + SCREEN           ✅ 正常
+;;   default blend + texture + RT              ✅ 正常
+;;
+;; Racket 版绕过办法:
+;;   不在 mask 之间用 draw-texture-rec 做 merge,
+;;   而是每一帧直接在 global-mask (单个 RenderTexture) 上
+;;   用 shapes (draw-circle-gradient + draw-triangle-fan)
+;;   渲染所有光源。每帧 clear-background BLACK 后重新画所有光源,
+;;   避免视觉残留。
+;;
+;; 区别体现:
+;;   C 版: 每光源独立 mask → merge 到 global-mask
+;;   Racket: 每光源直接画到 global-mask
+
+;; ============================================================
+;; 功能操作
+;; ============================================================
+;;
+;;   鼠标左键拖拽   → 移动光源 #1
+;;   鼠标右键点击   → 添加新光源
+;;   F1            → 切换阴影体积调试显示
+;;
+;;   (C 版没有使用 raygui, 而是直接鼠标交互,
+;;    Racket 版与 C 版交互一致)
+
+;; ============================================================
+;; 新增 FFI 绑定
+;; ============================================================
+;; draw-triangle-fan        — DrawTriangleFan(const Vector2*, int, Color)
+;; draw-circle-sector       — DrawCircleSector(Vector2, float, float, float, int, Color)
+;; gen-image-checked        — GenImageChecked(int, int, int, int, Color, Color)
+;; load-texture-from-image — LoadTextureFromImage(Image) -> Texture2D
+;; color-alpha              — ColorAlpha(Color, float) -> Color
+;; rl-set-blend-mode        — rlSetBlendMode(int)
+;; rl-set-blend-factors     — rlSetBlendFactors(int, int, int)
+;; rl-draw-render-batch-active — rlDrawRenderBatchActive()
+;; vec2-add/subtract/scale  — 纯 Racket 实现
+;; BLEND-ALPHA/BLEND-CUSTOM — blend mode 常量
+;; RLGL-SRC-ALPHA/MIN/MAX  — blend factor 常量
+
+;; ============================================================
+;; 已有绑定复用
+;; ============================================================
+;; init-window close-window window-should-close?
+;; set-target-fps begin-drawing end-drawing clear-background
+;; draw-text draw-line draw-rectangle draw-rectangle-lines
+;; draw-rectangle-rec draw-circle draw-circle-gradient
+;; draw-texture-rec draw-texture-pro fade
+;; load-render-texture unload-render-texture
+;; load-texture unload-texture
+;; is-mouse-button-down is-mouse-button-pressed
+;; is-key-pressed get-mouse-position
+;; get-screen-width get-screen-height get-random-value
+;; check-collision-point-rec check-collision-recs
+;; vector2 vector2-x vector2-y
+;; rectangle rectangle-x/y/w/h
+;; make-color vec2-normalize
+;; (所有颜色常量) KEY-F1 MOUSE-BUTTON-* BLEND-ALPHA

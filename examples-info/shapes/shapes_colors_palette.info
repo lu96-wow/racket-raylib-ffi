@@ -1,0 +1,7 @@
+;; shapes_colors_palette — 设计要点
+;;
+;; 对应 C: examples/shapes/shapes_colors_palette.c
+;;
+;; 无 raygui 依赖, 纯 shapes/基础绘制。
+;; Racket 版与 C 版功能一致, draw-text 替代 raygui 标签。
+;; 无新增 FFI 绑定 (复用已有)。

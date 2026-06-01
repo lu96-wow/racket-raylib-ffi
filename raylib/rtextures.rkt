@@ -153,6 +153,26 @@
          (C:color->bytes tint)))))
 
 ;; ============================================================
+;; Image 生成与纹理加载 (shapes_top_down_lights.c)
+;; GenImageChecked / LoadTextureFromImage
+;; (_image-bytes 和 unload-image 已在 rcore.rkt 中定义)
+;; ============================================================
+
+;; GenImageChecked(int width, int height, int checksX, int checksY, Color c1, Color c2) -> Image
+(define gen-image-checked
+  (let ([f (get-ffi-obj "GenImageChecked" T:lib
+             (_fun _int _int _int _int (c1 : C:_color-bytes) (c2 : C:_color-bytes)
+                   -> (img : C:_image-bytes)))])
+    (λ (w h cx cy col1 col2)
+      (f w h cx cy (C:color->bytes col1) (C:color->bytes col2)))))
+
+;; LoadTextureFromImage(Image image) -> Texture2D
+(define load-texture-from-image
+  (let ([f (get-ffi-obj "LoadTextureFromImage" T:lib
+             (_fun (img : C:_image-bytes) -> (t : _texture-bytes)))])
+    (λ (image) (f image))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -163,5 +183,6 @@
  begin-texture-mode end-texture-mode
  draw-texture-rec
  set-texture-filter
- draw-texture-pro)
+ draw-texture-pro
+ gen-image-checked load-texture-from-image)
 

@@ -1,0 +1,46 @@
+;; shapes_circle_sector_drawing — 设计要点
+;;
+;; 对应 C: examples/shapes/shapes_circle_sector_drawing.c
+;; 功能:  绘制扇形, 键盘控制角度/半径/段数
+
+;; ============================================================
+;; 主要区别: 键盘替代 raygui 滑块
+;; ============================================================
+;;
+;; C 原版用 raygui 提供 4 个滑块 (StartAngle/EndAngle/Radius/Segments)
+;; 和 MODE 显示 (MANUAL/AUTO)。
+;;
+;; Racket 版用键盘控制:
+;;
+;;   Q/W → StartAngle  ±5°   范围 0-720
+;;   A/S → EndAngle    ±5°   范围 0-720
+;;   Z/X → Radius      ±5    范围 0-200
+;;   E/R → Segments    ±1    范围 0-100
+
+;; ============================================================
+;; 实现差异
+;; ============================================================
+;;
+;; 1. MODE 计算与 C 版一致:
+;;      minSegments = ceil((endAngle - startAngle) / 90)
+;;      当 segments >= minSegments 时为 MANUAL。
+;;
+;; 2. 所有可变状态用 box。
+
+;; ============================================================
+;; 新增 FFI 绑定
+;; ============================================================
+;; draw-circle-sector — DrawCircleSector(Vector2, float, float, float, int, Color)
+
+;; ============================================================
+;; 已有绑定复用
+;; ============================================================
+;; init-window close-window window-should-close?
+;; set-target-fps begin-drawing end-drawing clear-background
+;; draw-text draw-line draw-rectangle draw-circle
+;; draw-circle-sector-lines draw-fps
+;; is-key-pressed get-screen-width get-screen-height
+;; vector2 vector2-x vector2-y
+;; make-color fade
+;; RAYWHITE LIGHTGRAY MAROON DARKGRAY (make-color ...)
+;; KEY-Q KEY-W KEY-A KEY-S KEY-Z KEY-X KEY-E KEY-R

@@ -36,6 +36,21 @@
           (ptr-set! r _float 0 (/ x len))
           (ptr-set! r _float 1 (/ y len)) r))))
 
+(define (vec2-add a b)
+  (let ([r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (+ (ptr-ref a _float 0) (ptr-ref b _float 0)))
+    (ptr-set! r _float 1 (+ (ptr-ref a _float 1) (ptr-ref b _float 1))) r))
+
+(define (vec2-subtract a b)
+  (let ([r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (- (ptr-ref a _float 0) (ptr-ref b _float 0)))
+    (ptr-set! r _float 1 (- (ptr-ref a _float 1) (ptr-ref b _float 1))) r))
+
+(define (vec2-scale v s)
+  (let ([r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (* (ptr-ref v _float 0) s))
+    (ptr-set! r _float 1 (* (ptr-ref v _float 1) s)) r))
+
 (define (vec3-add v1 v2)
   (let ([r (malloc T:_Vector3 'atomic)])
     (ptr-set! r _float 0 (+ (ptr-ref v1 _float 0) (ptr-ref v2 _float 0)))
@@ -118,6 +133,7 @@
 
 (provide
  clamp lerp remap
+ vec2-add vec2-subtract vec2-scale
  vec2-length vec2-normalize vec2-clamp
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize

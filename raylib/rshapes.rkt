@@ -382,6 +382,24 @@
       (f (C:rect->bytes rec) (C:vec2->bytes origin) rotation (C:color->bytes color)))))
 
 ;; ============================================================
+;; 三角形扇形绘制 (shapes_top_down_lights.c)
+;; DrawTriangleFan(const Vector2 *points, int pointCount, Color color)
+;; ============================================================
+
+(define draw-triangle-fan
+  (let ([f (get-ffi-obj "DrawTriangleFan" T:lib
+             (_fun _pointer _int (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count color)
+      ;; points-vec: vector of Vector2 pointers
+      ;; Allocate a flat float buffer: 2*point-count floats
+      (let ([buf (malloc _float (* 2 point-count) 'atomic)])
+        (for ([i (in-range point-count)])
+          (let ([v (vector-ref points-vec i)])
+            (ptr-set! buf _float (* 2 i)     (ptr-ref v _float 0))
+            (ptr-set! buf _float (+ (* 2 i) 1) (ptr-ref v _float 1))))
+        (f buf point-count (C:color->bytes color))))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -399,6 +417,7 @@
  draw-rectangle-v
  draw-rectangle-gradient-h
  draw-triangle
+ draw-triangle-fan
  draw-triangle-lines
  draw-poly
  draw-poly-lines

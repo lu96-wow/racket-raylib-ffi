@@ -123,6 +123,12 @@
    [dep-id _uint] [dep-width _int] [dep-height _int] [dep-mipmaps _int] [dep-format _int]))
 
 
+;; Image (raylib.h:277) — 24 字节: void* data + 4× int
+(define-cstruct _Image
+  ([data _pointer]
+   [width _int] [height _int]
+   [mipmaps _int] [format _int]))
+
 ;; Shader (raylib.h:375) — 12 字节: unsigned int id + int* locs
 (define-cstruct _Shader
   ([id _uint]
@@ -197,6 +203,10 @@
  set-RenderTexture-tex-height! set-RenderTexture-tex-mipmaps! set-RenderTexture-tex-format!
  set-RenderTexture-dep-id! set-RenderTexture-dep-width!
  set-RenderTexture-dep-height! set-RenderTexture-dep-mipmaps! set-RenderTexture-dep-format!
+ ;; Image
+ _Image Image? make-Image
+ Image-data Image-width Image-height Image-mipmaps Image-format
+ set-Image-data! set-Image-width! set-Image-height! set-Image-mipmaps! set-Image-format!
  ;; Shader
  _Shader Shader? make-Shader
  Shader-id Shader-locs

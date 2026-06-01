@@ -1,0 +1,22 @@
+;; shapes_bouncing_ball — 设计要点
+;;
+;; 对应 C: examples/shapes/shapes_bouncing_ball.c
+;; 功能:  弹跳球 + 物理模拟 (纯 shapes)
+
+;; ============================================================
+;; 主要区别
+;; ============================================================
+;;
+;; C 版使用 raygui 显示信息, Racket 版用 draw-text。
+;; 无新增绑定。
+
+;; ============================================================
+;; 已有绑定复用
+;; ============================================================
+;; init-window close-window window-should-close?
+;; set-target-fps begin-drawing end-drawing clear-background
+;; draw-text draw-circle draw-rectangle draw-rectangle-rec draw-fps
+;; is-key-pressed get-frame-time get-fps
+;; get-screen-width get-screen-height
+;; make-color
+;; (颜色常量)

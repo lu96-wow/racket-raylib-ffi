@@ -329,6 +329,16 @@
 (define SHADER-UNIFORM-INT     4)
 
 ;; ============================================================
+;; Blend 模式 (rlgl)
+;; ============================================================
+
+(define BLEND-ALPHA      0)
+(define BLEND-CUSTOM     4)
+(define RLGL-SRC-ALPHA   #x0302)
+(define RLGL-MIN         #x8007)
+(define RLGL-MAX         #x8008)
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -418,4 +428,6 @@
  SHADER-UNIFORM-FLOAT SHADER-UNIFORM-VEC2
  SHADER-UNIFORM-VEC3 SHADER-UNIFORM-VEC4
  SHADER-UNIFORM-INT
+ BLEND-ALPHA BLEND-CUSTOM
+ RLGL-SRC-ALPHA RLGL-MIN RLGL-MAX
 )

@@ -938,6 +938,33 @@
       (vec2-bytes->vec2 (f font text font-size spacing)))))
 
 ;; ============================================================
+;; 颜色 Alpha (shapes_top_down_lights.c)
+;; ColorAlpha(Color color, float alpha) -> Color
+;; ============================================================
+
+(define color-alpha
+  (let ([f (get-ffi-obj "ColorAlpha" T:lib
+             (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
+    (λ (color alpha)
+      (let ([lst (f (color->bytes color) alpha)])
+        (let ([c (malloc T:_Color 'atomic)])
+          (ptr-set! c _ubyte 0 (car lst))
+          (ptr-set! c _ubyte 1 (cadr lst))
+          (ptr-set! c _ubyte 2 (caddr lst))
+          (ptr-set! c _ubyte 3 (cadddr lst))
+          c)))))
+
+;; ============================================================
+;; rlgl 函数 (shapes_top_down_lights.c)
+;; rlSetBlendMode(int mode) / rlSetBlendFactors(int sf, int df, int eq)
+;; rlDrawRenderBatchActive(void)
+;; ============================================================
+
+(def-ffi rl-set-blend-mode        "rlSetBlendMode"        (_fun _int -> _void))
+(def-ffi rl-set-blend-factors     "rlSetBlendFactors"     (_fun _int _int _int -> _void))
+(def-ffi rl-draw-render-batch-active "rlDrawRenderBatchActive" (_fun -> _void))
+
+;; ============================================================
 ;; 导出 — 只导出当前示例需要的
 ;; ============================================================
 
@@ -995,6 +1022,9 @@
  ;; 3D 网格 / rlgl 矩阵操作
  draw-grid
  rl-push-matrix rl-pop-matrix rl-translate-f rl-rotate-f
+
+ ;; rlgl blend
+ rl-set-blend-mode rl-set-blend-factors rl-draw-render-batch-active
 
  ;; 随机
  get-random-value set-random-seed
@@ -1070,7 +1100,7 @@
  get-touch-position
 
  ;; 颜色工具
- fade color=?
+ fade color-alpha color=?
 
  ;; 输入 — 手势
  set-gestures-enabled is-gesture-detected? get-gesture-detected

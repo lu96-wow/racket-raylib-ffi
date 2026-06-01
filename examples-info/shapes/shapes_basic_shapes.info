@@ -1,0 +1,38 @@
+;; shapes_basic_shapes — 设计要点
+;;
+;; 对应 C: examples/shapes/shapes_basic_shapes.c
+;; 功能:  展示 raylib 基础绘图函数
+
+;; ============================================================
+;; 主要区别
+;; ============================================================
+;;
+;; 1. C 版本使用 raygui 显示当前绘图模式, Racket 版直接用
+;;    draw-text 显示。
+;;
+;; 2. C 版从 GetTime() 计算旋转角度, Racket 版用 box 累加。
+;;
+;; 3. 无 raygui 依赖。
+
+;; ============================================================
+;; 新增 FFI 绑定
+;; ============================================================
+;; draw-circle-gradient  — DrawCircleGradient()
+;; draw-circle-lines     — DrawCircleLines()
+;; draw-ellipse          — DrawEllipse()
+;; draw-ellipse-lines    — DrawEllipseLines()
+;; draw-rectangle-gradient-h — DrawRectangleGradientH()
+;; draw-triangle-lines   — DrawTriangleLines()
+;; draw-poly             — DrawPoly()
+;; draw-poly-lines       — DrawPolyLines()
+;; draw-poly-lines-ex    — DrawPolyLinesEx()
+
+;; ============================================================
+;; 已有绑定复用
+;; ============================================================
+;; init-window close-window window-should-close?
+;; set-target-fps begin-drawing end-drawing clear-background
+;; draw-text draw-rectangle draw-circle draw-line draw-fps
+;; is-key-pressed get-frame-time
+;; vector2 make-color
+;; (颜色常量)
