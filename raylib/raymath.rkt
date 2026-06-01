@@ -21,6 +21,18 @@
         [y (ptr-ref v _float 1)])
     (sqrt (+ (* x x) (* y y)))))
 
+(define (vec2-multiply v1 v2)
+  (let ([r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (* (ptr-ref v1 _float 0) (ptr-ref v2 _float 0)))
+    (ptr-set! r _float 1 (* (ptr-ref v1 _float 1) (ptr-ref v2 _float 1))) r))
+
+(define (vec2-rotate v angle)
+  (let* ([x (ptr-ref v _float 0)] [y (ptr-ref v _float 1)]
+         [c (cos angle)] [s (sin angle)]
+         [r (malloc T:_Vector2 'atomic)])
+    (ptr-set! r _float 0 (- (* x c) (* y s)))
+    (ptr-set! r _float 1 (+ (* x s) (* y c))) r))
+
 (define (vec2-clamp v mn mx)
   (let ([r (malloc T:_Vector2 'atomic)])
     (ptr-set! r _float 0 (clamp (ptr-ref v _float 0) (ptr-ref mn _float 0) (ptr-ref mx _float 0)))
@@ -133,8 +145,8 @@
 
 (provide
  clamp lerp remap
- vec2-add vec2-subtract vec2-scale
- vec2-length vec2-normalize vec2-clamp
+ vec2-add vec2-subtract vec2-scale vec2-multiply
+ vec2-length vec2-normalize vec2-rotate vec2-clamp
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize
  vec3-rotate-by-axis-angle vec3-lerp)
