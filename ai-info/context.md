@@ -301,6 +301,8 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | shapes_rectangle_advanced | rcore, rshapes, rtextures, raylib-var | draw-rectangle-gradient-ex, get-shapes-texture, get-shapes-texture-rectangle, rl-set-texture, rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f, rl-color-4ub, RL-QUADS, RL-TRIANGLES, draw-rectangle-rounded-gradient-h（纯 Racket 实现，对应 C 的 static 自定义函数）|
 | | shapes_splines_drawing | rcore, rshapes, raylib-var | draw-spline-linear, draw-spline-basis, draw-spline-catmull-rom, draw-spline-bezier-cubic, draw-spline-segment-linear, draw-spline-segment-basis, draw-spline-segment-catmull-rom, draw-spline-segment-bezier-cubic, vec2-vector->float-buf（8 个 FFI 绑定 + 1 个辅助函数）；键盘控制替代 raygui |
 | | shapes_double_pendulum | rcore, rshapes, rtextures, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现双摆物理模拟（RK 积分）+ RenderTexture 轨迹拖尾 |
+| | shapes_pie_chart | rcore, rshapes, rtext, raylib-var | 无需新增 FFI 绑定；键盘控制替代 raygui |
+| | shapes_vector_angle | rcore, rshapes, raymath, raylib-var | 无需新增 FFI 绑定；vec2-angle、vec2-line-angle 纯 Racket 实现 |
 | | shapes_triangle_strip | rcore, rshapes, raylib-var | color-from-hsv（1 个 FFI 绑定）；键盘控制替代 raygui |
 | | shapes_dashed_line | rcore, rshapes, raylib-var | draw-line-dashed（1 个 FFI 绑定）|
 | | shapes_digital_clock | rcore, rshapes, raylib-var | draw-triangle-strip（1 个 FFI 绑定）；纯 Racket 实现 7 段数码管 + 模拟表盘双模式时钟，SPACE 切换 |
