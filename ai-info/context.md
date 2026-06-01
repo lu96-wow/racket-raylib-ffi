@@ -269,6 +269,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
 | | | core_input_actions | rcore, rshapes, raylib-var | 纯 Racket 实现 Action 映射系统 (is-action-pressed?/released?/down?), 无需新增 FFI 绑定 |
 | | | core_directory_files | rcore, rshapes, raylib-var | get-working-directory, get-prev-directory-path, directory-exists?, load-directory-files-ex (4 个新增绑定), 用原生 raylib 绘制替代 raygui |
+| | | | shapes_rectangle_advanced | rcore, rshapes, rtextures, raylib-var | draw-rectangle-gradient-ex, get-shapes-texture, get-shapes-texture-rectangle, rl-set-texture, rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f, rl-color-4ub, RL-QUADS, RL-TRIANGLES, draw-rectangle-rounded-gradient-h（纯 Racket 实现）|
 | | | core_highdpi_testbed | rcore, rshapes, raylib-var | get-render-width, get-render-height, get-window-scale-dpi (3 个新增绑定) |
 | | | core_screen_recording | rcore, rshapes, raylib-var | _image-bytes, load-image-from-screen, unload-image, get-application-directory, export-image (5 个新增绑定), 用 ExportImage PNG 替代 C 版的 msf_gif GIF |
 | | | core_clipboard_text | rcore, rshapes, raylib-var | set-clipboard-text, get-clipboard-text (2 个新增绑定), 用原生 raylib 绘制替代 raygui |
@@ -297,5 +298,6 @@ timeout 3 racket examples/core/core_xxx.rkt
 | shapes_easings_ball | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-cubic-out, ease-elastic-in, ease-elastic-out（对应 reasings.h） |
 | shapes_easings_box | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-elastic-out, ease-bounce-out, ease-quad-out, ease-circ-out, ease-sine-out |
 | shapes_easings_rectangles | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-circ-out, ease-linear-in |
+| | shapes_rectangle_advanced | rcore, rshapes, rtextures, raylib-var | draw-rectangle-gradient-ex, get-shapes-texture, get-shapes-texture-rectangle, rl-set-texture, rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f, rl-color-4ub, RL-QUADS, RL-TRIANGLES, draw-rectangle-rounded-gradient-h（纯 Racket 实现，对应 C 的 static 自定义函数）|
 
 

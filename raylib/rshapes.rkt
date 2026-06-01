@@ -5,8 +5,10 @@
 ;; 对应 C: rshapes.c / raylib.h "Module: shapes"
 
 (require ffi/unsafe
+         racket/math
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt"))
+         (prefix-in C: "rcore.rkt")
+         (prefix-in TX: "rtextures.rkt"))
 
 ;; ============================================================
 ;; 圆形绘制 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
@@ -400,6 +402,239 @@
         (f buf point-count (C:color->bytes color))))))
 
 ;; ============================================================
+;; 渐变矩形填充 (shapes_rectangle_advanced.c)
+;; DrawRectangleGradientEx(Rectangle rec, Color topLeft, Color bottomLeft,
+;;                         Color bottomRight, Color topRight)
+;; ============================================================
+
+(define draw-rectangle-gradient-ex
+  (let ([f (get-ffi-obj "DrawRectangleGradientEx" T:lib
+             (_fun (r : C:_rect-bytes)
+                   (col1 : C:_color-bytes) (col2 : C:_color-bytes)
+                   (col3 : C:_color-bytes) (col4 : C:_color-bytes) -> _void))])
+    (λ (rec top-left bottom-left bottom-right top-right)
+      (f (C:rect->bytes rec)
+         (C:color->bytes top-left) (C:color->bytes bottom-left)
+         (C:color->bytes bottom-right) (C:color->bytes top-right)))))
+
+;; ============================================================
+;; Shapes 纹理获取 (shapes_rectangle_advanced.c)
+;; GetShapesTexture(void) -> Texture2D
+;; GetShapesTextureRectangle(void) -> Rectangle
+;; ============================================================
+
+(define get-shapes-texture
+  (let ([f (get-ffi-obj "GetShapesTexture" T:lib
+             (_fun -> (t : TX:_texture-bytes)))])
+    (λ () (f))))
+
+(define get-shapes-texture-rectangle
+  (let ([f (get-ffi-obj "GetShapesTextureRectangle" T:lib
+             (_fun -> (r : C:_rect-bytes)))])
+    (λ () (C:rect-bytes->rect (f)))))
+
+;; ============================================================
+;; rlgl 低层绘制函数 (shapes_rectangle_advanced.c)
+;; ============================================================
+
+(define rl-set-texture
+  (get-ffi-obj "rlSetTexture" T:lib (_fun _uint -> _void)))
+
+(define rl-begin
+  (get-ffi-obj "rlBegin" T:lib (_fun _int -> _void)))
+
+(define rl-end
+  (get-ffi-obj "rlEnd" T:lib (_fun -> _void)))
+
+(define rl-vertex-2f
+  (get-ffi-obj "rlVertex2f" T:lib (_fun _float _float -> _void)))
+
+(define rl-tex-coord-2f
+  (get-ffi-obj "rlTexCoord2f" T:lib (_fun _float _float -> _void)))
+
+(define rl-color-4ub
+  (get-ffi-obj "rlColor4ub" T:lib (_fun _ubyte _ubyte _ubyte _ubyte -> _void)))
+
+;; ============================================================
+;; rlgl 绘制模式常量
+;; ============================================================
+
+(define RL-QUADS     #x0007)
+(define RL-TRIANGLES #x0004)
+
+;; ============================================================
+;; 渐变圆角矩形绘制 (shapes_rectangle_advanced.c — 自定义函数)
+;;
+;; DrawRectangleRoundedGradientH:
+;;   绘制水平渐变圆角矩形，左右两侧可分别设置圆角半径
+;;
+;; 对应 C: static void DrawRectangleRoundedGradientH()
+;; ============================================================
+
+(define deg2rad (/ pi 180.0))
+
+(define (draw-rectangle-rounded-gradient-h
+         rec roundness-left roundness-right segments left-color right-color)
+  (define rec-x   (ptr-ref rec _float 0))
+  (define rec-y   (ptr-ref rec _float 1))
+  (define rec-w   (ptr-ref rec _float 2))
+  (define rec-h   (ptr-ref rec _float 3))
+
+  (if (or (and (<= roundness-left 0.0) (<= roundness-right 0.0))
+          (< rec-w 1) (< rec-h 1))
+      (draw-rectangle-gradient-ex rec left-color left-color right-color right-color)
+      (let ([roundness-left  (min roundness-left 1.0)]
+            [roundness-right (min roundness-right 1.0)]
+            [rec-size (min rec-w rec-h)]
+            [radius-left  0.0]
+            [radius-right 0.0])
+        (set! radius-left  (/ (* rec-size roundness-left)  2.0))
+        (set! radius-right (/ (* rec-size roundness-right) 2.0))
+        (when (< radius-left  0.0) (set! radius-left  0.0))
+        (when (< radius-right 0.0) (set! radius-right 0.0))
+        (when (and (<= radius-right 0.0) (<= radius-left 0.0))
+          (error "draw-rectangle-rounded-gradient-h: both radii zero"))
+        (define step-length (/ 90.0 segments))
+
+        ;; 12 个点坐标: 每个点为 (list x y)
+        (define points
+          (vector
+           (list (+ rec-x radius-left) rec-y)
+           (list (- (+ rec-x rec-w) radius-right) rec-y)
+           (list (+ rec-x rec-w) (+ rec-y radius-right))
+           (list (+ rec-x rec-w) (- (+ rec-y rec-h) radius-right))
+           (list (- (+ rec-x rec-w) radius-right) (+ rec-y rec-h))
+           (list (+ rec-x radius-left) (+ rec-y rec-h))
+           (list rec-x (- (+ rec-y rec-h) radius-left))
+           (list rec-x (+ rec-y radius-left))
+           (list (+ rec-x radius-left) (+ rec-y radius-left))
+           (list (- (+ rec-x rec-w) radius-right) (+ rec-y radius-right))
+           (list (- (+ rec-x rec-w) radius-right) (- (+ rec-y rec-h) radius-right))
+           (list (+ rec-x radius-left) (- (+ rec-y rec-h) radius-left))))
+        ;; 4 个圆心
+        (define centers (vector (vector-ref points 8) (vector-ref points 9)
+                                (vector-ref points 10) (vector-ref points 11)))
+        (define angles (vector 180.0 270.0 0.0 90.0))
+
+        ;; 获取 shapes 纹理
+        (define tex-shapes (get-shapes-texture))
+        (define tex-id (car tex-shapes))
+        (define tex-w  (cadr tex-shapes))
+        (define tex-h  (caddr tex-shapes))
+        (define shape-rect (get-shapes-texture-rectangle))
+        (define sr-x (ptr-ref shape-rect _float 0))
+        (define sr-y (ptr-ref shape-rect _float 1))
+        (define sr-w (ptr-ref shape-rect _float 2))
+        (define sr-h (ptr-ref shape-rect _float 3))
+
+        (define (rl-color c)
+          (rl-color-4ub (ptr-ref c _ubyte 0)
+                        (ptr-ref c _ubyte 1)
+                        (ptr-ref c _ubyte 2)
+                        (ptr-ref c _ubyte 3)))
+        (define (pt-x p) (car p))
+        (define (pt-y p) (cadr p))
+
+        ;; ---- 开始 QUADS 绘制 ----
+        (rl-set-texture tex-id)
+        (rl-begin RL-QUADS)
+
+        ;; 4 个圆角
+        (for ([k (in-range 4)])
+          (define color (case k [(0) left-color] [(1) right-color]
+                               [(2) right-color] [(3) left-color]))
+          (define radius (case k [(0) radius-left] [(1) radius-right]
+                                [(2) radius-right] [(3) radius-left]))
+          (define base-angle (vector-ref angles k))
+          (define cx (pt-x (vector-ref centers k)))
+          (define cy (pt-y (vector-ref centers k)))
+          (for ([i (in-range (quotient segments 2))])
+            (rl-color color)
+            (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+            (rl-vertex-2f cx cy)
+            (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+            (rl-vertex-2f
+             (+ cx (* (cos (* deg2rad (+ base-angle (* step-length 2 i 2)))) radius))
+             (+ cy (* (sin (* deg2rad (+ base-angle (* step-length 2 i 2)))) radius)))
+            (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+            (rl-vertex-2f
+             (+ cx (* (cos (* deg2rad (+ base-angle (* step-length 2 i 1)))) radius))
+             (+ cy (* (sin (* deg2rad (+ base-angle (* step-length 2 i 1)))) radius)))
+            (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+            (rl-vertex-2f
+             (+ cx (* (cos (* deg2rad (+ base-angle (* step-length 2 i 0)))) radius))
+             (+ cy (* (sin (* deg2rad (+ base-angle (* step-length 2 i 0)))) radius))))
+          (when (odd? segments)
+            (rl-color color)
+            (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+            (rl-vertex-2f cx cy)
+            (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+            (rl-vertex-2f
+             (+ cx (* (cos (* deg2rad (+ base-angle (* (quotient segments 2) 2) step-length))) radius))
+             (+ cy (* (sin (* deg2rad (+ base-angle (* (quotient segments 2) 2) step-length))) radius)))
+            (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+            (rl-vertex-2f
+             (+ cx (* (cos (* deg2rad (+ base-angle (* (quotient segments 2) 2)))) radius))
+             (+ cy (* (sin (* deg2rad (+ base-angle (* (quotient segments 2) 2)))) radius)))
+            (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+            (rl-vertex-2f cx cy)))
+        ;; [2] 上方矩形
+        (rl-color left-color)
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 0)) (pt-y (vector-ref points 0)))
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 8)) (pt-y (vector-ref points 8)))
+        (rl-color right-color)
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 9)) (pt-y (vector-ref points 9)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 1)) (pt-y (vector-ref points 1)))
+        ;; [4] 右方矩形
+        (rl-color right-color)
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 2)) (pt-y (vector-ref points 2)))
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 9)) (pt-y (vector-ref points 9)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 10)) (pt-y (vector-ref points 10)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 3)) (pt-y (vector-ref points 3)))
+        ;; [6] 下方矩形
+        (rl-color left-color)
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 11)) (pt-y (vector-ref points 11)))
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 5)) (pt-y (vector-ref points 5)))
+        (rl-color right-color)
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 4)) (pt-y (vector-ref points 4)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 10)) (pt-y (vector-ref points 10)))
+        ;; [8] 左方矩形
+        (rl-color left-color)
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 7)) (pt-y (vector-ref points 7)))
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 6)) (pt-y (vector-ref points 6)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 11)) (pt-y (vector-ref points 11)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 8)) (pt-y (vector-ref points 8)))
+        ;; [9] 中间矩形
+        (rl-color left-color)
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 8)) (pt-y (vector-ref points 8)))
+        (rl-tex-coord-2f (/ sr-x tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 11)) (pt-y (vector-ref points 11)))
+        (rl-color right-color)
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ (+ sr-y sr-h) tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 10)) (pt-y (vector-ref points 10)))
+        (rl-tex-coord-2f (/ (+ sr-x sr-w) tex-w) (/ sr-y tex-h))
+        (rl-vertex-2f (pt-x (vector-ref points 9)) (pt-y (vector-ref points 9)))
+        (rl-end)
+        (rl-set-texture 0))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -436,4 +671,16 @@
  draw-ring-lines
  draw-circle-sector
  draw-circle-sector-lines
- draw-rectangle-pro)
+ draw-rectangle-pro
+ draw-rectangle-gradient-ex
+ get-shapes-texture
+ get-shapes-texture-rectangle
+ rl-set-texture
+ rl-begin
+ rl-end
+ rl-vertex-2f
+ rl-tex-coord-2f
+ rl-color-4ub
+ RL-QUADS
+ RL-TRIANGLES
+ draw-rectangle-rounded-gradient-h)
