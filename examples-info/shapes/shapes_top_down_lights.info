@@ -71,3 +71,5 @@
 ;; rectangle rectangle-x/y/w/h
 ;; make-color vec2-normalize
 ;; (所有颜色常量) KEY-F1 MOUSE-BUTTON-* BLEND-ALPHA
+
+这个示例依旧有问题

@@ -1,30 +1,37 @@
 #lang racket/base
 
+;; raylib [shapes] example - top down lights (Racket FFI 翻译)
+;;
+;; 对应 C: examples/shapes/shapes_top_down_lights.c
+;;
+;; 与 C 版的区别:
+;;   C 版: 每光源独立 mask → draw-texture-rec 合并到 global mask
+;;   Racket: 每帧直接画 shapes (circle + triangles) 到 global mask
+;;   原因是 draw-texture-rec + CUSTOM blend + RenderTexture 组合
+;;   在 FFI 下不稳定, 但 shapes + CUSTOM blend + RT 是正常的。
+
 (require "../../raylib/raylib.rkt" racket/math)
 
-(define MAX-BOXES 20) (define MAX-SHADOWS 60) (define MAX-LIGHTS 16)
+(define MAX-BOXES 20) (define MAX-SHADOWS (* MAX-BOXES 3)) (define MAX-LIGHTS 16)
 (define W 800) (define H 450)
 
-;; structs
+;; 结构体
 (struct sgeom (v0 v1 v2 v3) #:transparent #:mutable)
-(define (make-sg) (sgeom (v2 0 0)(v2 0 0)(v2 0 0)(v2 0 0)))
+(define (sg-make) (sgeom (v2 0 0)(v2 0 0)(v2 0 0)(v2 0 0)))
 (define (v2 x y) (vector2 x y))
 (define (sg-set! s i v)
-  (case i [(0)(set-sgeom-v0! s v)][(1)(set-sgeom-v1! s v)]
-          [(2)(set-sgeom-v2! s v)][(3)(set-sgeom-v3! s v)]))
+  (case i[(0)(set-sgeom-v0! s v)][(1)(set-sgeom-v1! s v)]
+         [(2)(set-sgeom-v2! s v)][(3)(set-sgeom-v3! s v)]))
 (define (sg-ref s i)
-  (case i [(0)(sgeom-v0 s)][(1)(sgeom-v1 s)][(2)(sgeom-v2 s)][(3)(sgeom-v3 s)]))
-
-;; rectangle/vec2 shortcut
-(define (rx r) (rectangle-x r)) (define (ry r) (rectangle-y r))
-(define (rw r) (rectangle-w r)) (define (rh r) (rectangle-h r))
-(define (sr! r i v) ((case i [(0)set-rectangle-x!][(1)set-rectangle-y!][(2)set-rectangle-w!][(3)set-rectangle-h!]) r v))
-(define vx vector2-x) (define vy vector2-y)
+  (case i[(0)(sgeom-v0 s)][(1)(sgeom-v1 s)][(2)(sgeom-v2 s)][(3)(sgeom-v3 s)]))
+(define (rx r) (rectangle-x r))(define (ry r)(rectangle-y r))
+(define (rw r)(rectangle-w r))(define (rh r)(rectangle-h r))
+(define vx vector2-x)(define vy vector2-y)
 
 (struct light (active dirty pos radius bounds sgs sc) #:transparent #:mutable)
 (define (mklight)
   (light #f #f (v2 0 0) 0.0 (rectangle 0 0 0 0)
-         (for/vector([i MAX-SHADOWS])(make-sg)) 0))
+         (for/vector([i MAX-SHADOWS])(sg-make)) 0))
 (define lights (for/vector([i MAX-LIGHTS])(mklight)))
 
 (define (move-light slot x y)
@@ -32,15 +39,15 @@
     (set-light-dirty! li #t)
     (ptr-set! (light-pos li) _float 0 x)
     (ptr-set! (light-pos li) _float 1 y)
-    (sr! (light-bounds li) 0 (- x (light-radius li)))
-    (sr! (light-bounds li) 1 (- y (light-radius li)))))
+    (set-rectangle-x! (light-bounds li)(- x (light-radius li)))
+    (set-rectangle-y! (light-bounds li)(- y (light-radius li)))))
 
 (define (setup-light slot x y r)
   (let ([li (vector-ref lights slot)])
     (set-light-active! li #t)
     (set-light-radius! li r)
-    (sr! (light-bounds li) 2 (* r 2.0))
-    (sr! (light-bounds li) 3 (* r 2.0))
+    (set-rectangle-w! (light-bounds li)(* r 2.0))
+    (set-rectangle-h! (light-bounds li)(* r 2.0))
     (move-light slot x y)))
 
 (define (compute-shadow li sp ep)
@@ -59,17 +66,17 @@
 
 (define (update-light slot boxes n)
   (let ([li (vector-ref lights slot)])
-    (if (and (light-active li) (light-dirty li))
+    (if (and (light-active li)(light-dirty li))
       (let/ec return
         (set-light-dirty! li #f)
         (set-light-sc! li 0)
         (for ([i (in-range n)])
           (let ([b (vector-ref boxes i)])
             (when (check-collision-point-rec (light-pos li) b)
-              (return))
+              (return #f))
             (when (check-collision-recs (light-bounds li) b)
-              (let* ([bx (rx b)] [by (ry b)] [bw (rw b)] [bh (rh b)]
-                     [lpx (vx (light-pos li))] [lpy (vy (light-pos li))])
+              (let* ([bx (rx b)][by (ry b)][bw (rw b)][bh (rh b)]
+                     [lpx (vx (light-pos li))][lpy (vy (light-pos li))])
                 (let ([sp (v2 bx by)][ep (v2 (+ bx bw) by)])
                   (when (> lpy (vy ep))(compute-shadow li sp ep)))
                 (let ([sp (v2 (+ bx bw) by)][ep (v2 (+ bx bw)(+ by bh))])
@@ -87,6 +94,7 @@
         #t)
       #f)))
 
+;; boxes
 (define boxes (make-vector MAX-BOXES (rectangle 0 0 0 0)))
 (define (setup-boxes)
   (vector-set! boxes 0 (rectangle 150 80 40 40))
@@ -101,7 +109,7 @@
                  (exact->inexact (get-random-value 10 100))
                  (exact->inexact (get-random-value 10 100))))))
 
-(init-window W H "top down lights")
+(init-window W H "raylib [shapes] example - top down lights")
 (setup-boxes)
 (define bg-img (gen-image-checked 64 64 32 32 DARKBROWN DARKGRAY))
 (define bg-tex (load-texture-from-image bg-img))
@@ -114,13 +122,18 @@
 
 (let main ()
   (unless (window-should-close?)
+    ;; 控制
     (when (is-mouse-button-down MOUSE-BUTTON-LEFT)
       (move-light 0 (vx (get-mouse-position))(vy (get-mouse-position))))
     (when (and (is-mouse-button-pressed MOUSE-BUTTON-RIGHT)(< next-light MAX-LIGHTS))
       (setup-light next-light (vx (get-mouse-position))(vy (get-mouse-position)) 200.0)
       (set! next-light (+ next-light 1)))
-    (when (is-key-pressed KEY-F1)(set-box! show-lines? (not (unbox show-lines?))))
+    (when (is-key-pressed KEY-F1)(set-box! show-lines?(not (unbox show-lines?))))
+
+    ;; 更新所有 dirty 光源
     (for ([i (in-range MAX-LIGHTS)])(update-light i boxes MAX-BOXES))
+
+    ;; 每帧重建 global mask: 清 BLACK → 画所有光源
     (begin-texture-mode global-mask)
     (clear-background BLACK)
     (for ([i (in-range MAX-LIGHTS)])
@@ -140,20 +153,21 @@
           (rl-draw-render-batch-active)
           (rl-set-blend-mode BLEND-ALPHA))))
     (end-texture-mode)
+
+    ;; 绘制
     (begin-drawing)
     (clear-background BLACK)
-    
     (draw-texture-pro bg-tex (rectangle 0 0 64 64)
       (rectangle 0 0 (exact->inexact W)(exact->inexact H))(v2 0 0) 0.0 WHITE)
     (draw-texture-rec
-      (list (list-ref global-mask 1)(list-ref global-mask 2)(list-ref global-mask 3)
-            (list-ref global-mask 4)(list-ref global-mask 5))
+      (list (list-ref global-mask 1)(list-ref global-mask 2)
+            (list-ref global-mask 3)(list-ref global-mask 4)(list-ref global-mask 5))
       (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))(v2 0 0) WHITE)
     (for ([i (in-range MAX-LIGHTS)])
       (let ([li (vector-ref lights i)])
         (when (light-active li)
-          (draw-circle (exact-round (vx (light-pos li)))(exact-round (vy (light-pos li))) 10.0
-            (if (= i 0) YELLOW WHITE)))))
+          (draw-circle (exact-round (vx (light-pos li)))(exact-round (vy (light-pos li)))
+                       10.0 (if (= i 0) YELLOW WHITE)))))
     (if (unbox show-lines?)
       (begin
         (for ([s (in-range (light-sc (vector-ref lights 0)))])
@@ -161,15 +175,17 @@
                  [pts (vector (sg-ref sg 0)(sg-ref sg 1)(sg-ref sg 2)(sg-ref sg 3))])
             (draw-triangle-fan pts 4 DARKPURPLE)))
         (for ([b (in-range MAX-BOXES)])
-          (draw-rectangle-lines
-            (exact-round (rx (vector-ref boxes b)))(exact-round (ry (vector-ref boxes b)))
-            (exact-round (rw (vector-ref boxes b)))(exact-round (rh (vector-ref boxes b))) DARKBLUE))
-        (draw-text "F1=hide" 10 50 10 GREEN))
-      (draw-text "F1=show" 10 50 10 GREEN))
+          (draw-rectangle-lines (exact-round (rx (vector-ref boxes b)))
+            (exact-round (ry (vector-ref boxes b)))
+            (exact-round (rw (vector-ref boxes b)))
+            (exact-round (rh (vector-ref boxes b))) DARKBLUE))
+        (draw-text "(F1) Hide" 10 50 10 GREEN))
+      (draw-text "(F1) Show" 10 50 10 GREEN))
     (draw-fps (- W 80) 10)
-    (draw-text "drag=move,right=add" 10 10 10 DARKGREEN)
+    (draw-text "Drag=move, Right-click=add" 10 10 10 DARKGREEN)
     (end-drawing)
     (main)))
+
 (unload-texture bg-tex)
 (unload-render-texture global-mask)
 (close-window)
