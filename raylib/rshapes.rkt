@@ -402,6 +402,22 @@
         (f buf point-count (C:color->bytes color))))))
 
 ;; ============================================================
+;; 三角形条带绘制 (shapes_digital_clock.c)
+;; DrawTriangleStrip(const Vector2 *points, int pointCount, Color color)
+;; ============================================================
+
+(define draw-triangle-strip
+  (let ([f (get-ffi-obj "DrawTriangleStrip" T:lib
+             (_fun _pointer _int (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count color)
+      (let ([buf (malloc _float (* 2 point-count) 'atomic)])
+        (for ([i (in-range point-count)])
+          (let ([v (vector-ref points-vec i)])
+            (ptr-set! buf _float (* 2 i)     (ptr-ref v _float 0))
+            (ptr-set! buf _float (+ (* 2 i) 1) (ptr-ref v _float 1))))
+        (f buf point-count (C:color->bytes color))))))
+
+;; ============================================================
 ;; 渐变矩形填充 (shapes_rectangle_advanced.c)
 ;; DrawRectangleGradientEx(Rectangle rec, Color topLeft, Color bottomLeft,
 ;;                         Color bottomRight, Color topRight)
@@ -743,6 +759,7 @@
  draw-rectangle-gradient-h
  draw-triangle
  draw-triangle-fan
+ draw-triangle-strip
  draw-triangle-lines
  draw-poly
  draw-poly-lines
