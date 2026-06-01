@@ -635,6 +635,96 @@
         (rl-set-texture 0))))
 
 ;; ============================================================
+;; 样条线绘制 (shapes_splines_drawing.c)
+;; DrawSplineLinear(const Vector2 *points, int pointCount, float thick, Color color)
+;; DrawSplineBasis(const Vector2 *points, int pointCount, float thick, Color color)
+;; DrawSplineCatmullRom(const Vector2 *points, int pointCount, float thick, Color color)
+;; DrawSplineBezierCubic(const Vector2 *points, int pointCount, float thick, Color color)
+;; ============================================================
+;; 辅助: 将 Vector2 指针向量展平为 float 缓冲区
+(define (vec2-vector->float-buf points-vec point-count)
+  (let ([buf (malloc _float (* 2 point-count) 'atomic)])
+    (for ([i (in-range point-count)])
+      (let ([v (vector-ref points-vec i)])
+        (ptr-set! buf _float (* 2 i)     (ptr-ref v _float 0))
+        (ptr-set! buf _float (+ (* 2 i) 1) (ptr-ref v _float 1))))
+    buf))
+
+(define draw-spline-linear
+  (let ([f (get-ffi-obj "DrawSplineLinear" T:lib
+             (_fun _pointer _int _float (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count thick color)
+      (f (vec2-vector->float-buf points-vec point-count)
+         point-count thick (C:color->bytes color)))))
+
+(define draw-spline-basis
+  (let ([f (get-ffi-obj "DrawSplineBasis" T:lib
+             (_fun _pointer _int _float (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count thick color)
+      (f (vec2-vector->float-buf points-vec point-count)
+         point-count thick (C:color->bytes color)))))
+
+(define draw-spline-catmull-rom
+  (let ([f (get-ffi-obj "DrawSplineCatmullRom" T:lib
+             (_fun _pointer _int _float (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count thick color)
+      (f (vec2-vector->float-buf points-vec point-count)
+         point-count thick (C:color->bytes color)))))
+
+(define draw-spline-bezier-cubic
+  (let ([f (get-ffi-obj "DrawSplineBezierCubic" T:lib
+             (_fun _pointer _int _float (col : C:_color-bytes) -> _void))])
+    (λ (points-vec point-count thick color)
+      (f (vec2-vector->float-buf points-vec point-count)
+         point-count thick (C:color->bytes color)))))
+
+;; ============================================================
+;; 样条线段绘制 (单个段，Vector2 传值)
+;; DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color)
+;; DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
+;; DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
+;; DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color)
+;; ============================================================
+
+(define draw-spline-segment-linear
+  (let ([f (get-ffi-obj "DrawSplineSegmentLinear" T:lib
+             (_fun (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes)
+                   _float (col : C:_color-bytes) -> _void))])
+    (λ (p1 p2 thick color)
+      (f (C:vec2->bytes p1) (C:vec2->bytes p2)
+         thick (C:color->bytes color)))))
+
+(define draw-spline-segment-basis
+  (let ([f (get-ffi-obj "DrawSplineSegmentBasis" T:lib
+             (_fun (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes)
+                   (p3 : C:_vec2-bytes) (p4 : C:_vec2-bytes)
+                   _float (col : C:_color-bytes) -> _void))])
+    (λ (p1 p2 p3 p4 thick color)
+      (f (C:vec2->bytes p1) (C:vec2->bytes p2)
+         (C:vec2->bytes p3) (C:vec2->bytes p4)
+         thick (C:color->bytes color)))))
+
+(define draw-spline-segment-catmull-rom
+  (let ([f (get-ffi-obj "DrawSplineSegmentCatmullRom" T:lib
+             (_fun (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes)
+                   (p3 : C:_vec2-bytes) (p4 : C:_vec2-bytes)
+                   _float (col : C:_color-bytes) -> _void))])
+    (λ (p1 p2 p3 p4 thick color)
+      (f (C:vec2->bytes p1) (C:vec2->bytes p2)
+         (C:vec2->bytes p3) (C:vec2->bytes p4)
+         thick (C:color->bytes color)))))
+
+(define draw-spline-segment-bezier-cubic
+  (let ([f (get-ffi-obj "DrawSplineSegmentBezierCubic" T:lib
+             (_fun (p1 : C:_vec2-bytes) (c2 : C:_vec2-bytes)
+                   (c3 : C:_vec2-bytes) (p4 : C:_vec2-bytes)
+                   _float (col : C:_color-bytes) -> _void))])
+    (λ (p1 c2 c3 p4 thick color)
+      (f (C:vec2->bytes p1) (C:vec2->bytes c2)
+         (C:vec2->bytes c3) (C:vec2->bytes p4)
+         thick (C:color->bytes color)))))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -683,4 +773,13 @@
  rl-color-4ub
  RL-QUADS
  RL-TRIANGLES
- draw-rectangle-rounded-gradient-h)
+ draw-rectangle-rounded-gradient-h
+ vec2-vector->float-buf
+ draw-spline-linear
+ draw-spline-basis
+ draw-spline-catmull-rom
+ draw-spline-bezier-cubic
+ draw-spline-segment-linear
+ draw-spline-segment-basis
+ draw-spline-segment-catmull-rom
+ draw-spline-segment-bezier-cubic)
