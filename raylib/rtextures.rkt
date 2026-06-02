@@ -171,6 +171,92 @@
   (let ([f (get-ffi-obj "LoadTextureFromImage" T:lib
              (_fun (img : C:_image-bytes) -> (t : _texture-bytes)))])
     (λ (image) (f image))))
+;; ============================================================
+;; Image 文件加载 (textures_image_rotate.c)
+;; LoadImage(const char *fileName) -> Image
+;; ============================================================
+
+(define load-image
+  (let ([f (get-ffi-obj "LoadImage" T:lib
+             (_fun _string -> (img : C:_image-bytes)))])
+    (λ (filename) (f filename))))
+
+;; ============================================================
+;; ImageRotate(Image *image, int degrees) — 图像旋转
+;; C 函数接受指针，所以需要 malloc 创建临时 struct，调用后回读
+;;
+;; Image struct 布局（24 字节，64-bit）：
+;;   byte  0-7:  data  (_pointer)
+;;   byte  8-11: width (_int)    → ptr-ref _int 2
+;;   byte 12-15: height (_int)   → ptr-ref _int 3
+;;   byte 16-19: mipmaps (_int)  → ptr-ref _int 4
+;;   byte 20-23: format (_int)   → ptr-ref _int 5
+;; ============================================================
+
+(define image-rotate
+  ;; 注意: image-rotate 是函数式调用，返回新列表，不修改原列表！
+  ;; C 的 ImageRotate 会释放旧 data 指针并分配新 data，
+  ;; 所以返回的列表包含新 data 指针，原列表的 data 指针变为垂悬。
+  ;; 调用方需用 (set! img (image-rotate img deg)) 更新。
+  (let ([rotate-f (get-ffi-obj "ImageRotate" T:lib
+                    (_fun _pointer _int -> _void))])
+    (λ (image degrees)
+      ;; image 是 5 元素列表: (data width height mipmaps format)
+      (let ([img-ptr (malloc T:_Image 'atomic)])
+        ;; 将 list 数据写入 struct
+        (ptr-set! img-ptr _pointer 0 (list-ref image 0))
+        (ptr-set! img-ptr _int 2 (list-ref image 1))
+        (ptr-set! img-ptr _int 3 (list-ref image 2))
+        (ptr-set! img-ptr _int 4 (list-ref image 3))
+        (ptr-set! img-ptr _int 5 (list-ref image 4))
+        ;; 调用 C 函数修改 struct
+        (rotate-f img-ptr degrees)
+        ;; 回读修改后的数据
+        (let ([new-data (ptr-ref img-ptr _pointer 0)]
+              [new-width (ptr-ref img-ptr _int 2)]
+              [new-height (ptr-ref img-ptr _int 3)]
+              [new-mipmaps (ptr-ref img-ptr _int 4)]
+              [new-format (ptr-ref img-ptr _int 5)])
+          ;; 注意: malloc 'atomic 是 GC 内存，不需要 free
+          (list new-data new-width new-height new-mipmaps new-format))))))
+
+;; ============================================================
+;; GenImageColor(int width, int height, Color color) -> Image
+;; 生成纯色图像 (textures_screen_buffer.c)
+;; ============================================================
+
+(define gen-image-color
+  (let ([f (get-ffi-obj "GenImageColor" T:lib
+             (_fun _int _int (c : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (λ (w h color)
+      (f w h (C:color->bytes color)))))
+
+;; ============================================================
+;; UpdateTexture(Texture2D texture, const void *pixels) -> void
+;; 更新 GPU 纹理数据 (textures_screen_buffer.c)
+;; ============================================================
+
+(define update-texture
+  (let ([f (get-ffi-obj "UpdateTexture" T:lib
+             (_fun (t : _texture-bytes) _pointer -> _void))])
+    (λ (texture pixels) (f texture pixels))))
+
+;; ============================================================
+;; DrawTextureEx(Texture2D texture, Vector2 position,
+;;               float rotation, float scale, Color tint) -> void
+;; 高级纹理绘制 (textures_screen_buffer.c)
+;; ============================================================
+
+(define draw-texture-ex
+  (let ([f (get-ffi-obj "DrawTextureEx" T:lib
+             (_fun (t : _texture-bytes)
+                   (p : C:_vec2-bytes) _float _float
+                   (c : C:_color-bytes) -> _void))])
+    (λ (texture position rotation scale tint)
+      (f texture
+         (C:vec2->bytes position)
+         rotation scale
+         (C:color->bytes tint)))))
 
 ;; ============================================================
 ;; 导出
@@ -184,5 +270,23 @@
  draw-texture-rec
  set-texture-filter
  draw-texture-pro
- gen-image-checked load-texture-from-image)
+ gen-image-checked load-texture-from-image
+ load-image image-rotate
+ gen-image-color update-texture draw-texture-ex)
+
+
+;; ============================================================
+;; 导出
+;; ============================================================
+
+(provide
+ _texture-bytes _render-texture-bytes
+ load-texture unload-texture draw-texture
+ load-render-texture unload-render-texture
+ begin-texture-mode end-texture-mode
+ draw-texture-rec
+ set-texture-filter
+ draw-texture-pro
+ gen-image-checked load-texture-from-image
+ load-image image-rotate)
 
