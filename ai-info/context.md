@@ -279,6 +279,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | | | | core_text_file_loading | rcore, raylib-var | _font-bytes, load-file-text(自动释放), get-font-default, measure-text-ex (4 个新增绑定), LoadTextLines 用 string-split 替代, TextFormat 用 format 替代 |
 | | textures_image_rotate | rcore, rtextures, raylib-var | load-image (新增), image-rotate (新增), 复用 load-texture-from-image / draw-texture / unload-texture |
 | | textures_screen_buffer | rcore, rtextures, raylib-var | gen-image-color (新增), update-texture (新增), draw-texture-ex (新增), 直接 ptr-set! 写 Image.data 指针替代 90k ImageDrawPixel 调用 |
+| | textures_sprite_stacking | rtextures, raymath, raylib-var | 无需新增 FFI 绑定（load-texture / draw-texture-pro / clamp / get-frame-time / make-Rectangle 均已存在） |
 
 
 
