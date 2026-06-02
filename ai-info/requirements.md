@@ -4,3 +4,6 @@
 
 像automation-event那样容易出memeory问题的先询问用户怎么做| shapes_digital_clock | rcore, rshapes, raylib-var | draw-triangle-strip（1 个 FFI 绑定）；纯 Racket 实现 7 段数码管 + 模拟表盘双模式时钟，SPACE 切换 |
 
+
+--- BUG: shapes_kaleidoscope 绘制逻辑缺陷：只做了上下镜像对称，缺少 6 方向旋转对称效果。纯 Racket 逻辑问题，FFI 绑定正确 ---
+--- BUG: shapes_simple_particles 闪退，纯 Racket 逻辑问题，无新增 FFI 绑定 ---
