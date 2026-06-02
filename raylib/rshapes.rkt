@@ -484,6 +484,8 @@
 (define rl-color-4ub
   (get-ffi-obj "rlColor4ub" T:lib (_fun _ubyte _ubyte _ubyte _ubyte -> _void)))
 
+(define rl-normal-3f
+  (get-ffi-obj "rlNormal3f" T:lib (_fun _float _float _float -> _void)))
 ;; ============================================================
 ;; rlgl 绘制模式常量
 ;; ============================================================
@@ -800,6 +802,8 @@
  rl-begin
  rl-end
  rl-vertex-2f
+ rl-color-4ub
+ rl-normal-3f
  rl-tex-coord-2f
  rl-color-4ub
  RL-QUADS

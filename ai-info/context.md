@@ -280,6 +280,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | textures_image_rotate | rcore, rtextures, raylib-var | load-image (新增), image-rotate (新增), 复用 load-texture-from-image / draw-texture / unload-texture |
 | | textures_screen_buffer | rcore, rtextures, raylib-var | gen-image-color (新增), update-texture (新增), draw-texture-ex (新增), 直接 ptr-set! 写 Image.data 指针替代 90k ImageDrawPixel 调用 |
 | | textures_sprite_stacking | rtextures, raymath, raylib-var | 无需新增 FFI 绑定（load-texture / draw-texture-pro / clamp / get-frame-time / make-Rectangle 均已存在） |
+| | textures_textured_curve | rshapes, rtextures, raymath, raylib-var | rl-normal-3f (新增), 复用 rlgl 绑定集 (rl-set-texture/rl-begin/rl-end/rl-vertex-2f/rl-tex-coord-2f/rl-color-4ub/RL-QUADS), 纯 Racket 实现贝塞尔计算 |
 
 
 
