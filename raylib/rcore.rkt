@@ -159,6 +159,22 @@
         (ptr-ref cam _float 9)   ;; fovy
         (ptr-ref cam _int 10)))  ;; projection (10th int at byte 40)
 
+;; Matrix 传值类型 (textures_framebuffer_rendering.c)
+;; Matrix = 16 floats, 64 字节
+(define _matrix-bytes
+  (_list-struct _float _float _float _float
+                _float _float _float _float
+                _float _float _float _float
+                _float _float _float _float))
+
+;; GetCameraMatrix(Camera camera) -> Matrix
+(define get-camera-matrix
+  (let ([f (get-ffi-obj "GetCameraMatrix" T:lib
+             (_fun (c : _camera3d-bytes) -> (m : _matrix-bytes)))])
+    (λ (camera)
+      (f (camera3d->bytes camera)))))
+
+
 ;; ============================================================
 ;; 3D 相机 (core_3d_camera_mode.c, core_3d_camera_free.c)
 ;; ============================================================
@@ -1002,6 +1018,9 @@
  _ray-collision-bytes
  _filepathlist-bytes
  _image-bytes
+ _image-bytes
+ _shader-bytes
+ _matrix-bytes
  _shader-bytes
  _vrdeviceinfo-bytes
  _vrstereoconfig-bytes
@@ -1028,7 +1047,7 @@
  begin-mode-2d end-mode-2d
 
  ;; 3D 相机
- begin-mode-3d end-mode-3d update-camera
+ begin-mode-3d end-mode-3d update-camera get-camera-matrix
 
  ;; 屏幕信息 / 坐标转换
  get-screen-width get-screen-height

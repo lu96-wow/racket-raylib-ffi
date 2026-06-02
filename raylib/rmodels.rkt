@@ -100,6 +100,67 @@
 ;; 导出
 ;; ============================================================
 
+
+;; ============================================================
+;; Model 传值类型
+;; Model struct (26 字段):
+;;   Matrix transform      → 16 floats
+;;   int meshCount, materialCount
+;;   Mesh *meshes, Material *materials, int *meshMaterial
+;;   int boneCount
+;;   BoneInfo *bones, Transform *bindPose
+;;   Transform *currentPose
+;;   Matrix *boneMatrices
+;; ============================================================
+
+(define _model-bytes
+  (_list-struct
+    _float _float _float _float
+    _float _float _float _float
+    _float _float _float _float
+    _float _float _float _float
+    _int _int
+    _pointer _pointer _pointer
+    _int _pointer _pointer
+    _pointer _pointer))
+
+;; ============================================================
+;; LoadModel(const char *fileName) -> Model
+;; ============================================================
+
+(define load-model
+  (let ([f (get-ffi-obj "LoadModel" T:lib
+             (_fun _string -> (m : _model-bytes)))])
+    (lambda (filename) (f filename))))
+
+;; ============================================================
+;; UnloadModel(Model model) -> void
+;; ============================================================
+
+(define unload-model
+  (let ([f (get-ffi-obj "UnloadModel" T:lib
+             (_fun (m : _model-bytes) -> _void))])
+    (lambda (model) (f model))))
+
+;; ============================================================
+;; DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis,
+;;             float rotationAngle, Vector3 scale, Color tint)
+;; ============================================================
+
+(define draw-model-ex
+  (let ([f (get-ffi-obj "DrawModelEx" T:lib
+             (_fun (m : _model-bytes)
+                   (pos : C:_vec3-bytes)
+                   (axis : C:_vec3-bytes) _float
+                   (scale : C:_vec3-bytes)
+                   (col : C:_color-bytes) -> _void))])
+    (lambda (model position rotation-axis rotation-angle scale tint)
+      (f model
+         (C:vec3->bytes position)
+         (C:vec3->bytes rotation-axis) rotation-angle
+         (C:vec3->bytes scale)
+         (C:color->bytes tint)))))
+
 (provide
  draw-cube
  draw-cube-wires
@@ -108,5 +169,8 @@
  draw-cube-wires-v
  draw-sphere
  draw-ray
- get-ray-collision-box)
+ get-ray-collision-box
+ _model-bytes
+ load-model unload-model
+ draw-model-ex)
 

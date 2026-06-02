@@ -134,6 +134,13 @@
   ([id _uint]
    [locs _pointer]))
 ;; ============================================================
+;; Matrix (raylib.h:239) — 64 字节: 16 floats
+(define-cstruct _Matrix
+  ([m0 _float] [m1 _float] [m2 _float] [m3 _float]
+   [m4 _float] [m5 _float] [m6 _float] [m7 _float]
+   [m8 _float] [m9 _float] [m10 _float] [m11 _float]
+   [m12 _float] [m13 _float] [m14 _float] [m15 _float]))
+
 ;; 导出
 ;; ============================================================
 
@@ -211,4 +218,14 @@
  _Shader Shader? make-Shader
  Shader-id Shader-locs
  set-Shader-id! set-Shader-locs!
+ ;; Matrix
+ _Matrix Matrix? make-Matrix
+ Matrix-m0 Matrix-m1 Matrix-m2 Matrix-m3
+ Matrix-m4 Matrix-m5 Matrix-m6 Matrix-m7
+ Matrix-m8 Matrix-m9 Matrix-m10 Matrix-m11
+ Matrix-m12 Matrix-m13 Matrix-m14 Matrix-m15
+ set-Matrix-m0! set-Matrix-m1! set-Matrix-m2! set-Matrix-m3!
+ set-Matrix-m4! set-Matrix-m5! set-Matrix-m6! set-Matrix-m7!
+ set-Matrix-m8! set-Matrix-m9! set-Matrix-m10! set-Matrix-m11!
+ set-Matrix-m12! set-Matrix-m13! set-Matrix-m14! set-Matrix-m15!
 )

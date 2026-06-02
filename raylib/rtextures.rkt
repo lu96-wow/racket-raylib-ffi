@@ -262,6 +262,16 @@
 ;; 导出
 ;; ============================================================
 
+
+;; ============================================================
+;; SetMaterialTexture(Material *material, int mapType, Texture2D texture)
+;; ============================================================
+
+(define set-material-texture
+  (let ([f (get-ffi-obj "SetMaterialTexture" T:lib
+             (_fun _pointer _int (t : _texture-bytes) -> _void))])
+    (lambda (material-ptr map-type texture)
+      (f material-ptr map-type texture))))
 (provide
  _texture-bytes _render-texture-bytes
  load-texture unload-texture draw-texture
@@ -272,13 +282,8 @@
  draw-texture-pro
  gen-image-checked load-texture-from-image
  load-image image-rotate
- gen-image-color update-texture draw-texture-ex)
-
-
-;; ============================================================
-;; 导出
-;; ============================================================
-
+ gen-image-color update-texture draw-texture-ex
+ set-material-texture)
 (provide
  _texture-bytes _render-texture-bytes
  load-texture unload-texture draw-texture

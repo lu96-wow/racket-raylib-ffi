@@ -338,6 +338,9 @@
 (define RLGL-MIN         #x8007)
 (define RLGL-MAX         #x8008)
 
+;; Material map types
+(define MATERIAL-MAP-DIFFUSE 0)
+
 ;; ============================================================
 ;; 导出
 ;; ============================================================
@@ -430,4 +433,5 @@
  SHADER-UNIFORM-INT
  BLEND-ALPHA BLEND-CUSTOM
  RLGL-SRC-ALPHA RLGL-MIN RLGL-MAX
+ MATERIAL-MAP-DIFFUSE
 )

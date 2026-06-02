@@ -1,7 +1,8 @@
 #lang racket/base
 
 (require ffi/unsafe
-         (prefix-in T: "types.rkt"))
+         (prefix-in T: "types.rkt")
+         (prefix-in C: "rcore.rkt"))
 
 (define (clamp value mn mx)
   (max mn (min mx value)))
@@ -143,10 +144,36 @@
     (ptr-set! r _float 2 (+ (ptr-ref v1 _float 2) (* amount (- (ptr-ref v2 _float 2) (ptr-ref v1 _float 2)))))
     r))
 
+
+;; ============================================================
+;; Matrix FFI (textures_framebuffer_rendering.c)
+;; ============================================================
+
+(define vector3-distance
+  (let ([f (get-ffi-obj "Vector3Distance" T:lib
+             (_fun (v1 : C:_vec3-bytes) (v2 : C:_vec3-bytes) -> _float))])
+    (lambda (a b) (f (C:vec3->bytes a) (C:vec3->bytes b)))))
+
+(define matrix-perspective
+  (let ([f (get-ffi-obj "MatrixPerspective" T:lib
+             (_fun _double _double _double _double -> (m : C:_matrix-bytes)))])
+    (lambda (fov-y aspect near far) (f fov-y aspect near far))))
+
+(define matrix-multiply
+  (let ([f (get-ffi-obj "MatrixMultiply" T:lib
+             (_fun (l : C:_matrix-bytes) (r : C:_matrix-bytes) -> (m : C:_matrix-bytes)))])
+    (lambda (left right) (f left right))))
+
+(define matrix-invert
+  (let ([f (get-ffi-obj "MatrixInvert" T:lib
+             (_fun (m : C:_matrix-bytes) -> (result : C:_matrix-bytes)))])
+    (lambda (mat) (f mat))))
+
 (provide
  clamp lerp remap
  vec2-add vec2-subtract vec2-scale vec2-multiply
  vec2-length vec2-normalize vec2-rotate vec2-clamp
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize
- vec3-rotate-by-axis-angle vec3-lerp)
+ vec3-rotate-by-axis-angle vec3-lerp
+ vector3-distance matrix-perspective matrix-multiply matrix-invert)

@@ -208,6 +208,18 @@
 ;; 获取碰撞矩形 (shapes_collision_area.c)
 ;; GetCollisionRec(Rectangle rec1, Rectangle rec2) -> Rectangle
 ;; ============================================================
+;; DrawLine3D(Vector3 startPos, Vector3 endPos, Color color)
+;; 3D 线条绘制 (textures_framebuffer_rendering.c)
+;; ============================================================
+
+(define draw-line-3d
+  (let ([f (get-ffi-obj "DrawLine3D" T:lib
+             (_fun (s : C:_vec3-bytes) (e : C:_vec3-bytes) (c : C:_color-bytes) -> _void))])
+    (λ (start end color)
+      (f (C:vec3->bytes start) (C:vec3->bytes end) (C:color->bytes color)))))
+
+
+;; ============================================================
 
 (define get-collision-rec
   (let ([f (get-ffi-obj "GetCollisionRec" T:lib
@@ -787,6 +799,10 @@
  draw-line-v
  draw-line-bezier
  draw-line-dashed
+ check-collision-point-circle
+ draw-line-bezier
+ draw-line-dashed
+ draw-line-3d
  check-collision-point-circle
  check-collision-recs
  get-collision-rec
