@@ -282,6 +282,7 @@ timeout 3 racket examples/core/core_xxx.rkt
 | | textures_sprite_stacking | rtextures, raymath, raylib-var | 无需新增 FFI 绑定（load-texture / draw-texture-pro / clamp / get-frame-time / make-Rectangle 均已存在） |
 | | textures_textured_curve | rshapes, rtextures, raymath, raylib-var | rl-normal-3f (新增), 复用 rlgl 绑定集 (rl-set-texture/rl-begin/rl-end/rl-vertex-2f/rl-tex-coord-2f/rl-color-4ub/RL-QUADS), 纯 Racket 实现贝塞尔计算 |
 | ⚠️ | textures_framebuffer_rendering | rcore, rshapes, rtextures, raymath, raylib-var | draw-line-3d (新增), get-camera-matrix (新增), matrix-perspective/matrix-multiply/matrix-invert (3 个新增), vector3-distance (新增), _Matrix/_matrix-bytes (新增), 纯 Racket 实现 DrawCameraPrism (矩阵逆变换/NDC 解投影). BUG: 运行时存在问题，跳过 |
+| | models_loading_iqm | rcore, rtextures, rmodels, raylib-var | _model-bytes (26字段), _model-animation-bytes (35字段, 含 char[32]), load-model, unload-model, draw-model-ex, set-material-texture, MATERIAL-MAP-DIFFUSE, load-model-animations (返回指针+count), update-model-animation, unload-model-animations, model-animation-name, model-animation-keyframe-count |
 
 
 
