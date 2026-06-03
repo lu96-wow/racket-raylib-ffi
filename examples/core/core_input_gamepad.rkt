@@ -33,9 +33,9 @@
              "raylib [core] example - input gamepad")
 
 (define tex-ps3-pad
-  (load-texture "../examples/core/resources/ps3.png"))
+  (load-texture "../../../../examples/core/resources/ps3.png"))
 (define tex-xbox-pad
-  (load-texture "../examples/core/resources/xbox.png"))
+  (load-texture "../../../../examples/core/resources/xbox.png"))
 
 (define left-stick-deadzone-x  0.1)
 (define left-stick-deadzone-y  0.1)
