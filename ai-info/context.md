@@ -1,42 +1,32 @@
-# raylib Racket FFI 绑定 — 项目上下文
+# raylib Racket FFI 绑定 — AI 知识库
 
 ## 项目结构
 
 ```
-racket-bind/
-├── raylib/                  # FFI 绑定（纯函数绑定 + 结构体类型）
-│   ├── raylib.rkt           # 主入口，re-export 所有子模块 + raylib-var
-│   ├── types.rkt            # 结构体定义（_Color, _Vector2, 等）
-│   ├── rcore.rkt            # core 函数绑定 + def-ffi 宏
-│   ├── rshapes.rkt          # shapes 函数绑定
-│   ├── rtextures.rkt        # (骨架)
-│   ├── rtext.rkt            # (骨架)
-│   ├── rmodels.rkt          # (骨架)
-│   ├── raudio.rkt           # (骨架)
-│   └── rcamera.rkt          # (骨架)
-│
- ├── raylib-var/              # 预定义常量（与 FFI 绑定分离）
-├── raylib-var/              # 预定义常量（与 FFI 绑定分离）
-│   ├── var.rkt              # 主入口
-│   └── core.rkt             # 颜色、键盘键值、窗口标志等所有常量
-│
- │   └── core.rkt             # 颜色、键盘键值、窗口标志等所有常量
- │
- ├── raylib-racket/            # 纯 Racket 兼容实现层
- │   └── automation.rkt       # Automation Events 录制/导出/加载（纯 Racket）
- │                            # FFI 只有 play-automation-event 在 raylib/rcore.rkt 中
- │
-├── examples/core/           # core 示例的 Racket 翻译
-│   ├── core_basic_window.rkt
-│   └── core_delta_time.rkt
-│
-├── work/core/               # 分析工作区
-│   ├── total.txt            # 全量去重结构体 + 来源对照表
-│   ├── SUMMARY_deduplicated_structs.txt
-│   └── core_*.txt           # 49 个示例各自的结构体分析
-│
-└── ai-info/
-    └── context.md           # 本文件
+racket-raylib-ffi/
+├── raylib/               # FFI 绑定（函数 + 结构体类型）
+│   ├── raylib.rkt        # 主入口，re-export 全部子模块 + raylib-var
+│   ├── types.rkt         # 结构体定义（_Color, _Vector2 等）
+│   ├── rcore.rkt         # core 函数绑定 + def-ffi 宏
+│   ├── rshapes.rkt       # shapes 函数绑定
+│   ├── rtextures.rkt     # 纹理/图像绑定
+│   ├── rtext.rkt         # 文字/字体绑定（空白骨架）
+│   ├── rmodels.rkt       # 3D/模型绑定
+│   ├── raudio.rkt        # 音频绑定（空白骨架）
+│   ├── rcamera.rkt       # 相机控制
+│   └── raymath.rkt       # 纯 Racket 数学函数
+├── raylib-var/           # 常量（颜色、键值、标志）
+│   ├── var.rkt           # 主入口
+│   └── core.rkt          # 所有常量 + 结构体辅助构造器（make-color、vector2 等）
+├── raylib-racket/        # 纯 Racket 兼容实现层
+│   └── automation.rkt    # Automation Events 录制/导出/加载
+├── examples/             # Racket 翻译的示例（core/ shapes/ textures/ models/）
+├── doc/
+│   └── status.md         # 绑定状态报告（各模块完成度）
+├── examples-info/        # 各示例的设计要点/意外信息（core/ shapes/）
+├── work/                 # 分析工作区（结构体分析）
+├── test/                 # 测试
+└── ai-info/              # 本目录：AI 参考知识库
 ```
 
 ## 设计原则
@@ -205,117 +195,12 @@ _Vector2 布局: [float x (4B)] [float y (4B)]
 ### 运行测试
 
 ```bash
-cd /home/debian/raylib/racket-bind
+cd /home/debian/raylib/racket-raylib-ffi
 timeout 3 racket examples/core/core_xxx.rkt
 ```
 
-## 已完成示例
+## 已完成示例参考
 
-| 示例 | 涉及模块 | 新增函数/类型 |
-|------|---------|-------------|
-| core_basic_window | types, rcore, raylib-var | Color, init-window, close-window, window-should-close?, set-target-fps, begin-drawing, end-drawing, clear-background, draw-text, 26 colors |
-| core_delta_time | rcore, rshapes, raylib-var | Vector2, get-frame-time, get-fps, get-mouse-wheel-move, draw-fps, is-key-pressed, draw-circle-v, vector2/x/y/set-x!/set-y! |
-| core_input_keys | rcore, rshapes, raylib-var | is-key-down, draw-rectangle, use existing KEY-LEFT/RIGHT/UP/DOWN, draw-circle-v |
-| core_input_mouse | rcore, rshapes, raylib-var | is-mouse-button-pressed, get-mouse-position, is-cursor-hidden?, show-cursor, hide-cursor, get-mouse-x/y |
-| core_input_mouse_wheel | rcore, rshapes, raylib-var | get-mouse-wheel-move (existing), draw-rectangle |
-| core_input_gamepad | rcore, rshapes, rtextures, raylib-var | set-config-flags, is-gamepad-available?, get-gamepad-name, is-gamepad-button-down, get-gamepad-axis-count, get-gamepad-axis-movement, set-gamepad-vibration, get-gamepad-button-pressed, load-texture, unload-texture, draw-texture, draw-circle, draw-rectangle-rounded, draw-triangle, check-collision-point-rec, Rectangle |
-| core_input_multitouch | rcore, raylib-var | get-touch-point-count, get-touch-position, get-touch-x/y, get-touch-point-id |
-| core_input_gestures | rcore, rshapes, raylib-var | get-gesture-detected, fade, draw-rectangle-rec, draw-rectangle-lines, check-collision-point-rec, get-touch-position |
-| core_input_gestures_testbed | rcore, rshapes, raylib-var | draw-line-ex, draw-ring, get-gesture-drag-angle, get-gesture-pinch-angle, is-mouse-button-released, all gestures functions |
-| core_2d_camera_mouse_zoom | rcore, raylib-var | Camera2D (already defined), get-screen-width, get-screen-height, get-screen-to-world-2d, draw-grid, rl-push-matrix, rl-pop-matrix, rl-translate-f, rl-rotate-f |
-| core_2d_camera_platformer | rcore, raylib-var | get-world-to-screen-2d, 自定义 player/environment struct, 5 种相机跟随模式 (纯 Racket 实现) |
-| core_2d_camera_split_screen | rcore, rshapes, rtextures, raylib-var | draw-line-v, load-render-texture, unload-render-texture, begin-texture-mode, end-texture-mode, draw-texture-rec, RenderTexture |
-| core_3d_camera_mode | types, rcore, rmodels, raylib-var | Vector3, Camera3D, begin-mode-3d, end-mode-3d, draw-cube, draw-cube-wires, vector3 辅助函数 |
-| core_3d_camera_free | types, rcore, rmodels, raylib-var | update-camera, disable-cursor (已有), 复用 core_3d_camera_mode 全部绑定 |
-| core_3d_camera_first_person | types, rcore, rmodels, rcamera, raylib-var | draw-plane, camera-yaw, camera-pitch, 复用全部已有绑定 |
-| core_3d_camera_split_screen | types, rcore, rshapes, rtextures, rmodels, raylib-var | 复用全部已有绑定（无需新增） |
-| core_3d_camera_fps | types, rcore, rshapes, rtextures, rmodels, rcamera, raymath, raylib-var | draw-cube-v, draw-cube-wires-v, draw-sphere, raymath (clamp/lerp/vec2-length/vec2-normalize/vec3-add/vec3-scale/vec3-cross-product/vec3-length/vec3-dot-product/vec3-angle/vec3-negate/vec3-normalize/vec3-rotate-by-axis-angle/vec3-lerp) |
-| core_3d_camera_fps | types, rcore, rshapes, rtextures, rmodels, rcamera, raymath, raylib-var | draw-cube-v, draw-cube-wires-v, draw-sphere, raymath (clamp/lerp/vec2-length/vec2-normalize/vec3-add/vec3-scale/vec3-cross-product/vec3-length/vec3-dot-product/vec3-angle/vec3-negate/vec3-normalize/vec3-rotate-by-axis-angle/vec3-lerp) |
-| core_3d_picking | types, rcore, rshapes, rmodels, raylib-var | Ray, BoundingBox, RayCollision, get-screen-to-world-ray, get-ray-collision-box, draw-ray, measure-text |
-| core_world_screen | types, rcore, rmodels, raylib-var | get-world-to-screen（仅此一个新增） |
-| core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
-| core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
-| core_window_should_close | types, rcore, rshapes, raylib-var | 无需新增绑定 (set-exit-key, KEY-NULL 均已存在) |
-| core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
-| core_scissor_test | rcore, rshapes, raylib-var | begin-scissor-mode, end-scissor-mode (无需新结构体) |
-| core_custom_frame_control | rcore, rshapes, raylib-var | get-time, swap-screen-buffer, wait-time (无需新结构体) |
-| core_smooth_pixelperfect | rcore, rshapes, rtextures, raylib-var | draw-rectangle-pro (新增), 复用 render-texture/texture-pro/camera2d |
-| core_random_sequence | rcore, rshapes, raymath, raylib-var | load-random-sequence (FFI包装), remap (纯Racket) |
-| core_custom_logging | types, rcore, raylib-var | set-trace-log-callback, vsnprintf（需 ffi/unsafe 的 function-ptr 创建回调） |
-| core_drop_files | rcore, raylib-var | _filepathlist-bytes, is-file-dropped, load-dropped-files（自动读取 C 字符串并释放内存，返回 Racket 字符串列表） |
-| core_random_values | rcore, raylib-var | set-random-seed（TextFormat 用 format 替代，不绑定 C 变参函数） |
-| core_storage_values | rcore, raylib-var | 无需新增绑定（LoadFileData/SaveFileData 用 Racket file I/O 替代） || core_vr_simulator | types, rcore, rtextures, rmodels, raylib-var | _Shader, _vrdeviceinfo-bytes, _vrstereoconfig-bytes, _shader-bytes, load-shader, unload-shader, get-shader-location, set-shader-value, begin-shader-mode, end-shader-mode, load-vr-stereo-config, unload-vr-stereo-config, begin-vr-stereo-mode, end-vr-stereo-mode, malloc-float-vec2, malloc-float-vec4, SHADER-UNIFORM-* |
+示例列表和绑定状态见 `doc/status.md`。每个示例的设计要点、新增绑定说明见 `examples-info/` 目录。
 
-| core_monitor_detector | types, rcore, rshapes, raylib-var | get-monitor-count, get-current-monitor, get-monitor-position, get-monitor-name, get-monitor-width, get-monitor-height, get-monitor-physical-width, get-monitor-physical-height, get-monitor-refresh-rate, set-window-monitor, get-window-position, draw-rectangle-v |
-
-| core_window_should_close | types, rcore, rshapes, raylib-var | 无需新增绑定 (set-exit-key, KEY-NULL 均已存在) |
-
-| core_window_letterbox | types, rcore, rshapes, rtextures, raymath, raylib-var | set-window-min-size, set-texture-filter, draw-texture-pro, vec2-clamp, TEXTURE-FILTER-BILINEAR |
-
-| core_window_flags | types, rcore, rshapes, raylib-var | toggle-fullscreen, toggle-borderless-windowed, is-window-state?, set-window-state, clear-window-state, minimize-window, maximize-window, restore-window, draw-rectangle-lines-ex |
-
-| core_world_screen | types, rcore, rmodels, raylib-var | get-world-to-screen（仅此一个新增） |
-
-| core_3d_picking | types, rcore, rshapes, rmodels, raylib-var | Ray, BoundingBox, RayCollision, get-screen-to-world-ray, get-ray-collision-box, draw-ray, measure-text |
-
-
-| core_automation_events | raylib-racket/automation.rkt, rcore、rshapes、raylib-var | automation-event struct, play-automation-event (FFI), export/load-automation-events, recorder, record-frame!, 23 type constants, 完全纯 Racket 录制，无 C 持指针 |
-
-| | core_render_texture | types, rcore, rshapes, rtextures, raylib-var | 无需新增绑定（全部函数已绑定；rt->texture 辅助函数已在分屏示例定义） |
-| | core_undo_redo | types, rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现环状缓冲区 Undo/Redo 系统（color=? 辅助函数） |
-| | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
-
-
-| | | core_viewport_scaling | types, rcore, rshapes, rtextures, raylib-var | is-window-resized? (新增绑定), 六个视口缩放算法(纯 Racket 实现), screen2render-texture-position |
-| | | core_input_actions | rcore, rshapes, raylib-var | 纯 Racket 实现 Action 映射系统 (is-action-pressed?/released?/down?), 无需新增 FFI 绑定 |
-| | | core_directory_files | rcore, rshapes, raylib-var | get-working-directory, get-prev-directory-path, directory-exists?, load-directory-files-ex (4 个新增绑定), 用原生 raylib 绘制替代 raygui |
-| | | | shapes_rectangle_advanced | rcore, rshapes, rtextures, raylib-var | draw-rectangle-gradient-ex, get-shapes-texture, get-shapes-texture-rectangle, rl-set-texture, rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f, rl-color-4ub, RL-QUADS, RL-TRIANGLES, draw-rectangle-rounded-gradient-h（纯 Racket 实现）|
-| | | core_highdpi_testbed | rcore, rshapes, raylib-var | get-render-width, get-render-height, get-window-scale-dpi (3 个新增绑定) |
-| | | core_screen_recording | rcore, rshapes, raylib-var | _image-bytes, load-image-from-screen, unload-image, get-application-directory, export-image (5 个新增绑定), 用 ExportImage PNG 替代 C 版的 msf_gif GIF |
-| | | core_clipboard_text | rcore, rshapes, raylib-var | set-clipboard-text, get-clipboard-text (2 个新增绑定), 用原生 raylib 绘制替代 raygui |
-| | | | core_keyboard_testbed | rcore, rshapes, raylib-var | 无需新增绑定。get-key-text 纯 Racket 实现, TraceLog 用 printf 替代 |
-| | | | core_compute_hash | rcore, raylib-var | compute-crc32, compute-md5, compute-sha1, compute-sha256, encode-data-base64 (5 个新增绑定), 用原生 raylib 绘制替代 raygui |
-| | | | core_window_web | rcore, raylib-var | 无需新增绑定。纯翻译，展示 Web/Desktop 兼容结构 |
-| | | | | core_text_file_loading | rcore, raylib-var | _font-bytes, load-file-text(自动释放), get-font-default, measure-text-ex (4 个新增绑定), LoadTextLines 用 string-split 替代, TextFormat 用 format 替代 |
-| | textures_image_rotate | rcore, rtextures, raylib-var | load-image (新增), image-rotate (新增), 复用 load-texture-from-image / draw-texture / unload-texture |
-| | textures_screen_buffer | rcore, rtextures, raylib-var | gen-image-color (新增), update-texture (新增), draw-texture-ex (新增), 直接 ptr-set! 写 Image.data 指针替代 90k ImageDrawPixel 调用 |
-| | textures_sprite_stacking | rtextures, raymath, raylib-var | 无需新增 FFI 绑定（load-texture / draw-texture-pro / clamp / get-frame-time / make-Rectangle 均已存在） |
-| | textures_textured_curve | rshapes, rtextures, raymath, raylib-var | rl-normal-3f (新增), 复用 rlgl 绑定集 (rl-set-texture/rl-begin/rl-end/rl-vertex-2f/rl-tex-coord-2f/rl-color-4ub/RL-QUADS), 纯 Racket 实现贝塞尔计算 |
-| ⚠️ | textures_framebuffer_rendering | rcore, rshapes, rtextures, raymath, raylib-var | draw-line-3d (新增), get-camera-matrix (新增), matrix-perspective/matrix-multiply/matrix-invert (3 个新增), vector3-distance (新增), _Matrix/_matrix-bytes (新增), 纯 Racket 实现 DrawCameraPrism (矩阵逆变换/NDC 解投影). BUG: 运行时存在问题，跳过 |
-| | models_loading_iqm | rcore, rtextures, rmodels, raylib-var | _model-bytes (26字段), _model-animation-bytes (35字段, 含 char[32]), load-model, unload-model, draw-model-ex, set-material-texture, MATERIAL-MAP-DIFFUSE, load-model-animations (返回指针+count), update-model-animation, unload-model-animations, model-animation-name, model-animation-keyframe-count |
-
-
-
-
-## shapes 模块
-
-| 示例 | 涉及模块 | 新增函数/类型 |
-|------|---------|-------------|
-| shapes_basic_shapes | rcore, rshapes, raylib-var | draw-circle-gradient, draw-circle-lines, draw-ellipse, draw-ellipse-lines, draw-rectangle-gradient-h, draw-triangle-lines, draw-poly, draw-poly-lines, draw-poly-lines-ex (9 个新绑定) |
-| shapes_bouncing_ball | rcore, rshapes, raylib-var | 无需新增绑定（全部函数/常量已存在） |
-| shapes_bullet_hell | rcore, rshapes, rtextures, raylib-var | draw-circle-lines-v (1 个新绑定), rt->texture 辅助函数, 纯 Racket Bullet 结构体, 使用 racket/math (cos/sin/pi) |
-| shapes_colors_palette | rcore, rshapes, raylib-var | 无需新增绑定（全部函数/颜色常量已存在） |
-| shapes_logo_raylib | rcore, rshapes, raylib-var | 无需新增绑定 |
-| shapes_logo_raylib_anim | rcore, rshapes, raylib-var | text-subtext (1 个新增绑定) |
-| shapes_rectangle_scaling | rcore, rshapes, raylib-var | 无需新增绑定 |
-| shapes_lines_bezier | rcore, rshapes, raylib-var | draw-line-bezier, check-collision-point-circle (2 个新增绑定) |
-| shapes_collision_area | rcore, rshapes, raylib-var | check-collision-recs, get-collision-rec (2 个新增绑定) |
-| shapes_following_eyes | rcore, rshapes, raylib-var | 无需新增绑定（check-collision-point-circle 已绑定，cos/sin/atan 来自 racket/math） |
-| shapes_easings_ball | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-cubic-out, ease-elastic-in, ease-elastic-out（对应 reasings.h） |
-| shapes_easings_box | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-elastic-out, ease-bounce-out, ease-quad-out, ease-circ-out, ease-sine-out |
-| shapes_easings_rectangles | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现 ease-circ-out, ease-linear-in |
-| | shapes_rectangle_advanced | rcore, rshapes, rtextures, raylib-var | draw-rectangle-gradient-ex, get-shapes-texture, get-shapes-texture-rectangle, rl-set-texture, rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f, rl-color-4ub, RL-QUADS, RL-TRIANGLES, draw-rectangle-rounded-gradient-h（纯 Racket 实现，对应 C 的 static 自定义函数）|
-| | shapes_splines_drawing | rcore, rshapes, raylib-var | draw-spline-linear, draw-spline-basis, draw-spline-catmull-rom, draw-spline-bezier-cubic, draw-spline-segment-linear, draw-spline-segment-basis, draw-spline-segment-catmull-rom, draw-spline-segment-bezier-cubic, vec2-vector->float-buf（8 个 FFI 绑定 + 1 个辅助函数）；键盘控制替代 raygui |
-| | shapes_double_pendulum | rcore, rshapes, rtextures, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现双摆物理模拟（RK 积分）+ RenderTexture 轨迹拖尾 |
-| | shapes_starfield_effect | rcore, rshapes, raymath, raylib-var | 无需新增 FFI 绑定 |
-| | shapes_simple_particles | rcore, rshapes, raylib-var | 无需新增 FFI 绑定；纯 Racket 实现环形缓冲粒子系统（3 种粒子类型：WATER/SMOKE/FIRE）|
-| | shapes_mouse_trail | rcore, rshapes, raylib-var | 无需新增 FFI 绑定 |
-| | shapes_clock_of_clocks | rcore, rshapes, raymath, raylib-var | 无需新增 FFI 绑定；color-lerp 纯 Racket 实现。SKIP: runtime cpointer error |
-| | shapes_kaleidoscope | rcore, rshapes, raymath, raylib-var | vec2-multiply, vec2-rotate（2 个纯 Racket 辅助函数）；键盘控制替代 raygui |
-| | shapes_pie_chart | rcore, rshapes, rtext, raylib-var | 无需新增 FFI 绑定；键盘控制替代 raygui |
-| | shapes_vector_angle | rcore, rshapes, raymath, raylib-var | 无需新增 FFI 绑定；vec2-angle、vec2-line-angle 纯 Racket 实现 |
-| | shapes_triangle_strip | rcore, rshapes, raylib-var | color-from-hsv（1 个 FFI 绑定）；键盘控制替代 raygui |
-| | shapes_dashed_line | rcore, rshapes, raylib-var | draw-line-dashed（1 个 FFI 绑定）|
-| | shapes_digital_clock | rcore, rshapes, raylib-var | draw-triangle-strip（1 个 FFI 绑定）；纯 Racket 实现 7 段数码管 + 模拟表盘双模式时钟，SPACE 切换 |
-
-
+简要统计：已翻译 ~60+ 示例（core ~48 个、shapes ~31 个、textures ~5 个、models ~1 个）。
