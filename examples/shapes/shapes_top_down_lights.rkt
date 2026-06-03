@@ -1,32 +1,37 @@
 #lang racket/base
 
-;; raylib [shapes] example - top down lights (Racket FFI 翻译)
+;; raylib [shapes] example - top down lights
 ;;
-;; 对应 C: examples/shapes/shapes_top_down_lights.c
-;;
-;; 与 C 版的区别:
-;;   C 版: 每光源独立 mask → draw-texture-rec 合并到 global mask
-;;   Racket: 每帧直接画 shapes (circle + triangles) 到 global mask
-;;   原因是 draw-texture-rec + CUSTOM blend + RenderTexture 组合
-;;   在 FFI 下不稳定, 但 shapes + CUSTOM blend + RT 是正常的。
+;; 用已验证的 API 重写, 避免 CUSTOM blend 的不确定性。
+;; 使用 ADDITIVE blend 累积光源 + MULTIPLY blend 叠加光罩。
 
 (require "../../raylib/raylib.rkt" racket/math)
 
+;; ============================================================
+;; 常量
+;; ============================================================
 (define MAX-BOXES 20) (define MAX-SHADOWS (* MAX-BOXES 3)) (define MAX-LIGHTS 16)
 (define W 800) (define H 450)
+(define vx vector2-x)(define vy vector2-y)
+(define (rx r)(rectangle-x r))(define (ry r)(rectangle-y r))
+(define (rw r)(rectangle-w r))(define (rh r)(rectangle-h r))
+(define (v2 x y)(vector2 x y))
 
-;; 结构体
+(define GL-ZERO      0)
+(define GL-ONE       1)
+(define GL-DST-COLOR #x0306)
+(define GL-FUNC-ADD  #x8006)
+
+;; ============================================================
+;; 数据结构
+;; ============================================================
 (struct sgeom (v0 v1 v2 v3) #:transparent #:mutable)
 (define (sg-make) (sgeom (v2 0 0)(v2 0 0)(v2 0 0)(v2 0 0)))
-(define (v2 x y) (vector2 x y))
 (define (sg-set! s i v)
   (case i[(0)(set-sgeom-v0! s v)][(1)(set-sgeom-v1! s v)]
          [(2)(set-sgeom-v2! s v)][(3)(set-sgeom-v3! s v)]))
 (define (sg-ref s i)
   (case i[(0)(sgeom-v0 s)][(1)(sgeom-v1 s)][(2)(sgeom-v2 s)][(3)(sgeom-v3 s)]))
-(define (rx r) (rectangle-x r))(define (ry r)(rectangle-y r))
-(define (rw r)(rectangle-w r))(define (rh r)(rectangle-h r))
-(define vx vector2-x)(define vy vector2-y)
 
 (struct light (active dirty pos radius bounds sgs sc) #:transparent #:mutable)
 (define (mklight)
@@ -34,6 +39,9 @@
          (for/vector([i MAX-SHADOWS])(sg-make)) 0))
 (define lights (for/vector([i MAX-LIGHTS])(mklight)))
 
+;; ============================================================
+;; 灯光操作
+;; ============================================================
 (define (move-light slot x y)
   (let ([li (vector-ref lights slot)])
     (set-light-dirty! li #t)
@@ -94,7 +102,10 @@
         #t)
       #f)))
 
-;; boxes
+
+;; ============================================================
+;; 障碍物
+;; ============================================================
 (define boxes (make-vector MAX-BOXES (rectangle 0 0 0 0)))
 (define (setup-boxes)
   (vector-set! boxes 0 (rectangle 150 80 40 40))
@@ -109,20 +120,45 @@
                  (exact->inexact (get-random-value 10 100))
                  (exact->inexact (get-random-value 10 100))))))
 
-(init-window W H "raylib [shapes] example - top down lights")
+;; ============================================================
+;; 绘制辅助
+;; ============================================================
+(define (draw-light-circle li)
+  (draw-circle-gradient (light-pos li)(light-radius li)
+                        (color-alpha WHITE 0.0) WHITE))
+
+(define (draw-light-shadows li)
+  (for ([j (in-range (light-sc li))])
+    (let ([s (vector-ref (light-sgs li) j)])
+      (draw-triangle-fan (vector (sg-ref s 0)(sg-ref s 1)(sg-ref s 2)(sg-ref s 3))
+                         4 BLACK))))
+
+(define (draw-light-dot li i)
+  (draw-circle (exact-round (vx (light-pos li)))(exact-round (vy (light-pos li)))
+               10.0 (if (= i 0) YELLOW WHITE)))
+
+;; ============================================================
+;; 初始化
+;; ============================================================
+(init-window W H "raylib [shapes] example - top down lights [FFI]")
 (setup-boxes)
+
 (define bg-img (gen-image-checked 64 64 32 32 DARKBROWN DARKGRAY))
 (define bg-tex (load-texture-from-image bg-img))
 (unload-image bg-img)
-(define global-mask (load-render-texture W H))
+
+(define light-mask (load-render-texture W H))
 (setup-light 0 600.0 400.0 300.0)
 (define next-light 1)
 (define show-lines? (box #f))
 (set-target-fps 60)
 
+;; ============================================================
+;; 主循环
+;; ============================================================
 (let main ()
   (unless (window-should-close?)
-    ;; 控制
+
     (when (is-mouse-button-down MOUSE-BUTTON-LEFT)
       (move-light 0 (vx (get-mouse-position))(vy (get-mouse-position))))
     (when (and (is-mouse-button-pressed MOUSE-BUTTON-RIGHT)(< next-light MAX-LIGHTS))
@@ -130,44 +166,51 @@
       (set! next-light (+ next-light 1)))
     (when (is-key-pressed KEY-F1)(set-box! show-lines?(not (unbox show-lines?))))
 
-    ;; 更新所有 dirty 光源
     (for ([i (in-range MAX-LIGHTS)])(update-light i boxes MAX-BOXES))
 
-    ;; 每帧重建 global mask: 清 BLACK → 画所有光源
-    (begin-texture-mode global-mask)
+    ;; ── Step 1: 光罩 RT ──
+    (begin-texture-mode light-mask)
     (clear-background BLACK)
+
+    ;; ADDITIVE 累积光源
+    (rl-set-blend-factors RLGL-SRC-ALPHA GL-ONE GL-FUNC-ADD)
+    (rl-set-blend-mode BLEND-CUSTOM)
     (for ([i (in-range MAX-LIGHTS)])
       (let ([li (vector-ref lights i)])
-        (when (light-active li)
-          (rl-set-blend-factors RLGL-SRC-ALPHA RLGL-SRC-ALPHA RLGL-MIN)
-          (rl-set-blend-mode BLEND-CUSTOM)
-          (draw-circle-gradient (light-pos li)(light-radius li)
-                                (color-alpha WHITE 0.0) WHITE)
-          (rl-draw-render-batch-active)
-          (rl-set-blend-mode BLEND-ALPHA)
-          (rl-set-blend-factors RLGL-SRC-ALPHA RLGL-SRC-ALPHA RLGL-MAX)
-          (rl-set-blend-mode BLEND-CUSTOM)
-          (for ([j (in-range (light-sc li))])
-            (let ([s (vector-ref (light-sgs li) j)])
-              (draw-triangle-fan (vector (sg-ref s 0)(sg-ref s 1)(sg-ref s 2)(sg-ref s 3)) 4 BLACK)))
-          (rl-draw-render-batch-active)
-          (rl-set-blend-mode BLEND-ALPHA))))
+        (when (light-active li)(draw-light-circle li))))
+    (rl-draw-render-batch-active)
+    (rl-set-blend-mode BLEND-ALPHA)
+
+    ;; 正常 blend 画黑色阴影
+    (for ([i (in-range MAX-LIGHTS)])
+      (let ([li (vector-ref lights i)])
+        (when (light-active li)(draw-light-shadows li))))
     (end-texture-mode)
 
-    ;; 绘制
+    ;; ── Step 2: 绘制到屏幕 ──
     (begin-drawing)
     (clear-background BLACK)
+
+    ;; 棋盘格背景
     (draw-texture-pro bg-tex (rectangle 0 0 64 64)
       (rectangle 0 0 (exact->inexact W)(exact->inexact H))(v2 0 0) 0.0 WHITE)
+
+    ;; MULTIPLY 叠加光罩: dst * src
+    (rl-set-blend-factors GL-DST-COLOR GL-ZERO GL-FUNC-ADD)
+    (rl-set-blend-mode BLEND-CUSTOM)
     (draw-texture-rec
-      (list (list-ref global-mask 1)(list-ref global-mask 2)
-            (list-ref global-mask 3)(list-ref global-mask 4)(list-ref global-mask 5))
+      (list (list-ref light-mask 1)(list-ref light-mask 2)
+            (list-ref light-mask 3)(list-ref light-mask 4)(list-ref light-mask 5))
       (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))(v2 0 0) WHITE)
+    (rl-draw-render-batch-active)
+    (rl-set-blend-mode BLEND-ALPHA)
+
+    ;; 光源指示点
     (for ([i (in-range MAX-LIGHTS)])
       (let ([li (vector-ref lights i)])
-        (when (light-active li)
-          (draw-circle (exact-round (vx (light-pos li)))(exact-round (vy (light-pos li)))
-                       10.0 (if (= i 0) YELLOW WHITE)))))
+        (when (light-active li)(draw-light-dot li i))))
+
+    ;; F1 调试
     (if (unbox show-lines?)
       (begin
         (for ([s (in-range (light-sc (vector-ref lights 0)))])
@@ -181,11 +224,15 @@
             (exact-round (rh (vector-ref boxes b))) DARKBLUE))
         (draw-text "(F1) Hide" 10 50 10 GREEN))
       (draw-text "(F1) Show" 10 50 10 GREEN))
+
     (draw-fps (- W 80) 10)
     (draw-text "Drag=move, Right-click=add" 10 10 10 DARKGREEN)
     (end-drawing)
     (main)))
 
+;; ============================================================
+;; 清理
+;; ============================================================
 (unload-texture bg-tex)
-(unload-render-texture global-mask)
+(unload-render-texture light-mask)
 (close-window)

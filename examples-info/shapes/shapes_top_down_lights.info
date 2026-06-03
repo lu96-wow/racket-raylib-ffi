@@ -1,0 +1,47 @@
+;; shapes_top_down_lights — Racket FFI 版
+;;
+;; 对应 C: examples/shapes/shapes_top_down_lights.c
+;; 功能:  2D 光照 + 阴影投射系统 (适配 FFI 版本)
+;;
+;; ============================================================
+;; 与 C 版的差异
+;; ============================================================
+;; C 版: 用 CUSTOM blend (MIN/MAX) 做光照累积/阴影遮罩
+;; Racket: 用 ADDITIVE blend (SRC_ALPHA, ONE) 累积光源,
+;;         MULTIPLY blend (DST_COLOR, ZERO) 叠加光罩到场景
+;;
+;; 效果等价: 白色渐变区域→光透过, 黑色区域→阴影
+;;
+;; ============================================================
+;; 功能操作
+;; ============================================================
+;;   鼠标左键拖拽   → 移动主光源
+;;   鼠标右键点击   → 添加新光源
+;;   F1            → 切换阴影体积调试显示
+;;
+;; ============================================================
+;; 使用的 FFI 绑定
+;; ============================================================
+;; draw-triangle-fan        (rshapes)
+;; draw-circle-gradient     (rshapes)
+;; draw-texture-rec         (rtextures)
+;; draw-texture-pro         (rtextures)
+;; gen-image-checked        (rtextures)
+;; load-texture-from-image  (rtextures)
+;; color-alpha              (rcore)
+;; rl-set-blend-mode        (rcore)
+;; rl-set-blend-factors     (rcore)
+;; rl-draw-render-batch-active (rcore)
+;; load-render-texture      (rtextures)
+;; begin/end-texture-mode   (rtextures)
+;; vec2-add/subtract/scale  (raymath)
+;; vec2-normalize           (raymath)
+;; BLEND-ALPHA/BLEND-CUSTOM (raylib-var)
+;; RLGL-SRC-ALPHA           (raylib-var)
+;; 自定义常量: GL-ZERO GL-ONE GL-DST-COLOR GL-FUNC-ADD
+;;
+;; ============================================================
+;; 测试文件
+;; ============================================================
+;; test/shapes/test-top-down-lights-apis.rkt
+;;   — 逐步确认每个 API 的视觉效果
