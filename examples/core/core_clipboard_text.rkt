@@ -45,7 +45,7 @@
 (define (button! x y w h label)
   (define rect (rectangle (exact->inexact x) (exact->inexact y)
                           (exact->inexact w) (exact->inexact h)))
-  (draw-rectangle-rec rect (make-color 60 60 60))
+  (draw-rectangle-rec rect (color 60 60 60))
   (draw-text label (+ x 8) (+ y 10) 14 WHITE)
   (and (check-collision-point-rec (get-mouse-position) rect)
        (is-mouse-button-pressed MOUSE-BUTTON-LEFT)))
@@ -121,7 +121,7 @@
     (clear-background RAYWHITE)
 
     ;; 标题
-    (draw-text "Use the BUTTONS or KEY SHORTCUTS:" 50 20 20 (make-color 50 50 50))
+    (draw-text "Use the BUTTONS or KEY SHORTCUTS:" 50 20 20 (color 50 50 50))
     (draw-text "[CTRL+X] - CUT | [CTRL+C] COPY | [CTRL+V] PASTE" 50 60 20 MAROON)
 
     ;; 输入框
@@ -130,13 +130,13 @@
     (draw-text (unbox input-buffer) 55 130 20 BLACK)
 
     ;; 剪贴板状态
-    (draw-text "Clipboard current text data:" 50 260 20 (make-color 50 50 50))
-    (draw-rectangle-rec (rectangle 50 300 700 40) (make-color 240 240 240))
+    (draw-text "Clipboard current text data:" 50 260 20 (color 50 50 50))
+    (draw-rectangle-rec (rectangle 50 300 700 40) (color 240 240 240))
     (draw-rectangle-lines 50 300 700 40 DARKGRAY)
-    (draw-text (if (string=? clip "") "(empty)" clip) 55 310 20 (make-color 100 100 100))
+    (draw-text (if (string=? clip "") "(empty)" clip) 55 310 20 (color 100 100 100))
 
     (draw-text "Try copying text from other applications and pasting here!"
-               50 360 20 (make-color 100 100 100))
+               50 360 20 (color 100 100 100))
 
     (end-drawing)
     (loop)))

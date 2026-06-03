@@ -11,13 +11,13 @@
 (define split-width (quotient screen-width 2))
 
 (define (draw-camera-prism! camera aspect color)
-  (let* ([px (Camera3D-pos-x camera)]
-         [py (Camera3D-pos-y camera)]
-         [pz (Camera3D-pos-z camera)]
-         [tx (Camera3D-tar-x camera)]
-         [ty (Camera3D-tar-y camera)]
-         [tz (Camera3D-tar-z camera)]
-         [fovy (Camera3D-fovy camera)]
+  (let* ([px (camera3d-pos-x camera)]
+         [py (camera3d-pos-y camera)]
+         [pz (camera3d-pos-z camera)]
+         [tx (camera3d-tar-x camera)]
+         [ty (camera3d-tar-y camera)]
+         [tz (camera3d-tar-z camera)]
+         [fovy (camera3d-fovy camera)]
          [len (sqrt (+ (* (- px tx) (- px tx)) (* (- py ty) (- py ty)) (* (- pz tz) (- pz tz))))]
          [ndcs (list (vector -1.0 -1.0 1.0) (vector 1.0 -1.0 1.0)
                      (vector 1.0  1.0 1.0) (vector -1.0  1.0 1.0))]
@@ -40,8 +40,8 @@
                    [wy (+ (* m1 x) (* m5 y) (* m9  z) m13)]
                    [wz (+ (* m2 x) (* m6 y) (* m10 z) m14)]
                    [ww (+ (* m3 x) (* m7 y) (* m11 z) m15)])
-              (make-Vector3 (/ wx ww) (/ wy ww) (/ wz ww))))]
-         [cam-pos (make-Vector3 px py pz)])
+              (vector3 (/ wx ww) (/ wy ww) (/ wz ww))))]
+         [cam-pos (vector3 px py pz)])
     (draw-line-3d (list-ref corners 0) (list-ref corners 1) color)
     (draw-line-3d (list-ref corners 1) (list-ref corners 2) color)
     (draw-line-3d (list-ref corners 2) (list-ref corners 3) color)
@@ -52,31 +52,31 @@
 (init-window screen-width screen-height
   "raylib [textures] example - framebuffer rendering")
 
-(define subj-cam (make-Camera3D 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 0))
-(set-Camera3D-pos-x! subj-cam 5.0)
-(set-Camera3D-pos-y! subj-cam 5.0)
-(set-Camera3D-pos-z! subj-cam 5.0)
-(set-Camera3D-tar-x! subj-cam 0.0)
-(set-Camera3D-tar-y! subj-cam 0.0)
-(set-Camera3D-tar-z! subj-cam 0.0)
-(set-Camera3D-up-x! subj-cam 0.0)
-(set-Camera3D-up-y! subj-cam 1.0)
-(set-Camera3D-up-z! subj-cam 0.0)
-(set-Camera3D-fovy! subj-cam 45.0)
-(set-Camera3D-projection! subj-cam CAMERA-PERSPECTIVE)
+(define subj-cam (camera3d 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 0))
+(set-camera3d-pos-x! subj-cam 5.0)
+(set-camera3d-pos-y! subj-cam 5.0)
+(set-camera3d-pos-z! subj-cam 5.0)
+(set-camera3d-tar-x! subj-cam 0.0)
+(set-camera3d-tar-y! subj-cam 0.0)
+(set-camera3d-tar-z! subj-cam 0.0)
+(set-camera3d-up-x! subj-cam 0.0)
+(set-camera3d-up-y! subj-cam 1.0)
+(set-camera3d-up-z! subj-cam 0.0)
+(set-camera3d-fovy! subj-cam 45.0)
+(set-camera3d-projection! subj-cam CAMERA-PERSPECTIVE)
 
-(define obs-cam (make-Camera3D 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 0))
-(set-Camera3D-pos-x! obs-cam 10.0)
-(set-Camera3D-pos-y! obs-cam 10.0)
-(set-Camera3D-pos-z! obs-cam 10.0)
-(set-Camera3D-tar-x! obs-cam 0.0)
-(set-Camera3D-tar-y! obs-cam 0.0)
-(set-Camera3D-tar-z! obs-cam 0.0)
-(set-Camera3D-up-x! obs-cam 0.0)
-(set-Camera3D-up-y! obs-cam 1.0)
-(set-Camera3D-up-z! obs-cam 0.0)
-(set-Camera3D-fovy! obs-cam 45.0)
-(set-Camera3D-projection! obs-cam CAMERA-PERSPECTIVE)
+(define obs-cam (camera3d 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 0))
+(set-camera3d-pos-x! obs-cam 10.0)
+(set-camera3d-pos-y! obs-cam 10.0)
+(set-camera3d-pos-z! obs-cam 10.0)
+(set-camera3d-tar-x! obs-cam 0.0)
+(set-camera3d-tar-y! obs-cam 0.0)
+(set-camera3d-tar-z! obs-cam 0.0)
+(set-camera3d-up-x! obs-cam 0.0)
+(set-camera3d-up-y! obs-cam 1.0)
+(set-camera3d-up-z! obs-cam 0.0)
+(set-camera3d-fovy! obs-cam 45.0)
+(set-camera3d-projection! obs-cam CAMERA-PERSPECTIVE)
 
 (define obs-tgt (load-render-texture split-width screen-height))
 (define subj-tgt (load-render-texture split-width screen-height))
@@ -84,16 +84,16 @@
 
 
 
-(define obs-src (make-Rectangle 0.0 0.0
+(define obs-src (rectangle 0.0 0.0
                   (exact->inexact (list-ref obs-tgt 2))
                   (- (exact->inexact (list-ref obs-tgt 3)))))
-(define obs-dst (make-Rectangle 0.0 0.0
+(define obs-dst (rectangle 0.0 0.0
                   (exact->inexact split-width)
                   (exact->inexact screen-height)))
-(define subj-src (make-Rectangle 0.0 0.0
+(define subj-src (rectangle 0.0 0.0
                    (exact->inexact (list-ref subj-tgt 2))
                    (- (exact->inexact (list-ref subj-tgt 3)))))
-(define subj-dst (make-Rectangle (exact->inexact split-width) 0.0
+(define subj-dst (rectangle (exact->inexact split-width) 0.0
                    (exact->inexact split-width)
                    (exact->inexact screen-height)))
 (define (rt->texture rt)
@@ -107,8 +107,8 @@
 (define cap 128.0)
 (define crop-src
   (let ([tw (list-ref subj-tgt 2)] [th (list-ref subj-tgt 3)])
-    (make-Rectangle (/ (- tw cap) 2.0) (/ (- th cap) 2.0) cap (- cap))))
-(define crop-dst (make-Rectangle (+ split-width 20.0) 20.0 cap cap))
+    (rectangle (/ (- tw cap) 2.0) (/ (- th cap) 2.0) cap (- cap))))
+(define crop-dst (rectangle (+ split-width 20.0) 20.0 cap cap))
 
 (set-target-fps 60)
 (disable-cursor)
@@ -118,16 +118,16 @@
     (update-camera obs-cam CAMERA-FREE)
     (update-camera subj-cam CAMERA-ORBITAL)
     (when (is-key-pressed KEY-R)
-      (set-Camera3D-tar-x! obs-cam 0.0)
-      (set-Camera3D-tar-y! obs-cam 0.0)
-      (set-Camera3D-tar-z! obs-cam 0.0))
+      (set-camera3d-tar-x! obs-cam 0.0)
+      (set-camera3d-tar-y! obs-cam 0.0)
+      (set-camera3d-tar-z! obs-cam 0.0))
 
     (begin-texture-mode obs-tgt)
     (clear-background RAYWHITE)
     (begin-mode-3d obs-cam)
     (draw-grid 10 1.0)
-    (draw-cube (make-Vector3 0.0 0.0 0.0) 2.0 2.0 2.0 GOLD)
-    (draw-cube-wires (make-Vector3 0.0 0.0 0.0) 2.0 2.0 2.0 PINK)
+    (draw-cube (vector3 0.0 0.0 0.0) 2.0 2.0 2.0 GOLD)
+    (draw-cube-wires (vector3 0.0 0.0 0.0) 2.0 2.0 2.0 PINK)
     (draw-camera-prism! subj-cam aspect-ratio GREEN)
     (end-mode-3d)
     (draw-text "Observer View" 10 (- (list-ref obs-tgt 3) 30) 20 BLACK)
@@ -139,8 +139,8 @@
     (begin-texture-mode subj-tgt)
     (clear-background RAYWHITE)
     (begin-mode-3d subj-cam)
-    (draw-cube (make-Vector3 0.0 0.0 0.0) 2.0 2.0 2.0 GOLD)
-    (draw-cube-wires (make-Vector3 0.0 0.0 0.0) 2.0 2.0 2.0 PINK)
+    (draw-cube (vector3 0.0 0.0 0.0) 2.0 2.0 2.0 GOLD)
+    (draw-cube-wires (vector3 0.0 0.0 0.0) 2.0 2.0 2.0 PINK)
     (draw-grid 10 1.0)
     (end-mode-3d)
     (let* ([tw (list-ref subj-tgt 2)] [th (list-ref subj-tgt 3)])

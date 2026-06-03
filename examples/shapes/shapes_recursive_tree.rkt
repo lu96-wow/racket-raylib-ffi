@@ -121,9 +121,9 @@
               (draw-line-ex    (branch-start b) (branch-end b) (unbox thick) RED)))))
 
     ;; 控制面板背景
-    (draw-line 580 0 580 (get-screen-height) (make-color 218 218 218))
+    (draw-line 580 0 580 (get-screen-height) (color 218 218 218))
     (draw-rectangle 580 0 (get-screen-width) (get-screen-height)
-                    (make-color 232 232 232))
+                    (color 232 232 232))
 
     ;; 参数显示
     (draw-text (format "Angle  [Q/W]: ~a" (fmt (unbox angle) 1))  640 40  10 DARKGRAY)

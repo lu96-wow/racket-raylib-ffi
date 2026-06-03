@@ -13,7 +13,7 @@
 ;; ============================================================
 
 (define (generate-random-color)
-  (make-color (get-random-value 0 255)
+  (color (get-random-value 0 255)
               (get-random-value 0 255)
               (get-random-value 0 255)
               255))

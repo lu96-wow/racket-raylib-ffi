@@ -155,6 +155,243 @@
 (define (set-camera3d-projection!  cam v) (ptr-set! cam _int 10 v))
 
 ;; ============================================================
+;; 辅助: Ray 指针 (2 × Vector3 = 6 floats)
+;; ============================================================
+
+(define (ray pos-x pos-y pos-z dir-x dir-y dir-z)
+  (let ([r (malloc T:_Ray 'atomic)])
+    (ptr-set! r _float 0 (exact->inexact pos-x))
+    (ptr-set! r _float 1 (exact->inexact pos-y))
+    (ptr-set! r _float 2 (exact->inexact pos-z))
+    (ptr-set! r _float 3 (exact->inexact dir-x))
+    (ptr-set! r _float 4 (exact->inexact dir-y))
+    (ptr-set! r _float 5 (exact->inexact dir-z))
+    r))
+
+(define (ray-pos-x r) (ptr-ref r _float 0))
+(define (ray-pos-y r) (ptr-ref r _float 1))
+(define (ray-pos-z r) (ptr-ref r _float 2))
+(define (ray-dir-x r) (ptr-ref r _float 3))
+(define (ray-dir-y r) (ptr-ref r _float 4))
+(define (ray-dir-z r) (ptr-ref r _float 5))
+
+(define (set-ray-pos-x! r v) (ptr-set! r _float 0 (exact->inexact v)))
+(define (set-ray-pos-y! r v) (ptr-set! r _float 1 (exact->inexact v)))
+(define (set-ray-pos-z! r v) (ptr-set! r _float 2 (exact->inexact v)))
+(define (set-ray-dir-x! r v) (ptr-set! r _float 3 (exact->inexact v)))
+(define (set-ray-dir-y! r v) (ptr-set! r _float 4 (exact->inexact v)))
+(define (set-ray-dir-z! r v) (ptr-set! r _float 5 (exact->inexact v)))
+
+;; ============================================================
+;; 辅助: RayCollision 指针
+;; hit @ bool, distance @ float, point=V3(3), normal=V3(3)
+;; ============================================================
+
+(define (ray-collision hit distance point-x point-y point-z
+                       norm-x norm-y norm-z)
+  (let ([rc (malloc T:_RayCollision 'atomic)])
+    (ptr-set! rc _stdbool 0 hit)
+    (ptr-set! rc _float 1 (exact->inexact distance))
+    (ptr-set! rc _float 2 (exact->inexact point-x))
+    (ptr-set! rc _float 3 (exact->inexact point-y))
+    (ptr-set! rc _float 4 (exact->inexact point-z))
+    (ptr-set! rc _float 5 (exact->inexact norm-x))
+    (ptr-set! rc _float 6 (exact->inexact norm-y))
+    (ptr-set! rc _float 7 (exact->inexact norm-z))
+    rc))
+
+(define (ray-collision-hit rc)        (ptr-ref rc _stdbool 0))
+(define (ray-collision-distance rc)   (ptr-ref rc _float 1))
+(define (ray-collision-point-x rc)    (ptr-ref rc _float 2))
+(define (ray-collision-point-y rc)    (ptr-ref rc _float 3))
+(define (ray-collision-point-z rc)    (ptr-ref rc _float 4))
+(define (ray-collision-norm-x rc)     (ptr-ref rc _float 5))
+(define (ray-collision-norm-y rc)     (ptr-ref rc _float 6))
+(define (ray-collision-norm-z rc)     (ptr-ref rc _float 7))
+
+(define (set-ray-collision-hit! rc v)       (ptr-set! rc _stdbool 0 v))
+(define (set-ray-collision-distance! rc v)  (ptr-set! rc _float 1 (exact->inexact v)))
+(define (set-ray-collision-point-x! rc v)   (ptr-set! rc _float 2 (exact->inexact v)))
+(define (set-ray-collision-point-y! rc v)   (ptr-set! rc _float 3 (exact->inexact v)))
+(define (set-ray-collision-point-z! rc v)   (ptr-set! rc _float 4 (exact->inexact v)))
+(define (set-ray-collision-norm-x! rc v)    (ptr-set! rc _float 5 (exact->inexact v)))
+(define (set-ray-collision-norm-y! rc v)    (ptr-set! rc _float 6 (exact->inexact v)))
+(define (set-ray-collision-norm-z! rc v)    (ptr-set! rc _float 7 (exact->inexact v)))
+
+;; ============================================================
+;; 辅助: BoundingBox 指针 (2 × Vector3)
+;; ============================================================
+
+(define (bounding-box min-x min-y min-z max-x max-y max-z)
+  (let ([bb (malloc T:_BoundingBox 'atomic)])
+    (ptr-set! bb _float 0 (exact->inexact min-x))
+    (ptr-set! bb _float 1 (exact->inexact min-y))
+    (ptr-set! bb _float 2 (exact->inexact min-z))
+    (ptr-set! bb _float 3 (exact->inexact max-x))
+    (ptr-set! bb _float 4 (exact->inexact max-y))
+    (ptr-set! bb _float 5 (exact->inexact max-z))
+    bb))
+
+(define (bounding-box-min-x bb) (ptr-ref bb _float 0))
+(define (bounding-box-min-y bb) (ptr-ref bb _float 1))
+(define (bounding-box-min-z bb) (ptr-ref bb _float 2))
+(define (bounding-box-max-x bb) (ptr-ref bb _float 3))
+(define (bounding-box-max-y bb) (ptr-ref bb _float 4))
+(define (bounding-box-max-z bb) (ptr-ref bb _float 5))
+
+(define (set-bounding-box-min-x! bb v) (ptr-set! bb _float 0 (exact->inexact v)))
+(define (set-bounding-box-min-y! bb v) (ptr-set! bb _float 1 (exact->inexact v)))
+(define (set-bounding-box-min-z! bb v) (ptr-set! bb _float 2 (exact->inexact v)))
+(define (set-bounding-box-max-x! bb v) (ptr-set! bb _float 3 (exact->inexact v)))
+(define (set-bounding-box-max-y! bb v) (ptr-set! bb _float 4 (exact->inexact v)))
+(define (set-bounding-box-max-z! bb v) (ptr-set! bb _float 5 (exact->inexact v)))
+
+;; ============================================================
+;; 辅助: RenderTexture 指针 (11 字段)
+;; ============================================================
+
+(define (render-texture id
+                        tex-id tex-width tex-height tex-mipmaps tex-format
+                        dep-id dep-width dep-height dep-mipmaps dep-format)
+  (let ([rt (malloc T:_RenderTexture 'atomic)])
+    (ptr-set! rt _uint 0 id)
+    (ptr-set! rt _uint 1 tex-id)
+    (ptr-set! rt _int 2 tex-width)
+    (ptr-set! rt _int 3 tex-height)
+    (ptr-set! rt _int 4 tex-mipmaps)
+    (ptr-set! rt _int 5 tex-format)
+    (ptr-set! rt _uint 6 dep-id)
+    (ptr-set! rt _int 7 dep-width)
+    (ptr-set! rt _int 8 dep-height)
+    (ptr-set! rt _int 9 dep-mipmaps)
+    (ptr-set! rt _int 10 dep-format)
+    rt))
+
+(define (render-texture-id rt)             (ptr-ref rt _uint 0))
+(define (render-texture-tex-id rt)         (ptr-ref rt _uint 1))
+(define (render-texture-tex-width rt)      (ptr-ref rt _int 2))
+(define (render-texture-tex-height rt)     (ptr-ref rt _int 3))
+(define (render-texture-tex-mipmaps rt)    (ptr-ref rt _int 4))
+(define (render-texture-tex-format rt)     (ptr-ref rt _int 5))
+(define (render-texture-dep-id rt)         (ptr-ref rt _uint 6))
+(define (render-texture-dep-width rt)      (ptr-ref rt _int 7))
+(define (render-texture-dep-height rt)     (ptr-ref rt _int 8))
+(define (render-texture-dep-mipmaps rt)    (ptr-ref rt _int 9))
+(define (render-texture-dep-format rt)     (ptr-ref rt _int 10))
+
+(define (set-render-texture-id! rt v)             (ptr-set! rt _uint 0 v))
+(define (set-render-texture-tex-id! rt v)         (ptr-set! rt _uint 1 v))
+(define (set-render-texture-tex-width! rt v)      (ptr-set! rt _int 2 v))
+(define (set-render-texture-tex-height! rt v)     (ptr-set! rt _int 3 v))
+(define (set-render-texture-tex-mipmaps! rt v)    (ptr-set! rt _int 4 v))
+(define (set-render-texture-tex-format! rt v)     (ptr-set! rt _int 5 v))
+(define (set-render-texture-dep-id! rt v)         (ptr-set! rt _uint 6 v))
+(define (set-render-texture-dep-width! rt v)      (ptr-set! rt _int 7 v))
+(define (set-render-texture-dep-height! rt v)     (ptr-set! rt _int 8 v))
+(define (set-render-texture-dep-mipmaps! rt v)    (ptr-set! rt _int 9 v))
+(define (set-render-texture-dep-format! rt v)     (ptr-set! rt _int 10 v))
+
+;; ============================================================
+;; 辅助: Image 指针 (pointer + 4 ints)
+;; ============================================================
+
+(define (image data width height mipmaps format)
+  (let ([img (malloc T:_Image 'atomic)])
+    (ptr-set! img _pointer 0 data)
+    (ptr-set! img _int 1 width)
+    (ptr-set! img _int 2 height)
+    (ptr-set! img _int 3 mipmaps)
+    (ptr-set! img _int 4 format)
+    img))
+
+(define (image-data img)    (ptr-ref img _pointer 0))
+(define (image-width img)   (ptr-ref img _int 1))
+(define (image-height img)  (ptr-ref img _int 2))
+(define (image-mipmaps img) (ptr-ref img _int 3))
+(define (image-format img)  (ptr-ref img _int 4))
+
+(define (set-image-data! img v)    (ptr-set! img _pointer 0 v))
+(define (set-image-width! img v)   (ptr-set! img _int 1 v))
+(define (set-image-height! img v)  (ptr-set! img _int 2 v))
+(define (set-image-mipmaps! img v) (ptr-set! img _int 3 v))
+(define (set-image-format! img v)  (ptr-set! img _int 4 v))
+
+;; ============================================================
+;; 辅助: Shader 指针 (uint + pointer)
+;; ============================================================
+
+(define (shader id locs)
+  (let ([s (malloc T:_Shader 'atomic)])
+    (ptr-set! s _uint 0 id)
+    (ptr-set! s _pointer 1 locs)
+    s))
+
+(define (shader-id s)   (ptr-ref s _uint 0))
+(define (shader-locs s) (ptr-ref s _pointer 1))
+
+(define (set-shader-id! s v)   (ptr-set! s _uint 0 v))
+(define (set-shader-locs! s v) (ptr-set! s _pointer 1 v))
+
+;; ============================================================
+;; 辅助: Matrix 指针 (16 floats, 64 字节)
+;; ============================================================
+
+(define (matrix m0 m1 m2 m3 m4 m5 m6 m7
+                m8 m9 m10 m11 m12 m13 m14 m15)
+  (let ([m (malloc T:_Matrix 'atomic)])
+    (ptr-set! m _float 0  (exact->inexact m0))
+    (ptr-set! m _float 1  (exact->inexact m1))
+    (ptr-set! m _float 2  (exact->inexact m2))
+    (ptr-set! m _float 3  (exact->inexact m3))
+    (ptr-set! m _float 4  (exact->inexact m4))
+    (ptr-set! m _float 5  (exact->inexact m5))
+    (ptr-set! m _float 6  (exact->inexact m6))
+    (ptr-set! m _float 7  (exact->inexact m7))
+    (ptr-set! m _float 8  (exact->inexact m8))
+    (ptr-set! m _float 9  (exact->inexact m9))
+    (ptr-set! m _float 10 (exact->inexact m10))
+    (ptr-set! m _float 11 (exact->inexact m11))
+    (ptr-set! m _float 12 (exact->inexact m12))
+    (ptr-set! m _float 13 (exact->inexact m13))
+    (ptr-set! m _float 14 (exact->inexact m14))
+    (ptr-set! m _float 15 (exact->inexact m15))
+    m))
+
+(define (matrix-m0  m) (ptr-ref m _float 0))
+(define (matrix-m1  m) (ptr-ref m _float 1))
+(define (matrix-m2  m) (ptr-ref m _float 2))
+(define (matrix-m3  m) (ptr-ref m _float 3))
+(define (matrix-m4  m) (ptr-ref m _float 4))
+(define (matrix-m5  m) (ptr-ref m _float 5))
+(define (matrix-m6  m) (ptr-ref m _float 6))
+(define (matrix-m7  m) (ptr-ref m _float 7))
+(define (matrix-m8  m) (ptr-ref m _float 8))
+(define (matrix-m9  m) (ptr-ref m _float 9))
+(define (matrix-m10 m) (ptr-ref m _float 10))
+(define (matrix-m11 m) (ptr-ref m _float 11))
+(define (matrix-m12 m) (ptr-ref m _float 12))
+(define (matrix-m13 m) (ptr-ref m _float 13))
+(define (matrix-m14 m) (ptr-ref m _float 14))
+(define (matrix-m15 m) (ptr-ref m _float 15))
+
+(define (set-matrix-m0!  m v) (ptr-set! m _float 0  (exact->inexact v)))
+(define (set-matrix-m1!  m v) (ptr-set! m _float 1  (exact->inexact v)))
+(define (set-matrix-m2!  m v) (ptr-set! m _float 2  (exact->inexact v)))
+(define (set-matrix-m3!  m v) (ptr-set! m _float 3  (exact->inexact v)))
+(define (set-matrix-m4!  m v) (ptr-set! m _float 4  (exact->inexact v)))
+(define (set-matrix-m5!  m v) (ptr-set! m _float 5  (exact->inexact v)))
+(define (set-matrix-m6!  m v) (ptr-set! m _float 6  (exact->inexact v)))
+(define (set-matrix-m7!  m v) (ptr-set! m _float 7  (exact->inexact v)))
+(define (set-matrix-m8!  m v) (ptr-set! m _float 8  (exact->inexact v)))
+(define (set-matrix-m9!  m v) (ptr-set! m _float 9  (exact->inexact v)))
+(define (set-matrix-m10! m v) (ptr-set! m _float 10 (exact->inexact v)))
+(define (set-matrix-m11! m v) (ptr-set! m _float 11 (exact->inexact v)))
+(define (set-matrix-m12! m v) (ptr-set! m _float 12 (exact->inexact v)))
+(define (set-matrix-m13! m v) (ptr-set! m _float 13 (exact->inexact v)))
+(define (set-matrix-m14! m v) (ptr-set! m _float 14 (exact->inexact v)))
+(define (set-matrix-m15! m v) (ptr-set! m _float 15 (exact->inexact v)))
+
+;; ============================================================
 ;; 预定义颜色
 ;; ============================================================
 
@@ -368,6 +605,44 @@
  set-camera3d-tar-x! set-camera3d-tar-y! set-camera3d-tar-z!
  set-camera3d-up-x! set-camera3d-up-y! set-camera3d-up-z!
  set-camera3d-fovy! set-camera3d-projection!
+ ray ray-pos-x ray-pos-y ray-pos-z
+ ray-dir-x ray-dir-y ray-dir-z
+ set-ray-pos-x! set-ray-pos-y! set-ray-pos-z!
+ set-ray-dir-x! set-ray-dir-y! set-ray-dir-z!
+ ray-collision ray-collision-hit ray-collision-distance
+ ray-collision-point-x ray-collision-point-y ray-collision-point-z
+ ray-collision-norm-x ray-collision-norm-y ray-collision-norm-z
+ set-ray-collision-hit! set-ray-collision-distance!
+ set-ray-collision-point-x! set-ray-collision-point-y! set-ray-collision-point-z!
+ set-ray-collision-norm-x! set-ray-collision-norm-y! set-ray-collision-norm-z!
+ bounding-box
+ bounding-box-min-x bounding-box-min-y bounding-box-min-z
+ bounding-box-max-x bounding-box-max-y bounding-box-max-z
+ set-bounding-box-min-x! set-bounding-box-min-y! set-bounding-box-min-z!
+ set-bounding-box-max-x! set-bounding-box-max-y! set-bounding-box-max-z!
+ render-texture
+ render-texture-id render-texture-tex-id
+ render-texture-tex-width render-texture-tex-height
+ render-texture-tex-mipmaps render-texture-tex-format
+ render-texture-dep-id render-texture-dep-width
+ render-texture-dep-height render-texture-dep-mipmaps render-texture-dep-format
+ set-render-texture-id! set-render-texture-tex-id!
+ set-render-texture-tex-width! set-render-texture-tex-height!
+ set-render-texture-tex-mipmaps! set-render-texture-tex-format!
+ set-render-texture-dep-id! set-render-texture-dep-width!
+ set-render-texture-dep-height! set-render-texture-dep-mipmaps! set-render-texture-dep-format!
+ image image-data image-width image-height image-mipmaps image-format
+ set-image-data! set-image-width! set-image-height! set-image-mipmaps! set-image-format!
+ shader shader-id shader-locs set-shader-id! set-shader-locs!
+ matrix
+ matrix-m0 matrix-m1 matrix-m2 matrix-m3
+ matrix-m4 matrix-m5 matrix-m6 matrix-m7
+ matrix-m8 matrix-m9 matrix-m10 matrix-m11
+ matrix-m12 matrix-m13 matrix-m14 matrix-m15
+ set-matrix-m0! set-matrix-m1! set-matrix-m2! set-matrix-m3!
+ set-matrix-m4! set-matrix-m5! set-matrix-m6! set-matrix-m7!
+ set-matrix-m8! set-matrix-m9! set-matrix-m10! set-matrix-m11!
+ set-matrix-m12! set-matrix-m13! set-matrix-m14! set-matrix-m15!
  RAYWHITE LIGHTGRAY GRAY DARKGRAY YELLOW GOLD ORANGE
  PINK RED MAROON GREEN LIME DARKGREEN SKYBLUE
  BLUE DARKBLUE PURPLE VIOLET DARKPURPLE

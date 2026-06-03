@@ -127,7 +127,7 @@
 
     ;; --- VR 渲染到纹理 ---
     (begin-texture-mode render-target)
-    (clear-background (make-color 245 245 245))
+    (clear-background (color 245 245 245))
     (begin-vr-stereo-mode vr-config)
     (begin-mode-3d cam)
     (draw-cube (vector3 0.0 0.0 0.0) 2.0 2.0 2.0 RED)
@@ -139,7 +139,7 @@
 
     ;; --- 绘制到屏幕（失真着色器）---
     (begin-drawing)
-    (clear-background (make-color 245 245 245))
+    (clear-background (color 245 245 245))
     (begin-shader-mode distortion-shader)
     (draw-texture-pro (list (list-ref render-target 1) (list-ref render-target 2)
                             (list-ref render-target 3) (list-ref render-target 4)

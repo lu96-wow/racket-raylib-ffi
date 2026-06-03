@@ -87,8 +87,8 @@
         ;; source rect: (0, src-y, frame-w, frame-h) 截取当前帧
         ;; dest rect: 居中, (scaled-w, scaled-h) 缩放
         (draw-texture-pro booth
-          (make-Rectangle 0.0 src-y frame-w frame-h)          ;; source
-          (make-Rectangle (/ screen-width 2.0) dest-y          ;; dest
+          (rectangle 0.0 src-y frame-w frame-h)          ;; source
+          (rectangle (/ screen-width 2.0) dest-y          ;; dest
                           scaled-w scaled-h)
           (vector2 origin-x origin-y)                           ;; origin (中心)
           current-rotation                                      ;; rotation

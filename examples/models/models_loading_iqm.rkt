@@ -14,7 +14,7 @@
 (init-window screen-width screen-height
   "raylib [models] example - loading iqm")
 
-(define camera (make-Camera3D 10.0 10.0 10.0
+(define camera (camera3d 10.0 10.0 10.0
                               0.0 4.0 0.0
                               0.0 1.0 0.0
                               45.0 CAMERA-PERSPECTIVE))
@@ -28,7 +28,7 @@
 ;; materials is index 19 in model list
 (set-material-texture (list-ref guy-model 19) MATERIAL-MAP-DIFFUSE guy-texture)
 
-(define position (make-Vector3 0.0 0.0 0.0))
+(define position (vector3 0.0 0.0 0.0))
 
 ;; Load animation
 (let-values ([(anims-ptr anim-count)
@@ -60,8 +60,8 @@
       
       (begin-mode-3d camera)
       (draw-model-ex guy-model position
-                     (make-Vector3 1.0 0.0 0.0) -90.0
-                     (make-Vector3 1.0 1.0 1.0) WHITE)
+                     (vector3 1.0 0.0 0.0) -90.0
+                     (vector3 1.0 1.0 1.0) WHITE)
       (draw-grid 10 1.0)
       (end-mode-3d)
       

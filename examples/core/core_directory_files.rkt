@@ -113,16 +113,16 @@
     (clear-background RAYWHITE)
 
     ;; 返回按钮
-    (draw-rectangle-rec back-btn (make-color 100 100 100))
+    (draw-rectangle-rec back-btn (color 100 100 100))
     (draw-text "<" 55 14 14 WHITE)
 
     ;; 目录路径
-    (draw-text cur-dir (+ 40 48 10) 14 14 (make-color 50 50 50))
+    (draw-text cur-dir (+ 40 48 10) 14 14 (color 50 50 50))
 
     ;; 文件列表
     (define (item-color i)
-      (cond [(= i (unbox item-active)) (make-color 200 200 255)]
-            [(even? i) (make-color 245 245 255)]
+      (cond [(= i (unbox item-active)) (color 200 200 255)]
+            [(even? i) (color 245 245 255)]
             [else RAYWHITE]))
 
     (for ([i (in-range (min file-count VISIBLE-ITEMS))])
@@ -140,11 +140,11 @@
           (string-append "  " path)
           path))
       (draw-text display-name 5 (+ y 3) 14
-                 (if is-dir? (make-color 0 100 200) (make-color 50 50 50))))
+                 (if is-dir? (color 0 100 200) (color 50 50 50))))
 
     ;; 提示
     (draw-text (format "~a files/dirs | scroll to browse" file-count)
-               10 (- SCREEN-HEIGHT 20) 10 (make-color 100 100 100))
+               10 (- SCREEN-HEIGHT 20) 10 (color 100 100 100))
 
     (end-drawing)
     (loop)))

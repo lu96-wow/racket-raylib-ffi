@@ -179,18 +179,18 @@
     (cond
       [(and (odd? y) (odd? x))
        (draw-plane (vector3 (* x 5.0) 0.0 (* y 5.0)) (vector2 5.0 5.0)
-                   (make-color 150 200 200))]
+                   (color 150 200 200))]
       [(and (even? y) (even? x))
        (draw-plane (vector3 (* x 5.0) 0.0 (* y 5.0)) (vector2 5.0 5.0) LIGHTGRAY)]))
   (define tower-size (vector3 16.0 32.0 16.0))
-  (define tower-color (make-color 150 200 200))
+  (define tower-color (color 150 200 200))
   (define (draw-tower x z)
     (define pos (vector3 x 16.0 z))
     (draw-cube-v pos tower-size tower-color)
     (draw-cube-wires-v pos tower-size DARKBLUE))
   (draw-tower 16.0 16.0) (draw-tower -16.0 16.0)
   (draw-tower -16.0 -16.0) (draw-tower 16.0 -16.0)
-  (draw-sphere (vector3 300.0 300.0 0.0) 100.0 (make-color 255 0 0)))
+  (draw-sphere (vector3 300.0 300.0 0.0) 100.0 (color 255 0 0)))
 
 ;; ============================================================
 ;; 主循环

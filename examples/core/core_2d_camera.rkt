@@ -29,7 +29,7 @@
     (define x (+ -6000.0 spacing))
     (vector-set! buildings i (rectangle x y w h))
     (vector-set! build-colors i
-                 (make-color (get-random-value 200 240)
+                 (color (get-random-value 200 240)
                              (get-random-value 200 240)
                              (get-random-value 200 250)))
     (loop (+ i 1) (+ spacing w))))

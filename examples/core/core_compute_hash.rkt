@@ -81,7 +81,7 @@
         [mouse-pos (get-mouse-position)])
     ;; 检测悬停
     (let ([hover? (check-collision-point-rec mouse-pos bounds)])
-      (draw-rectangle-rec bounds (if hover? LIGHTGRAY (make-color 220 220 220)))
+      (draw-rectangle-rec bounds (if hover? LIGHTGRAY (color 220 220 220)))
       (draw-rectangle-lines-ex bounds 2.0 DARKGRAY)
       (draw-text text (+ x 10) (+ y 8) 12 DARKGRAY))
     ;; 检测点击
@@ -97,7 +97,7 @@
 (define (draw-label-value y label value color)
   (draw-text label 40 (+ y 4) 12 DARKGRAY)
   (let ([val-bounds (rectangle 160 y (- 720 120) 32)])
-    (draw-rectangle-rec val-bounds (make-color 240 240 240))
+    (draw-rectangle-rec val-bounds (color 240 240 240))
     (draw-rectangle-lines-ex val-bounds 1.0 LIGHTGRAY)
     (draw-text value 164 (+ y 6) 10 color)))
 
@@ -186,28 +186,28 @@
       ;; CRC32
       (draw-label-value 200 "CRC32 [32 bit]:"
                         (if hash-crc32 (uint->hex hash-crc32) "-")
-                        (make-color 0 150 0))
+                        (color 0 150 0))
 
       ;; MD5
       (draw-label-value 236 "MD5 [128 bit]:"
                         (if hash-md5 (uint-list->hex hash-md5) "-")
-                        (make-color 0 120 180))
+                        (color 0 120 180))
 
       ;; SHA1
       (draw-label-value 272 "SHA1 [160 bit]:"
                         (if hash-sha1 (uint-list->hex hash-sha1) "-")
-                        (make-color 150 80 0))
+                        (color 150 80 0))
 
       ;; SHA256
       (draw-label-value 308 "SHA256 [256 bit]:"
                         (if hash-sha256 (uint-list->hex hash-sha256) "-")
-                        (make-color 120 0 120))
+                        (color 120 0 120))
 
       ;; Base64
       (draw-text "BONUS - BASE64 ENCODED STRING:" 40 (- (+ 200 (* 36 5)) 30) 12 LIGHTGRAY)
       (draw-label-value (+ 200 (* 36 5)) "BASE64 ENCODING:"
                         (if base64-text base64-text "-")
-                        (make-color 0 100 0))
+                        (color 0 100 0))
 
       (end-drawing)
       (loop)))

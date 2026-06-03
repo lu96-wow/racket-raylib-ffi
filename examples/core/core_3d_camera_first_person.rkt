@@ -54,7 +54,7 @@
                           (/ h 2.0)
                           (exact->inexact (get-random-value -15 15))))
     (vector-set! colors i
-                 (make-color (get-random-value 20 255)
+                 (color (get-random-value 20 255)
                              (get-random-value 10 55)
                              30))))
 

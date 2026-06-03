@@ -29,7 +29,7 @@
 ;; 文本文件路径（相对 racket-bind/ 工作目录）
 ;; ============================================================
 
-(define file-name "core_text_file_loading.rkt")
+(define file-name "examples/core/core_text_file_loading.rkt")
 
 ;; ============================================================
 ;; 自动换行 — 纯 Racket 实现

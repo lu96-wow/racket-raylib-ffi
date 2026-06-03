@@ -11,7 +11,7 @@
 ;;
 ;; 启动: cd racket-bind && racket test/keyboard-camera.rkt
 
-(require "../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 常量
@@ -172,7 +172,7 @@
 
     ;; --- 绘制 3D ---
     (begin-drawing)
-    (clear-background (make-color 245 245 245))
+    (clear-background (color 245 245 245))
 
     (begin-mode-3d cam)
 

@@ -25,7 +25,7 @@
 (set-target-fps 60)
 
 (define (random-color)
-  (make-color (get-random-value 100 250) (get-random-value 50 150)
+  (color (get-random-value 100 250) (get-random-value 50 150)
               (get-random-value 10 100) 255))
 
 (define colors (make-vector 10 #f))

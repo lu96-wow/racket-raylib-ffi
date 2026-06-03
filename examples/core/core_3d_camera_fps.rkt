@@ -194,7 +194,7 @@
 (define (draw-level)
   (define floor-extent 25)
   (define tile-size 5.0)
-  (define tile-color1 (make-color 150 200 200))
+  (define tile-color1 (color 150 200 200))
 
   ;; 棋盘格地板
   (for* ([y (in-range (- floor-extent) floor-extent)]
@@ -209,7 +209,7 @@
 
   ;; 四座塔
   (define tower-size (vector3 16.0 32.0 16.0))
-  (define tower-color (make-color 150 200 200))
+  (define tower-color (color 150 200 200))
 
   (define (draw-tower x z)
     (define pos (vector3 x 16.0 z))
@@ -222,7 +222,7 @@
   (draw-tower 16.0 -16.0)
 
   ;; 红色太阳
-  (draw-sphere (vector3 300.0 300.0 0.0) 100.0 (make-color 255 0 0)))
+  (draw-sphere (vector3 300.0 300.0 0.0) 100.0 (color 255 0 0)))
 
 ;; ============================================================
 ;; 主循环

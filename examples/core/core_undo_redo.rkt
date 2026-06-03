@@ -143,7 +143,7 @@
     ;; ---- SPACE: 随机改变颜色 ----
     (when (is-key-pressed KEY-SPACE)
       (set! player-color
-            (make-color (get-random-value 20 255)
+            (color (get-random-value 20 255)
                         (get-random-value 20 220)
                         (get-random-value 20 240))))
 

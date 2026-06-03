@@ -185,7 +185,7 @@
                                  (exact->inexact bullet-radius) BLACK))))
 
     ;; Draw UI
-    (draw-rectangle 10 10 280 150 (make-color 0 0 0 200))
+    (draw-rectangle 10 10 280 150 (color 0 0 0 200))
     (draw-text "Controls:" 20 20 10 LIGHTGRAY)
     (draw-text "- Right/Left or A/D: Change rows number" 40 40 10 LIGHTGRAY)
     (draw-text "- Up/Down or W/S: Change bullet speed" 40 60 10 LIGHTGRAY)
@@ -194,13 +194,13 @@
     (draw-text "- Enter: Switch draw method (Performance)" 40 120 10 LIGHTGRAY)
     (draw-text "- C: Clear bullets" 40 140 10 LIGHTGRAY)
 
-    (draw-rectangle 610 10 170 30 (make-color 0 0 0 200))
+    (draw-rectangle 610 10 170 30 (color 0 0 0 200))
     (if draw-in-performance-mode?
         (draw-text "Draw method: DrawTexture(*)" 620 20 10 GREEN)
         (draw-text "Draw method: DrawCircle(*)" 620 20 10 RED))
 
     ;; Status bar
-    (draw-rectangle 135 410 530 30 (make-color 0 0 0 200))
+    (draw-rectangle 135 410 530 30 (color 0 0 0 200))
     (draw-text
       (format "[ FPS: ~a, Bullets: ~a, Rows: ~a, Bullet speed: ~a, Angle increment per frame: ~a, Cooldown: ~a ]"
               (get-fps) (- bullet-count bullet-disabled-count) bullet-rows
