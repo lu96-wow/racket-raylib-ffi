@@ -284,14 +284,4 @@
  load-image image-rotate
  gen-image-color update-texture draw-texture-ex
  set-material-texture)
-(provide
- _texture-bytes _render-texture-bytes
- load-texture unload-texture draw-texture
- load-render-texture unload-render-texture
- begin-texture-mode end-texture-mode
- draw-texture-rec
- set-texture-filter
- draw-texture-pro
- gen-image-checked load-texture-from-image
- load-image image-rotate)
 

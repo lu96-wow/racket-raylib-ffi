@@ -144,88 +144,12 @@
 ;; 导出
 ;; ============================================================
 
+;; types.rkt 只导出 C 结构体类型 + lib
+;; 结构体访问器/构造器请使用 raylib-var/core.rkt 中的小写辅助函数
+;; (color, vector2, vector2-x, set-vector2-x! 等)
 (provide
  lib
- ;; Color
- _Color Color? make-Color
- Color-r Color-g Color-b Color-a
- set-Color-r! set-Color-g! set-Color-b! set-Color-a!
- ;; Vector2
- _Vector2 Vector2? make-Vector2
- Vector2-x Vector2-y
- set-Vector2-x! set-Vector2-y!
- ;; Vector3
- _Vector3 Vector3? make-Vector3
- Vector3-x Vector3-y Vector3-z
- set-Vector3-x! set-Vector3-y! set-Vector3-z!
- ;; Rectangle
- _Rectangle Rectangle? make-Rectangle
- Rectangle-x Rectangle-y Rectangle-width Rectangle-height
- set-Rectangle-x! set-Rectangle-y! set-Rectangle-width! set-Rectangle-height!
- ;; Camera2D
- _Camera2D Camera2D? make-Camera2D
- Camera2D-off-x Camera2D-off-y
- Camera2D-tar-x Camera2D-tar-y
- Camera2D-rotation Camera2D-zoom
- set-Camera2D-off-x! set-Camera2D-off-y!
- set-Camera2D-tar-x! set-Camera2D-tar-y!
- set-Camera2D-rotation! set-Camera2D-zoom!
- ;; Camera3D
- _Camera3D Camera3D? make-Camera3D
- Camera3D-pos-x Camera3D-pos-y Camera3D-pos-z
- Camera3D-tar-x Camera3D-tar-y Camera3D-tar-z
- Camera3D-up-x Camera3D-up-y Camera3D-up-z
- Camera3D-fovy Camera3D-projection
- set-Camera3D-pos-x! set-Camera3D-pos-y! set-Camera3D-pos-z!
- set-Camera3D-tar-x! set-Camera3D-tar-y! set-Camera3D-tar-z!
- set-Camera3D-up-x! set-Camera3D-up-y! set-Camera3D-up-z!
- set-Camera3D-fovy! set-Camera3D-projection!
- ;; Ray
- _Ray Ray? make-Ray
- Ray-pos-x Ray-pos-y Ray-pos-z
- Ray-dir-x Ray-dir-y Ray-dir-z
- set-Ray-pos-x! set-Ray-pos-y! set-Ray-pos-z!
- set-Ray-dir-x! set-Ray-dir-y! set-Ray-dir-z!
- ;; RayCollision
- _RayCollision RayCollision? make-RayCollision
- RayCollision-hit RayCollision-distance
- RayCollision-point-x RayCollision-point-y RayCollision-point-z
- RayCollision-norm-x RayCollision-norm-y RayCollision-norm-z
- set-RayCollision-hit! set-RayCollision-distance!
- set-RayCollision-point-x! set-RayCollision-point-y! set-RayCollision-point-z!
- set-RayCollision-norm-x! set-RayCollision-norm-y! set-RayCollision-norm-z!
- ;; BoundingBox
- _BoundingBox BoundingBox? make-BoundingBox
- BoundingBox-min-x BoundingBox-min-y BoundingBox-min-z
- BoundingBox-max-x BoundingBox-max-y BoundingBox-max-z
- set-BoundingBox-min-x! set-BoundingBox-min-y! set-BoundingBox-min-z!
- set-BoundingBox-max-x! set-BoundingBox-max-y! set-BoundingBox-max-z!
- ;; RenderTexture
- _RenderTexture RenderTexture? make-RenderTexture
- RenderTexture-id RenderTexture-tex-id RenderTexture-tex-width
- RenderTexture-tex-height RenderTexture-tex-mipmaps RenderTexture-tex-format
- RenderTexture-dep-id RenderTexture-dep-width
- RenderTexture-dep-height RenderTexture-dep-mipmaps RenderTexture-dep-format
- set-RenderTexture-id! set-RenderTexture-tex-id! set-RenderTexture-tex-width!
- set-RenderTexture-tex-height! set-RenderTexture-tex-mipmaps! set-RenderTexture-tex-format!
- set-RenderTexture-dep-id! set-RenderTexture-dep-width!
- set-RenderTexture-dep-height! set-RenderTexture-dep-mipmaps! set-RenderTexture-dep-format!
- ;; Image
- _Image Image? make-Image
- Image-data Image-width Image-height Image-mipmaps Image-format
- set-Image-data! set-Image-width! set-Image-height! set-Image-mipmaps! set-Image-format!
- ;; Shader
- _Shader Shader? make-Shader
- Shader-id Shader-locs
- set-Shader-id! set-Shader-locs!
- ;; Matrix
- _Matrix Matrix? make-Matrix
- Matrix-m0 Matrix-m1 Matrix-m2 Matrix-m3
- Matrix-m4 Matrix-m5 Matrix-m6 Matrix-m7
- Matrix-m8 Matrix-m9 Matrix-m10 Matrix-m11
- Matrix-m12 Matrix-m13 Matrix-m14 Matrix-m15
- set-Matrix-m0! set-Matrix-m1! set-Matrix-m2! set-Matrix-m3!
- set-Matrix-m4! set-Matrix-m5! set-Matrix-m6! set-Matrix-m7!
- set-Matrix-m8! set-Matrix-m9! set-Matrix-m10! set-Matrix-m11!
- set-Matrix-m12! set-Matrix-m13! set-Matrix-m14! set-Matrix-m15!
-)
+ _Color _Vector2 _Vector3 _Rectangle
+ _Camera2D _Camera3D
+ _Ray _RayCollision _BoundingBox
+ _RenderTexture _Image _Shader _Matrix)

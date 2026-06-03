@@ -799,9 +799,6 @@
  draw-line-v
  draw-line-bezier
  draw-line-dashed
- check-collision-point-circle
- draw-line-bezier
- draw-line-dashed
  draw-line-3d
  check-collision-point-circle
  check-collision-recs
@@ -821,7 +818,6 @@
  rl-color-4ub
  rl-normal-3f
  rl-tex-coord-2f
- rl-color-4ub
  RL-QUADS
  RL-TRIANGLES
  draw-rectangle-rounded-gradient-h

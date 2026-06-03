@@ -1018,10 +1018,8 @@
  _ray-collision-bytes
  _filepathlist-bytes
  _image-bytes
- _image-bytes
  _shader-bytes
  _matrix-bytes
- _shader-bytes
  _vrdeviceinfo-bytes
  _vrstereoconfig-bytes
 
@@ -1036,8 +1034,6 @@
  get-monitor-physical-width get-monitor-physical-height
  get-monitor-refresh-rate set-window-monitor get-window-position
  set-trace-log-callback vsnprintf
-
-
 
  ;; 绘制
  begin-drawing end-drawing
