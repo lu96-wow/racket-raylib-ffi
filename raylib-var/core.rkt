@@ -333,7 +333,7 @@
 ;; ============================================================
 
 (define BLEND-ALPHA      0)
-(define BLEND-CUSTOM     4)
+(define BLEND-CUSTOM     6)
 (define RLGL-SRC-ALPHA   #x0302)
 (define RLGL-MIN         #x8007)
 (define RLGL-MAX         #x8008)

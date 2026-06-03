@@ -125,7 +125,7 @@
 ;; ============================================================
 (define (draw-light-circle li)
   (draw-circle-gradient (light-pos li)(light-radius li)
-                        (color-alpha WHITE 0.0) WHITE))
+                        WHITE (color-alpha WHITE 0.0)))
 
 (define (draw-light-shadows li)
   (for ([j (in-range (light-sc li))])

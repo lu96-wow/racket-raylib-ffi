@@ -184,7 +184,7 @@
 (lib:draw-text "有绘制内容防止残留" 50 350 15 lib:GREEN)
 (lib:end-drawing)
 (assert-= lib:BLEND-ALPHA 0)
-(assert-= lib:BLEND-CUSTOM 4)
+(assert-= lib:BLEND-CUSTOM 6)
 (assert-= lib:RLGL-SRC-ALPHA #x0302)
 (assert-= lib:RLGL-MIN #x8007)
 (assert-= lib:RLGL-MAX #x8008)
