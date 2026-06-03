@@ -1,16 +1,16 @@
 ;; shapes_top_down_lights — Racket FFI 版
 ;;
 ;; 对应 C: examples/shapes/shapes_top_down_lights.c
-;; 功能:  2D 光照 + 阴影投射系统 (适配 FFI 版本)
+;; 功能:  2D 光照 + 阴影投射系统
 ;;
 ;; ============================================================
-;; 与 C 版的差异
+;; 架构（完全等于 C 版）
 ;; ============================================================
-;; C 版: 用 CUSTOM blend (MIN/MAX) 做光照累积/阴影遮罩
-;; Racket: 用 ADDITIVE blend (SRC_ALPHA, ONE) 累积光源,
-;;         MULTIPLY blend (DST_COLOR, ZERO) 叠加光罩到场景
-;;
-;; 效果等价: 白色渐变区域→光透过, 黑色区域→阴影
+;;   每光源独立 RT mask (清 WHITE)
+;;     → MIN blend + DrawCircleGradient (内透明→外白)
+;;     → MAX blend + DrawTriangleFan (WHITE 三角形 = 阴影)
+;;   合并到全局 mask (清 BLACK, MIN blend)
+;;   叠加到场景 (颜色叠加)
 ;;
 ;; ============================================================
 ;; 功能操作
@@ -37,8 +37,7 @@
 ;; vec2-add/subtract/scale  (raymath)
 ;; vec2-normalize           (raymath)
 ;; BLEND-ALPHA/BLEND-CUSTOM (raylib-var)
-;; RLGL-SRC-ALPHA           (raylib-var)
-;; 自定义常量: GL-ZERO GL-ONE GL-DST-COLOR GL-FUNC-ADD
+;; RLGL-SRC-ALPHA / RLGL-MIN / RLGL-MAX (raylib-var)
 ;;
 ;; ============================================================
 ;; 测试文件

@@ -1,9 +1,7 @@
 #lang racket/base
 
 ;; raylib [shapes] example - top down lights
-;;
-;; 用已验证的 API 重写, 避免 CUSTOM blend 的不确定性。
-;; 使用 ADDITIVE blend 累积光源 + MULTIPLY blend 叠加光罩。
+;; 完全按照 C 版结构: 每光源独立 RT → MIN 叠光 + MAX 画阴影 → 合并到全局 mask
 
 (require "../../raylib/raylib.rkt" racket/math)
 
@@ -17,11 +15,6 @@
 (define (rw r)(rectangle-w r))(define (rh r)(rectangle-h r))
 (define (v2 x y)(vector2 x y))
 
-(define GL-ZERO      0)
-(define GL-ONE       1)
-(define GL-DST-COLOR #x0306)
-(define GL-FUNC-ADD  #x8006)
-
 ;; ============================================================
 ;; 数据结构
 ;; ============================================================
@@ -33,10 +26,10 @@
 (define (sg-ref s i)
   (case i[(0)(sgeom-v0 s)][(1)(sgeom-v1 s)][(2)(sgeom-v2 s)][(3)(sgeom-v3 s)]))
 
-(struct light (active dirty pos radius bounds sgs sc) #:transparent #:mutable)
+(struct light (active dirty pos radius bounds sgs sc mask) #:transparent #:mutable)
 (define (mklight)
   (light #f #f (v2 0 0) 0.0 (rectangle 0 0 0 0)
-         (for/vector([i MAX-SHADOWS])(sg-make)) 0))
+         (for/vector([i MAX-SHADOWS])(sg-make)) 0 #f))
 (define lights (for/vector([i MAX-LIGHTS])(mklight)))
 
 ;; ============================================================
@@ -56,7 +49,9 @@
     (set-light-radius! li r)
     (set-rectangle-w! (light-bounds li)(* r 2.0))
     (set-rectangle-h! (light-bounds li)(* r 2.0))
-    (move-light slot x y)))
+    (set-light-mask! li (load-render-texture W H))
+    (move-light slot x y)
+    (draw-light-mask slot)))
 
 (define (compute-shadow li sp ep)
   (let ([sc (light-sc li)])
@@ -99,8 +94,39 @@
                       (sg-set! s 0 (v2 bx by))(sg-set! s 1 (v2 bx (+ by bh)))
                       (sg-set! s 2 (v2 (+ bx bw)(+ by bh)))(sg-set! s 3 (v2 (+ bx bw) by))
                       (set-light-sc! li (+ sc 1)))))))))
+        (draw-light-mask slot)
         #t)
       #f)))
+
+;; 画单个光源 mask: 清 WHITE → MIN 画渐变 → MAX 画阴影(WHITE)
+(define (draw-light-mask slot)
+  (let ([li (vector-ref lights slot)])
+    (when (light-active li)
+      (let ([rt (light-mask li)]
+            [rp (light-pos li)]
+            [rr (light-radius li)]
+            [n (light-sc li)]
+            [sgs (light-sgs li)])
+        (begin-texture-mode rt)
+        (clear-background WHITE)
+
+        ;; MIN blend: 渐变 (内透明→外白)
+        (rl-set-blend-factors RLGL-SRC-ALPHA RLGL-SRC-ALPHA RLGL-MIN)
+        (rl-set-blend-mode BLEND-CUSTOM)
+        (draw-circle-gradient rp rr (color-alpha WHITE 0.0) WHITE)
+        (rl-draw-render-batch-active)
+
+        ;; MAX blend: 阴影白色三角形
+        (rl-set-blend-mode BLEND-ALPHA)
+        (rl-set-blend-factors RLGL-SRC-ALPHA RLGL-SRC-ALPHA RLGL-MAX)
+        (rl-set-blend-mode BLEND-CUSTOM)
+        (for ([j (in-range n)])
+          (let ([s (vector-ref sgs j)])
+            (draw-triangle-fan (vector (sg-ref s 0)(sg-ref s 1)(sg-ref s 2)(sg-ref s 3))
+                               4 WHITE)))
+        (rl-draw-render-batch-active)
+        (rl-set-blend-mode BLEND-ALPHA)
+        (end-texture-mode)))))
 
 
 ;; ============================================================
@@ -121,33 +147,16 @@
                  (exact->inexact (get-random-value 10 100))))))
 
 ;; ============================================================
-;; 绘制辅助
-;; ============================================================
-(define (draw-light-circle li)
-  (draw-circle-gradient (light-pos li)(light-radius li)
-                        WHITE (color-alpha WHITE 0.0)))
-
-(define (draw-light-shadows li)
-  (for ([j (in-range (light-sc li))])
-    (let ([s (vector-ref (light-sgs li) j)])
-      (draw-triangle-fan (vector (sg-ref s 0)(sg-ref s 1)(sg-ref s 2)(sg-ref s 3))
-                         4 BLACK))))
-
-(define (draw-light-dot li i)
-  (draw-circle (exact-round (vx (light-pos li)))(exact-round (vy (light-pos li)))
-               10.0 (if (= i 0) YELLOW WHITE)))
-
-;; ============================================================
 ;; 初始化
 ;; ============================================================
-(init-window W H "raylib [shapes] example - top down lights [FFI]")
+(init-window W H "raylib [shapes] example - top down lights")
 (setup-boxes)
 
 (define bg-img (gen-image-checked 64 64 32 32 DARKBROWN DARKGRAY))
 (define bg-tex (load-texture-from-image bg-img))
 (unload-image bg-img)
 
-(define light-mask (load-render-texture W H))
+(define global-mask (load-render-texture W H))
 (setup-light 0 600.0 400.0 300.0)
 (define next-light 1)
 (define show-lines? (box #f))
@@ -166,49 +175,53 @@
       (set! next-light (+ next-light 1)))
     (when (is-key-pressed KEY-F1)(set-box! show-lines?(not (unbox show-lines?))))
 
-    (for ([i (in-range MAX-LIGHTS)])(update-light i boxes MAX-BOXES))
-
-    ;; ── Step 1: 光罩 RT ──
-    (begin-texture-mode light-mask)
-    (clear-background BLACK)
-
-    ;; ADDITIVE 累积光源
-    (rl-set-blend-factors RLGL-SRC-ALPHA GL-ONE GL-FUNC-ADD)
-    (rl-set-blend-mode BLEND-CUSTOM)
+    ;; 检查脏光源, 更新 mask
+    (define dirty? #f)
     (for ([i (in-range MAX-LIGHTS)])
-      (let ([li (vector-ref lights i)])
-        (when (light-active li)(draw-light-circle li))))
-    (rl-draw-render-batch-active)
-    (rl-set-blend-mode BLEND-ALPHA)
+      (when (update-light i boxes MAX-BOXES)(set! dirty? #t)))
 
-    ;; 正常 blend 画黑色阴影
-    (for ([i (in-range MAX-LIGHTS)])
-      (let ([li (vector-ref lights i)])
-        (when (light-active li)(draw-light-shadows li))))
-    (end-texture-mode)
+    ;; 合并全局 mask
+    (when dirty?
+      (begin-texture-mode global-mask)
+      (clear-background BLACK)
+      (rl-set-blend-factors RLGL-SRC-ALPHA RLGL-SRC-ALPHA RLGL-MIN)
+      (rl-set-blend-mode BLEND-CUSTOM)
+      (for ([i (in-range MAX-LIGHTS)])
+        (let ([li (vector-ref lights i)])
+          (when (light-active li)
+            (define tex (list (list-ref (light-mask li) 1)
+                              (list-ref (light-mask li) 2)
+                              (list-ref (light-mask li) 3)
+                              (list-ref (light-mask li) 4)
+                              (list-ref (light-mask li) 5)))
+            (draw-texture-rec tex (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))
+                              (v2 0 0) WHITE))))
+      (rl-draw-render-batch-active)
+      (rl-set-blend-mode BLEND-ALPHA)
+      (end-texture-mode))
 
-    ;; ── Step 2: 绘制到屏幕 ──
+    ;; 绘制屏幕
     (begin-drawing)
     (clear-background BLACK)
 
-    ;; 棋盘格背景
+    ;; 棋盘格
     (draw-texture-pro bg-tex (rectangle 0 0 64 64)
       (rectangle 0 0 (exact->inexact W)(exact->inexact H))(v2 0 0) 0.0 WHITE)
 
-    ;; MULTIPLY 叠加光罩: dst * src
-    (rl-set-blend-factors GL-DST-COLOR GL-ZERO GL-FUNC-ADD)
-    (rl-set-blend-mode BLEND-CUSTOM)
-    (draw-texture-rec
-      (list (list-ref light-mask 1)(list-ref light-mask 2)
-            (list-ref light-mask 3)(list-ref light-mask 4)(list-ref light-mask 5))
-      (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))(v2 0 0) WHITE)
-    (rl-draw-render-batch-active)
-    (rl-set-blend-mode BLEND-ALPHA)
+    ;; 叠加全局光罩
+    (define gm-tex (list (list-ref global-mask 1)(list-ref global-mask 2)
+                         (list-ref global-mask 3)(list-ref global-mask 4)
+                         (list-ref global-mask 5)))
+    (draw-texture-rec gm-tex (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))
+                      (v2 0 0) (color-alpha WHITE 1.0))
 
-    ;; 光源指示点
+    ;; 光源位置
     (for ([i (in-range MAX-LIGHTS)])
       (let ([li (vector-ref lights i)])
-        (when (light-active li)(draw-light-dot li i))))
+        (when (light-active li)
+          (draw-circle (exact-round (vx (light-pos li)))
+                       (exact-round (vy (light-pos li)))
+                       10.0 (if (= i 0) YELLOW WHITE)))))
 
     ;; F1 调试
     (if (unbox show-lines?)
@@ -234,5 +247,9 @@
 ;; 清理
 ;; ============================================================
 (unload-texture bg-tex)
-(unload-render-texture light-mask)
+(unload-render-texture global-mask)
+(for ([i (in-range MAX-LIGHTS)])
+  (let ([li (vector-ref lights i)])
+    (when (and (light-active li)(light-mask li))
+      (unload-render-texture (light-mask li)))))
 (close-window)
