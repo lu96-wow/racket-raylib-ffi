@@ -1,35 +1,35 @@
 Vector2 *
 Vector3 *
-Vector4 
+Vector4 *
 Matrix *
 Color *
 Rectangle *
 Image *
-Texture x
-RenderTexture x
-NPatchInfo 
-GlyphInfo 
-Font x
+Texture *
+RenderTexture *
+NPatchInfo *
+GlyphInfo *
+Font *
 Camera3D *
 Camera2D *
-Mesh 
+Mesh *
 Shader *
-MaterialMap 
-Material 
-Transform 
-BoneInfo 
-ModelSkeleton 
-Model x
-ModelAnimation x
+MaterialMap *
+Material *
+Transform *
+BoneInfo *
+ModelSkeleton *
+Model *
+ModelAnimation *
 Ray *
 RayCollision *
 BoundingBox *
-Wave 
-AudioStream 
-Sound 
-Music 
+Wave *
+AudioStream *
+Sound *
+Music *
 VrDeviceInfo *
 VrStereoConfig *
-FilePathList x
-AutomationEvent x
-AutomationEventList 
+FilePathList *
+AutomationEvent *
+AutomationEventList *
