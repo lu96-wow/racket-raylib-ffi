@@ -1,0 +1,63 @@
+GetFontDefault *
+LoadFont 
+LoadFontEx 
+LoadFontFromImage 
+LoadFontFromMemory 
+IsFontValid 
+LoadFontData 
+GenImageFontAtlas 
+UnloadFontData 
+UnloadFont 
+ExportFontAsCode 
+
+DrawFPS *
+DrawText *
+DrawTextEx 
+DrawTextPro 
+DrawTextCodepoint 
+DrawTextCodepoints 
+
+SetTextLineSpacing 
+MeasureText *
+MeasureTextEx *
+MeasureTextCodepoints 
+GetGlyphIndex 
+GetGlyphInfo 
+GetGlyphAtlasRec 
+
+LoadUTF8 
+UnloadUTF8 
+LoadCodepoints 
+UnloadCodepoints 
+GetCodepointCount 
+GetCodepoint 
+GetCodepointNext 
+GetCodepointPrevious 
+CodepointToUTF8 
+
+LoadTextLines 
+UnloadTextLines 
+TextCopy 
+TextIsEqual 
+TextLength 
+TextFormat 
+TextSubtext *
+TextRemoveSpaces 
+GetTextBetween 
+TextReplace 
+TextReplaceAlloc 
+TextReplaceBetween 
+TextReplaceBetweenAlloc 
+TextInsert 
+TextInsertAlloc 
+TextJoin 
+TextSplit 
+TextAppend 
+TextFindIndex 
+TextToUpper 
+TextToLower 
+TextToPascal 
+TextToSnake 
+TextToCamel 
+TextToInteger 
+TextToFloat 

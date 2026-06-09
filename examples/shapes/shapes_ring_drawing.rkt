@@ -3,29 +3,89 @@
 ;; raylib [shapes] example - ring drawing (Racket FFI 翻译)
 ;;
 ;; 对应 C: examples/shapes/shapes_ring_drawing.c
-;; DrawRingLines / DrawCircleSectorLines 新增绑定
-;; raygui 用键盘控制替代
+;; raygui 替代: 用 raylib 原生绘制 + 鼠标交互实现滑块/复选框
 
-(require "../../raylib/raylib.rkt"
-         racket/math)
+(require racket/math
+         racket/match
+         "../../raylib/raylib.rkt")
 
 ;; ============================================================
-;; 键盘控制参数
-;;   键位约定: 上排键增大, 下排键减小
-;; ============================================================
-;; start-angle:   q↑ / w↓   步进 5
-;; end-angle:     a↑ / s↓   步进 5
-;; inner-radius:  z↑ / x↓   步进 5
-;; outer-radius:  e↑ / r↓   步进 5
-;; segments:      d↑ / f↓   步进 1
-;; 
-;; 模式开关:
-;;   t = 切换 Draw Ring
-;;   g = 切换 Draw RingLines
-;;   h = 切换 Draw CircleLines
+;; 联动滑块控件 (raylib 原生绘制 + 鼠标交互)
 ;; ============================================================
 
-(define (fmt1 v) (real->decimal-string v 1))
+;; 滑块状态: (box (list x y w h vmin vmax cur-val dragging? label))
+(define (make-slider x y w h vmin vmax init label)
+  (box (list x y w h vmin vmax init #f label)))
+
+;; 滑块 handle 宽度
+(define SLIDER-HANDLE-W 12)
+
+;; 更新: 处理鼠标输入，修改滑块值
+(define (update-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define mx (get-mouse-x))
+  (define my (get-mouse-y))
+  (define mdown (is-mouse-button-down MOUSE-BUTTON-LEFT))
+  (define mreleased (is-mouse-button-released MOUSE-BUTTON-LEFT))
+  (define in-rect (and (>= mx (- x 2)) (<= mx (+ x w 2))
+                       (>= my (- y 2)) (<= my (+ y h 2))))
+
+  (define new-drag?
+    (cond
+      [mreleased #f]
+      [(and mdown in-rect (not drag?)) #t]
+      [drag? (if mdown #t #f)]
+      [else #f]))
+
+  ;; 拖拽中更新值
+  (define new-val
+    (if new-drag?
+        (let* ([t (max 0.0 (min 1.0 (/ (- mx x) w)))]
+               [v (exact-round (+ vmin (* t (- vmax vmin))))])
+          v)
+        cur))
+
+  (set-box! sl-box (list x y w h vmin vmax new-val new-drag? label)))
+
+;; 绘制: 渲染滑块外观
+(define (draw-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define range (- vmax vmin))
+  (define t (if (zero? range) 0.0 (/ (- cur vmin) range)))
+  (define handle-x (+ x (exact-round (* w t))))
+  (define track-y (+ y (quotient h 2) -2))
+  ;; 轨道
+  (draw-rectangle x track-y w 4 (fade GRAY 0.3))
+  ;; handle
+  (draw-rectangle (- handle-x (quotient SLIDER-HANDLE-W 2)) y
+                  SLIDER-HANDLE-W h (if drag? MAROON (fade DARKGRAY 0.7)))
+  ;; 值
+  (draw-text (number->string cur) (+ x w 8) (- (+ y (quotient h 2)) 5) 10 DARKGRAY))
+
+;; 滑块当前值
+(define (slider-val sl-box)
+  (cadddr (cdddr (unbox sl-box))))  ;; list-ref at index 6
+
+;; ============================================================
+;; 复选框控件
+;; ============================================================
+(define (draw-checkbox x y label-text checked?)
+  (define box-size 16)
+  (define mx (get-mouse-x))
+  (define my (get-mouse-y))
+  (define mclicked (is-mouse-button-pressed MOUSE-BUTTON-LEFT))
+
+  (define new-val
+    (if (and mclicked (>= mx x) (<= mx (+ x box-size 100))
+             (>= my y) (<= my (+ y box-size)))
+        (not checked?)
+        checked?))
+
+  (draw-rectangle-lines x y box-size box-size DARKGRAY)
+  (when new-val
+    (draw-rectangle (+ x 3) (+ y 3) (- box-size 6) (- box-size 6) MAROON))
+  (draw-text label-text (+ x 22) (- (+ y (quotient box-size 2)) 5) 10 DARKGRAY)
+  new-val)
 
 ;; ============================================================
 ;; 初始化
@@ -40,14 +100,22 @@
 (define center (vector2 (/ (- (get-screen-width) 300) 2.0)
                         (/ (get-screen-height) 2.0)))
 
-(define inner-radius      80.0)
-(define outer-radius      190.0)
-(define start-angle       0.0)
-(define end-angle         360.0)
-(define segments          0.0)
-(define draw-ring?        #t)
-(define draw-ring-lines?  #f)
+;; 参数
+(define start-angle    0)
+(define end-angle      360)
+(define inner-radius   80)
+(define outer-radius   190)
+(define segments       0)
+(define draw-ring?     #t)
+(define draw-ring-lines? #f)
 (define draw-circle-lines? #f)
+
+;; 滑块: 520 + 150 + 12 = 682 区域
+(define sl-start-angle  (make-slider 520  42 150 16 -450 450 0   "StartAngle"))
+(define sl-end-angle    (make-slider 520  74 150 16 -450 450 360 "EndAngle"))
+(define sl-inner-radius (make-slider 520 140 150 16 0    300 80  "InnerRadius"))
+(define sl-outer-radius (make-slider 520 172 150 16 0    400 190 "OuterRadius"))
+(define sl-segments     (make-slider 520 238 150 16 0    200 0   "Segments"))
 
 (set-target-fps 60)
 
@@ -57,26 +125,19 @@
 
 (let loop ()
   (unless (window-should-close?)
-    ;; ---- 更新（键盘控制）----
-    (cond
-      [(is-key-pressed KEY-Q) (set! start-angle (+ start-angle 5))]
-      [(is-key-pressed KEY-W) (set! start-angle (- start-angle 5))])
-    (cond
-      [(is-key-pressed KEY-A) (set! end-angle (+ end-angle 5))]
-      [(is-key-pressed KEY-S) (set! end-angle (- end-angle 5))])
-    (cond
-      [(is-key-pressed KEY-Z) (set! inner-radius (+ inner-radius 5))]
-      [(is-key-pressed KEY-X) (set! inner-radius (- inner-radius 5))])
-    (cond
-      [(is-key-pressed KEY-E) (set! outer-radius (+ outer-radius 5))]
-      [(is-key-pressed KEY-R) (set! outer-radius (- outer-radius 5))])
-    (cond
-      [(is-key-pressed KEY-D) (set! segments (+ segments 1))]
-      [(is-key-pressed KEY-F) (set! segments (- segments 1))])
+    ;; ---- 更新（鼠标交互）----
+    (update-slider sl-start-angle)
+    (update-slider sl-end-angle)
+    (update-slider sl-inner-radius)
+    (update-slider sl-outer-radius)
+    (update-slider sl-segments)
 
-    (when (is-key-pressed KEY-T) (set! draw-ring? (not draw-ring?)))
-    (when (is-key-pressed KEY-G) (set! draw-ring-lines? (not draw-ring-lines?)))
-    (when (is-key-pressed KEY-H) (set! draw-circle-lines? (not draw-circle-lines?)))
+    ;; 读取滑块值
+    (set! start-angle   (slider-val sl-start-angle))
+    (set! end-angle     (slider-val sl-end-angle))
+    (set! inner-radius  (slider-val sl-inner-radius))
+    (set! outer-radius  (slider-val sl-outer-radius))
+    (set! segments      (slider-val sl-segments))
 
     ;; ---- 绘制 ----
     (begin-drawing)
@@ -89,55 +150,55 @@
 
     ;; 绘制环/扇形
     (when draw-ring?
-      (draw-ring center inner-radius outer-radius start-angle end-angle
+      (draw-ring center (exact->inexact inner-radius) (exact->inexact outer-radius)
+                 (exact->inexact start-angle) (exact->inexact end-angle)
                  (exact-round segments) (fade MAROON 0.3)))
     (when draw-ring-lines?
-      (draw-ring-lines center inner-radius outer-radius start-angle end-angle
+      (draw-ring-lines center (exact->inexact inner-radius) (exact->inexact outer-radius)
+                       (exact->inexact start-angle) (exact->inexact end-angle)
                        (exact-round segments) (fade BLACK 0.4)))
     (when draw-circle-lines?
-      (draw-circle-sector-lines center outer-radius start-angle end-angle
+      (draw-circle-sector-lines center (exact->inexact outer-radius)
+                                (exact->inexact start-angle) (exact->inexact end-angle)
                                 (exact-round segments) (fade BLACK 0.4)))
 
-    ;; 参数显示
-    (draw-text (string-append "StartAngle  [Q/W]: " (fmt1 start-angle))
-               600 40 10 DARKGRAY)
-    (draw-text (string-append "EndAngle    [A/S]: " (fmt1 end-angle))
-               600 70 10 DARKGRAY)
-    (draw-text (string-append "InnerRadius [Z/X]: " (fmt1 inner-radius))
-               600 140 10 DARKGRAY)
-    (draw-text (string-append "OuterRadius [E/R]: " (fmt1 outer-radius))
-               600 170 10 DARKGRAY)
-    (draw-text (string-append "Segments    [D/F]: " (fmt1 segments))
-               600 240 10 DARKGRAY)
+    ;; 绘制滑块
+    (draw-slider sl-start-angle)
+    (draw-slider sl-end-angle)
+    (draw-slider sl-inner-radius)
+    (draw-slider sl-outer-radius)
+    (draw-slider sl-segments)
 
-    ;; 模式开关显示
-    (define (check-text v) (if v "[x]" "[ ]"))
-    (draw-text (string-append (check-text draw-ring?) " Draw Ring       [T]")
-               600 320 10 DARKGRAY)
-    (draw-text (string-append (check-text draw-ring-lines?) " Draw RingLines   [G]")
-               600 350 10 DARKGRAY)
-    (draw-text (string-append (check-text draw-circle-lines?) " Draw CircleLines [H]")
-               600 380 10 DARKGRAY)
+    ;; 标签
+    (draw-text "StartAngle"   520 30 10 DARKGRAY)
+    (draw-text "EndAngle"     520 62 10 DARKGRAY)
+    (draw-text "InnerRadius"  520 128 10 DARKGRAY)
+    (draw-text "OuterRadius"  520 160 10 DARKGRAY)
+    (draw-text "Segments"     520 226 10 DARKGRAY)
 
-    ;; MODE 文字
-    (let ([min-seg (ceiling (/ (- end-angle start-angle) 90))])
-      (draw-text (string-append "MODE: " (if (>= segments min-seg) "MANUAL" "AUTO"))
-                 600 270 10 (if (>= segments min-seg) MAROON DARKGRAY)))
+    ;; 复选框
+    (set! draw-ring?
+      (draw-checkbox 520 316 "DrawRing" draw-ring?))
+    (set! draw-ring-lines?
+      (draw-checkbox 520 346 "DrawRingLines" draw-ring-lines?))
+    (set! draw-circle-lines?
+      (draw-checkbox 520 376 "DrawCircleLines" draw-circle-lines?))
 
-    ;; 操作提示
-    (draw-text "Q/W A/S Z/X E/R D/F = adjust values"
-               600 420 8 (fade DARKGRAY 0.6))
-    (draw-text "T/G/H = toggle modes"
-               600 435 8 (fade DARKGRAY 0.6))
+    ;; MODE
+    (define seg-f (exact->inexact segments))
+    (define sa-f (exact->inexact start-angle))
+    (define ea-f (exact->inexact end-angle))
+    (define min-seg (ceiling (/ (- ea-f sa-f) 90)))
+    (draw-text (string-append "MODE: " (if (>= seg-f min-seg) "MANUAL" "AUTO"))
+               520 270 10 (if (>= seg-f min-seg) MAROON DARKGRAY))
+
+    (draw-text "Drag sliders to adjust values"
+               520 415 8 (fade DARKGRAY 0.6))
 
     (draw-fps 10 10)
-
     (end-drawing)
 
     (loop)))
 
-;; ============================================================
 ;; 清理
-;; ============================================================
-
 (close-window)

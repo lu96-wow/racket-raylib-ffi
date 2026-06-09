@@ -1,0 +1,9 @@
+UpdateCamera *
+UpdateCameraPro 
+CameraYaw *
+CameraPitch *
+SetCameraMode 
+SetCameraPanControl 
+SetCameraAltControl 
+SetCameraSmoothZoomControl 
+SetCameraMoveControls 

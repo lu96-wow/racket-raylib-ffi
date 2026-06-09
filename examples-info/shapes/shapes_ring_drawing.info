@@ -2,6 +2,11 @@
 ;;
 ;; 对应 C: examples/shapes/shapes_ring_drawing.c
 ;;
-;; 无 raygui 依赖, 纯 shapes/基础绘制。
-;; Racket 版与 C 版功能一致, draw-text 替代 raygui 标签。
-;; 无新增 FFI 绑定 (复用已有)。
+;; raygui 替代方案: 用 raylib 原生绘制 + 鼠标交互实现滑块/复选框
+;;   - 滑块: DrawRectangle(轨道) + DrawRectangle(手柄) + IsMouseButtonDown 拖拽
+;;   - 复选框: DrawRectangleLines(边框) + DrawRectangle(填充) + IsMouseButtonPressed 切换
+;;   - 控件状态通过 box 封装的可变 list 管理
+;;   - 所有渲染在 raylib 窗口内完成，无子窗口
+;;   - update-slider 在 BeginDrawing 前处理输入，draw-slider 在内部绘制
+;;
+;; 无第三方依赖（不依赖 racket/gui、raygui），纯 raylib FFI 绑定实现。

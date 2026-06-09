@@ -1,0 +1,257 @@
+InitWindow *
+CloseWindow *
+WindowShouldClose *
+IsWindowReady 
+IsWindowFullscreen 
+IsWindowHidden 
+IsWindowMinimized 
+IsWindowMaximized 
+IsWindowFocused 
+IsWindowResized *
+IsWindowState *
+SetWindowState *
+ClearWindowState *
+ToggleFullscreen *
+ToggleBorderlessWindowed *
+MaximizeWindow *
+MinimizeWindow *
+RestoreWindow *
+SetWindowIcon 
+SetWindowIcons 
+SetWindowTitle 
+SetWindowPosition 
+SetWindowMonitor *
+SetWindowMinSize *
+SetWindowMaxSize 
+SetWindowSize 
+SetWindowOpacity 
+SetWindowFocused 
+GetWindowHandle 
+GetScreenWidth *
+GetScreenHeight *
+GetRenderWidth *
+GetRenderHeight *
+GetMonitorCount *
+GetCurrentMonitor *
+GetMonitorPosition *
+GetMonitorWidth *
+GetMonitorHeight *
+GetMonitorPhysicalWidth *
+GetMonitorPhysicalHeight *
+GetMonitorRefreshRate *
+GetWindowPosition *
+GetWindowScaleDPI *
+GetMonitorName *
+SetClipboardText *
+GetClipboardText *
+GetClipboardImage 
+EnableEventWaiting 
+DisableEventWaiting 
+
+ShowCursor *
+HideCursor *
+IsCursorHidden *
+EnableCursor *
+DisableCursor *
+IsCursorOnScreen *
+
+ClearBackground *
+BeginDrawing *
+EndDrawing *
+BeginMode2D *
+EndMode2D *
+BeginMode3D *
+EndMode3D *
+BeginTextureMode *
+EndTextureMode *
+BeginShaderMode *
+EndShaderMode *
+BeginBlendMode 
+EndBlendMode 
+BeginScissorMode *
+EndScissorMode *
+BeginVrStereoMode *
+EndVrStereoMode *
+
+LoadVrStereoConfig *
+UnloadVrStereoConfig *
+
+LoadShader *
+LoadShaderFromMemory 
+IsShaderValid 
+GetShaderLocation *
+GetShaderLocationAttrib 
+SetShaderValue *
+SetShaderValueV 
+SetShaderValueMatrix 
+SetShaderValueTexture 
+UnloadShader *
+
+GetScreenToWorldRay *
+GetScreenToWorldRayEx 
+GetWorldToScreen *
+GetWorldToScreenEx 
+GetWorldToScreen2D *
+GetScreenToWorld2D *
+GetCameraMatrix *
+GetCameraMatrix2D 
+
+SetTargetFPS *
+GetFrameTime *
+GetTime *
+GetFPS *
+
+SwapScreenBuffer *
+PollInputEvents *
+WaitTime *
+
+SetRandomSeed *
+GetRandomValue *
+LoadRandomSequence *
+UnloadRandomSequence *
+
+TakeScreenshot 
+SetConfigFlags *
+OpenURL 
+
+SetTraceLogLevel 
+TraceLog 
+SetTraceLogCallback *
+
+MemAlloc 
+MemRealloc 
+MemFree x
+
+LoadFileData 
+UnloadFileData 
+SaveFileData 
+ExportDataAsCode 
+LoadFileText *
+UnloadFileText x
+SaveFileText 
+SetLoadFileDataCallback 
+SetSaveFileDataCallback 
+SetLoadFileTextCallback 
+SetSaveFileTextCallback 
+FileRename 
+FileRemove 
+FileCopy 
+FileMove 
+FileTextReplace 
+FileTextFindIndex 
+FileExists 
+DirectoryExists *
+IsFileExtension 
+GetFileLength 
+GetFileModTime 
+GetFileExtension 
+GetFileName 
+GetFileNameWithoutExt 
+GetDirectoryPath 
+GetPrevDirectoryPath *
+GetWorkingDirectory *
+GetApplicationDirectory *
+MakeDirectory 
+ChangeDirectory 
+IsPathFile 
+IsFileNameValid 
+LoadDirectoryFiles 
+LoadDirectoryFilesEx *
+UnloadDirectoryFiles x
+IsFileDropped *
+LoadDroppedFiles *
+UnloadDroppedFiles x
+GetDirectoryFileCount 
+GetDirectoryFileCountEx 
+
+CompressData 
+DecompressData 
+EncodeDataBase64 *
+DecodeDataBase64 
+ComputeCRC32 *
+ComputeMD5 *
+ComputeSHA1 *
+ComputeSHA256 *
+
+LoadAutomationEventList 
+UnloadAutomationEventList 
+ExportAutomationEventList 
+SetAutomationEventList 
+SetAutomationEventBaseFrame 
+StartAutomationEventRecording 
+StopAutomationEventRecording 
+PlayAutomationEvent x
+
+IsKeyPressed *
+IsKeyPressedRepeat *
+IsKeyDown *
+IsKeyReleased *
+IsKeyUp *
+GetKeyPressed *
+GetCharPressed *
+GetKeyName *
+SetExitKey *
+
+IsGamepadAvailable *
+GetGamepadName *
+IsGamepadButtonPressed *
+IsGamepadButtonDown *
+IsGamepadButtonReleased *
+IsGamepadButtonUp *
+GetGamepadButtonPressed *
+GetGamepadAxisCount *
+GetGamepadAxisMovement *
+SetGamepadMappings *
+SetGamepadVibration *
+
+IsMouseButtonPressed *
+IsMouseButtonDown *
+IsMouseButtonReleased *
+IsMouseButtonUp *
+GetMouseX *
+GetMouseY *
+GetMousePosition *
+GetMouseDelta *
+SetMousePosition *
+SetMouseOffset *
+SetMouseScale *
+GetMouseWheelMove *
+GetMouseWheelMoveV *
+SetMouseCursor *
+
+GetTouchX *
+GetTouchY *
+GetTouchPosition *
+GetTouchPointId *
+GetTouchPointCount *
+
+SetGesturesEnabled *
+IsGestureDetected *
+GetGestureDetected *
+GetGestureHoldDuration *
+GetGestureDragVector *
+GetGestureDragAngle *
+GetGesturePinchVector *
+GetGesturePinchAngle *
+
+UpdateCamera *
+UpdateCameraPro 
+
+DrawText *
+DrawLine *
+DrawFPS *
+MeasureText *
+TextSubtext *
+Fade *
+ColorAlpha *
+ColorFromHSV *
+ColorIsEqual
+SetShapesTexture 
+GetShapesTexture x
+GetShapesTextureRectangle x
+SetMaterialTexture x
+LoadImageFromScreen *
+UnloadImage *
+ExportImage *
+GetFontDefault *
+MeasureTextEx *
