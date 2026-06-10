@@ -3,134 +3,189 @@
 ;; raylib [shapes] example - rounded rectangle drawing (Racket FFI 翻译)
 ;;
 ;; 对应 C: examples/shapes/shapes_rounded_rectangle_drawing.c
-;; 键盘控制替代 raygui 滑块
+;; 滑块控制替代 raygui 滑块 (参照 ring_drawing.rkt)
 
-(require "../../raylib/raylib.rkt"
-         racket/math)
+(require racket/math
+         racket/match
+         "../../raylib/raylib.rkt")
 
 ;; ============================================================
-;; 键盘控制
-;; ============================================================
-;; width:          q↑ / w↓   步进 10   范围 0-500
-;; height:         a↑ / s↓   步进 10   范围 0-400
-;; roundness:      z↑ / x↓   步进 0.05 范围 0.0-1.0
-;; lineThick:      e↑ / r↓   步进 1    范围 0-20
-;; segments:       d↑ / f↓   步进 1    范围 0-60
-;; drawRoundedRect:  1 = 切换
-;; drawRoundedLines: 2 = 切换
-;; drawRect:         3 = 切换
+;; 联动滑块控件 (raylib 原生绘制 + 鼠标交互) — 浮点版本
 ;; ============================================================
 
-(define (fmt v d) (real->decimal-string v d))
-(define (on/off v) (if v "[x]" "[ ]"))
+;; 滑块状态: (box (list x y w h vmin vmax cur-val dragging? label))
+(define (make-slider x y w h vmin vmax init label)
+  (box (list x y w h vmin vmax init #f label)))
+
+(define SLIDER-HANDLE-W 12)
+
+(define (update-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define mx (get-mouse-x))
+  (define my (get-mouse-y))
+  (define mdown (is-mouse-button-down MOUSE-BUTTON-LEFT))
+  (define mreleased (is-mouse-button-released MOUSE-BUTTON-LEFT))
+  (define in-rect (and (>= mx (- x 2)) (<= mx (+ x w 2))
+                       (>= my (- y 2)) (<= my (+ y h 2))))
+
+  (define new-drag?
+    (cond
+      [mreleased #f]
+      [(and mdown in-rect (not drag?)) #t]
+      [drag? (if mdown #t #f)]
+      [else #f]))
+
+  (define new-val
+    (if new-drag?
+        (let* ([t (max 0.0 (min 1.0 (/ (- mx x) w)))]
+               [v (+ vmin (* t (- vmax vmin)))])
+          v)
+        cur))
+
+  (set-box! sl-box (list x y w h vmin vmax new-val new-drag? label)))
+
+(define (draw-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define range (- vmax vmin))
+  (define t (if (zero? range) 0.0 (/ (- cur vmin) range)))
+  (define handle-x (+ x (exact-round (* w t))))
+  (define track-y (+ y (quotient h 2) -2))
+  (draw-rectangle x track-y w 4 (fade GRAY 0.3))
+  (draw-rectangle (- handle-x (quotient SLIDER-HANDLE-W 2)) y
+                  SLIDER-HANDLE-W h (if drag? MAROON (fade DARKGRAY 0.7)))
+  (draw-text (real->decimal-string cur 2) (+ x w 8) (- (+ y (quotient h 2)) 5) 10 DARKGRAY))
+
+(define (slider-val sl-box)
+  (cadddr (cdddr (unbox sl-box))))
+
+;; ============================================================
+;; 复选框控件 (参照 ring_drawing.rkt)
+;; ============================================================
+(define BOX-SIZE 16)
+
+(define (draw-checkbox x y label-text checked?)
+  (define mx (get-mouse-x))
+  (define my (get-mouse-y))
+  (define mclicked (is-mouse-button-pressed MOUSE-BUTTON-LEFT))
+
+  (define new-val
+    (if (and mclicked (>= mx x) (<= mx (+ x BOX-SIZE 100))
+             (>= my y) (<= my (+ y BOX-SIZE)))
+        (not checked?)
+        checked?))
+
+  (draw-rectangle-lines x y BOX-SIZE BOX-SIZE DARKGRAY)
+  (when new-val
+    (draw-rectangle (+ x 3) (+ y 3) (- BOX-SIZE 6) (- BOX-SIZE 6) MAROON))
+  (draw-text label-text (+ x 22) (- (+ y (quotient BOX-SIZE 2)) 5) 10 DARKGRAY)
+  new-val)
 
 ;; ============================================================
 ;; 初始化
 ;; ============================================================
+
 (define screen-w 800)
 (define screen-h 450)
 
 (init-window screen-w screen-h
              "raylib [shapes] example - rounded rectangle drawing")
 
-(define width      (box 200.0))
-(define height     (box 100.0))
-(define roundness  (box 0.2))
-(define segments   (box 0.0))
-(define line-thick (box 1.0))
-(define draw-rect?          (box #f))
-(define draw-rounded-rect?  (box #t))
-(define draw-rounded-lines? (box #f))
+;; 滑块: x=520, w=150, h=16, 范围对应 C 版 raygui GuiSliderBar
+(define sl-width      (make-slider 520  42 150 16    0.0 500.0 200.0 "Width"))
+(define sl-height     (make-slider 520  74 150 16    0.0 400.0 100.0 "Height"))
+(define sl-roundness  (make-slider 520 140 150 16    0.0   1.0   0.2 "Roundness"))
+(define sl-thickness  (make-slider 520 172 150 16    0.0  20.0   1.0 "Thickness"))
+(define sl-segments   (make-slider 520 238 150 16    0.0  60.0   0.0 "Segments"))
+
+;; 当前值（每帧由滑块/复选框更新）
+(define width      200.0)
+(define height     100.0)
+(define roundness    0.2)
+(define thickness    1.0)
+(define segments     0.0)
+(define draw-rect?          #f)
+(define draw-rounded-rect?  #t)
+(define draw-rounded-lines? #f)
 
 (set-target-fps 60)
 
 ;; ============================================================
 ;; 主循环
 ;; ============================================================
-(let main-loop ()
+
+(let loop ()
   (unless (window-should-close?)
-    ;; ---- 键盘控制 ----
-    (cond [(is-key-pressed KEY-Q)
-           (set-box! width (min 500.0 (+ (unbox width) 10.0)))]
-          [(is-key-pressed KEY-W)
-           (set-box! width (max 0.0   (- (unbox width) 10.0)))])
-    (cond [(is-key-pressed KEY-A)
-           (set-box! height (min 400.0 (+ (unbox height) 10.0)))]
-          [(is-key-pressed KEY-S)
-           (set-box! height (max 0.0   (- (unbox height) 10.0)))])
-    (cond [(is-key-pressed KEY-Z)
-           (set-box! roundness (min 1.0 (+ (unbox roundness) 0.05)))]
-          [(is-key-pressed KEY-X)
-           (set-box! roundness (max 0.0 (- (unbox roundness) 0.05)))])
-    (cond [(is-key-pressed KEY-E)
-           (set-box! line-thick (min 20.0 (+ (unbox line-thick) 1.0)))]
-          [(is-key-pressed KEY-R)
-           (set-box! line-thick (max 0.0  (- (unbox line-thick) 1.0)))])
-    (cond [(is-key-pressed KEY-D)
-           (set-box! segments (min 60.0 (+ (unbox segments) 1.0)))]
-          [(is-key-pressed KEY-F)
-           (set-box! segments (max 0.0  (- (unbox segments) 1.0)))])
-    (when (is-key-pressed KEY-ONE)
-      (set-box! draw-rounded-rect? (not (unbox draw-rounded-rect?))))
-    (when (is-key-pressed KEY-TWO)
-      (set-box! draw-rounded-lines? (not (unbox draw-rounded-lines?))))
-    (when (is-key-pressed KEY-THREE)
-      (set-box! draw-rect? (not (unbox draw-rect?))))
+    ;; ---- 更新（鼠标交互）----
+    (update-slider sl-width)
+    (update-slider sl-height)
+    (update-slider sl-roundness)
+    (update-slider sl-thickness)
+    (update-slider sl-segments)
 
-    ;; ---- 更新 ----
-    (define w  (unbox width))
-    (define h  (unbox height))
-    (define rn (unbox roundness))
-    (define sg (unbox segments))
-    (define lt (unbox line-thick))
-    (define dr (unbox draw-rect?))
-    (define drr (unbox draw-rounded-rect?))
-    (define drl (unbox draw-rounded-lines?))
+    ;; 读取滑块值
+    (set! width      (slider-val sl-width))
+    (set! height     (slider-val sl-height))
+    (set! roundness  (slider-val sl-roundness))
+    (set! thickness  (slider-val sl-thickness))
+    (set! segments   (slider-val sl-segments))
 
-    (define rec (rectangle (/ (- (get-screen-width) w 250) 2.0)
-                           (/ (- (get-screen-height) h) 2.0)
-                           w h))
+    ;; ---- 计算矩形位置 ----
+    (define rec (rectangle (/ (- (get-screen-width) width 250) 2.0)
+                           (/ (- (get-screen-height) height) 2.0)
+                           width height))
 
     ;; ---- 绘制 ----
     (begin-drawing)
     (clear-background RAYWHITE)
 
-    ;; 分隔线 + 控制面板
+    ;; 分隔线 + 控制面板背景
     (draw-line 560 0 560 (get-screen-height) (fade LIGHTGRAY 0.6))
     (draw-rectangle 560 0 (- (get-screen-width) 500) (get-screen-height)
                     (fade LIGHTGRAY 0.3))
 
     ;; 矩形绘制
-    (when dr  (draw-rectangle-rec rec (fade GOLD 0.6)))
-    (when drr (draw-rectangle-rounded rec rn (exact-round sg) (fade MAROON 0.2)))
-    (when drl (draw-rectangle-rounded-lines-ex rec rn (exact-round sg) lt (fade MAROON 0.4)))
+    (when draw-rect?
+      (draw-rectangle-rec rec (fade GOLD 0.6)))
+    (when draw-rounded-rect?
+      (draw-rectangle-rounded rec roundness (exact-round segments) (fade MAROON 0.2)))
+    (when draw-rounded-lines?
+      (draw-rectangle-rounded-lines-ex rec roundness (exact-round segments) thickness
+                                       (fade MAROON 0.4)))
 
-    ;; 参数显示
-    (draw-text (format "Width      [Q/W]: ~a" (fmt w 2))  640 40  10 DARKGRAY)
-    (draw-text (format "Height     [A/S]: ~a" (fmt h 2))  640 70  10 DARKGRAY)
-    (draw-text (format "Roundness  [Z/X]: ~a" (fmt rn 2)) 640 140 10 DARKGRAY)
-    (draw-text (format "Thickness  [E/R]: ~a" (fmt lt 2)) 640 170 10 DARKGRAY)
-    (draw-text (format "Segments   [D/F]: ~a" (fmt sg 2)) 640 240 10 DARKGRAY)
+    ;; 绘制滑块
+    (draw-slider sl-width)
+    (draw-slider sl-height)
+    (draw-slider sl-roundness)
+    (draw-slider sl-thickness)
+    (draw-slider sl-segments)
 
-    ;; MODE 显示
-    (define mode-text (if (>= sg 4.0) "MANUAL" "AUTO"))
-    (define mode-color (if (>= sg 4.0) MAROON DARKGRAY))
-    (draw-text (format "MODE: ~a" mode-text) 640 280 10 mode-color)
+    ;; 标签
+    (draw-text "Width"      520 30 10 DARKGRAY)
+    (draw-text "Height"     520 62 10 DARKGRAY)
+    (draw-text "Roundness"  520 128 10 DARKGRAY)
+    (draw-text "Thickness"  520 160 10 DARKGRAY)
+    (draw-text "Segments"   520 226 10 DARKGRAY)
 
     ;; 复选框
-    (draw-text (format "~a DrawRoundedRect   [1]"
-                       (on/off drr)) 640 320 10 DARKGRAY)
-    (draw-text (format "~a DrawRoundedLines  [2]"
-                       (on/off drl)) 640 350 10 DARKGRAY)
-    (draw-text (format "~a DrawRect          [3]"
-                       (on/off dr))  640 380 10 DARKGRAY)
+    (set! draw-rounded-rect?
+      (draw-checkbox 520 316 "DrawRoundedRect" draw-rounded-rect?))
+    (set! draw-rounded-lines?
+      (draw-checkbox 520 346 "DrawRoundedLines" draw-rounded-lines?))
+    (set! draw-rect?
+      (draw-checkbox 520 376 "DrawRect" draw-rect?))
+
+    ;; MODE 显示
+    (define mode-text (if (>= segments 4.0) "MANUAL" "AUTO"))
+    (define mode-color (if (>= segments 4.0) MAROON DARKGRAY))
+    (draw-text (format "MODE: ~a" mode-text) 520 270 10 mode-color)
+
+    (draw-text "Drag sliders to adjust values"
+               520 415 8 (fade DARKGRAY 0.6))
 
     (draw-fps 10 10)
     (end-drawing)
 
-    (main-loop)))
+    (loop)))
 
-;; ============================================================
 ;; 清理
-;; ============================================================
 (close-window)

@@ -1,14 +1,91 @@
 #lang racket/base
 ;; raylib [shapes] example - splines drawing (Racket FFI 翻译)
 ;; 对应 C: examples/shapes/shapes_splines_drawing.c
-;; 交互式样条线绘制，键盘控制替代 raygui
+;; 交互式样条线绘制，滑块控制替代 raygui (参照 ring_drawing.rkt)
 (require "../../raylib/raylib.rkt"
-         (only-in ffi/unsafe malloc)
-         racket/math)
+         racket/match
+         racket/math
+         (only-in ffi/unsafe malloc))
 
 (define MAX-SPLINE-POINTS 32)
 (define SPLINE-LINEAR 0) (define SPLINE-BASIS 1)
 (define SPLINE-CATMULLROM 2) (define SPLINE-BEZIER 3)
+
+;; ============================================================
+;; 滑块控件 (浮点版本)
+;; ============================================================
+(define (make-slider x y w h vmin vmax init label)
+  (box (list x y w h vmin vmax init #f label)))
+(define SLIDER-HANDLE-W 12)
+
+(define (update-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define mx (get-mouse-x)) (define my (get-mouse-y))
+  (define mdown (is-mouse-button-down MOUSE-BUTTON-LEFT))
+  (define mreleased (is-mouse-button-released MOUSE-BUTTON-LEFT))
+  (define in-rect (and (>= mx (- x 2)) (<= mx (+ x w 2))
+                       (>= my (- y 2)) (<= my (+ y h 2))))
+  (define new-drag?
+    (cond [mreleased #f] [(and mdown in-rect (not drag?)) #t]
+          [drag? (if mdown #t #f)] [else #f]))
+  (define new-val
+    (if new-drag?
+        (let* ([t (max 0.0 (min 1.0 (/ (- mx x) w)))]
+               [v (+ vmin (* t (- vmax vmin)))]) v)
+        cur))
+  (set-box! sl-box (list x y w h vmin vmax new-val new-drag? label)))
+
+(define (draw-slider sl-box)
+  (match-define (list x y w h vmin vmax cur drag? label) (unbox sl-box))
+  (define range (- vmax vmin))
+  (define t (if (zero? range) 0.0 (/ (- cur vmin) range)))
+  (define handle-x (+ x (exact-round (* w t))))
+  (define track-y (+ y (quotient h 2) -2))
+  (draw-rectangle x track-y w 4 (fade GRAY 0.3))
+  (draw-rectangle (- handle-x (quotient SLIDER-HANDLE-W 2)) y
+                  SLIDER-HANDLE-W h (if drag? MAROON (fade DARKGRAY 0.7)))
+  (draw-text (real->decimal-string cur 0) (+ x w 8) (- (+ y (quotient h 2)) 5) 10 DARKGRAY))
+
+(define (slider-val sl-box)
+  (cadddr (cdddr (unbox sl-box))))
+
+;; ============================================================
+;; 复选框控件
+;; ============================================================
+(define BOX-SIZE 16)
+
+(define (draw-checkbox x y label-text checked?)
+  (define mx (get-mouse-x)) (define my (get-mouse-y))
+  (define mclicked (is-mouse-button-pressed MOUSE-BUTTON-LEFT))
+  (define new-val
+    (if (and mclicked (>= mx x) (<= mx (+ x BOX-SIZE 100))
+             (>= my y) (<= my (+ y BOX-SIZE)))
+        (not checked?) checked?))
+  (draw-rectangle-lines x y BOX-SIZE BOX-SIZE DARKGRAY)
+  (when new-val
+    (draw-rectangle (+ x 3) (+ y 3) (- BOX-SIZE 6) (- BOX-SIZE 6) MAROON))
+  (draw-text label-text (+ x 22) (- (+ y (quotient BOX-SIZE 2)) 5) 10 DARKGRAY)
+  new-val)
+
+;; ============================================================
+;; 样条类型选择器 (点击切换，高亮当前选中项)
+;; ============================================================
+(define TYPE-LABELS #("LINEAR" "B-SPLINE" "CATMULL-ROM" "BEZIER"))
+
+(define (draw-type-selector x y active-type)
+  (draw-text "Spline type:" x y 10 DARKGRAY)
+  (define mx (get-mouse-x)) (define my (get-mouse-y))
+  (define mclicked (is-mouse-button-pressed MOUSE-BUTTON-LEFT))
+  (define new-active active-type)
+  (for ([i (in-range 4)])
+    (define ty (+ y 22 (* i 20)))
+    (define txt (vector-ref TYPE-LABELS i))
+    (define color (if (= i active-type) MAROON DARKGRAY))
+    (when (and mclicked (>= mx x) (<= mx (+ x 130))
+               (>= my ty) (<= my (+ ty 16)))
+      (set! new-active i))
+    (draw-text txt x ty 10 color))
+  new-active)
 
 (set-config-flags FLAG-MSAA-4X-HINT)
 (init-window 800 450 "raylib [shapes] example - splines drawing")
@@ -18,7 +95,7 @@
   (vector (vector2 50.0 400.0) (vector2 160.0 220.0)
           (vector2 340.0 380.0) (vector2 520.0 60.0)
           (vector2 710.0 260.0)))
-(define point-count (box 5))
+(define point-count 5)
 
 ;; Bezier 控制点: vector of (start . end) cons pairs
 (define control
@@ -40,15 +117,15 @@
           (ptr-set! ce _float 0 (- (ptr-ref pn _float 0) 50.0))
           (ptr-set! ce _float 1 (ptr-ref pn _float 1)))))))
 
-(recalc-controls! (unbox point-count))
+(recalc-controls! point-count)
 
-(define selected-point      (box -1))
-(define focused-point       (box -1))
-(define selected-control-pt (box #f))
-(define focused-control-pt  (box #f))
-(define spline-thickness    (box 8.0))
-(define spline-type-active  (box SPLINE-LINEAR))
-(define show-helpers?       (box #t))
+(define selected-point      -1)
+(define focused-point       -1)
+(define selected-control-pt #f)
+(define focused-control-pt  #f)
+(define spline-thickness    8.0)
+(define spline-type-active  SPLINE-LINEAR)
+(define show-helpers?       #t)
 
 (define (mouse-x) (get-mouse-x))
 (define (mouse-y) (get-mouse-y))
@@ -73,140 +150,139 @@
   (vector-set! result total (vector-ref points (sub1 n)))
   result)
 
+;; 滑块: x=12, w=120, h=16, 范围 1-40
+(define sl-thickness (make-slider 12 142 120 16 1.0 40.0 8.0 "Thickness"))
+
 (set-target-fps 60)
 ;; 主循环 — 更新
-(let main-loop ()
+(let loop ()
   (unless (window-should-close?)
-    (define pc (unbox point-count))
-    (define sp (unbox selected-point))
-    (define fp (unbox focused-point))
-    (define scp (unbox selected-control-pt))
-    (define fcp (unbox focused-control-pt))
-    (define sta (unbox spline-type-active))
-    (define is-bezier? (= sta SPLINE-BEZIER))
+    (define is-bezier? (= spline-type-active SPLINE-BEZIER))
+    (define dragging? (or (>= selected-point 0) selected-control-pt))
 
-    ;; 右键添加新点
-    (when (and (is-mouse-button-pressed MOUSE-BUTTON-RIGHT) (< pc MAX-SPLINE-POINTS))
+    ;; ---- 右键添加新点 ----
+    (when (and (is-mouse-button-pressed MOUSE-BUTTON-RIGHT)
+               (< point-count MAX-SPLINE-POINTS))
       (define new-pt (malloc _Vector2 'atomic))
       (set-v2! new-pt (mouse-x) (mouse-y))
-      (vector-set! points pc new-pt)
-      (when (< (sub1 pc) (sub1 MAX-SPLINE-POINTS))
+      (vector-set! points point-count new-pt)
+      (when (< (sub1 point-count) (sub1 MAX-SPLINE-POINTS))
         (define cs (malloc _Vector2 'atomic))
         (define ce (malloc _Vector2 'atomic))
-        (set-v2! cs (+ (v2-x (vector-ref points (sub1 pc))) 50.0)
-                    (v2-y (vector-ref points (sub1 pc))))
-        (set-v2! ce (- (v2-x (vector-ref points pc)) 50.0)
-                    (v2-y (vector-ref points pc)))
-        (vector-set! control (sub1 pc) (cons cs ce)))
-      (set-box! point-count (add1 pc)))
+        (set-v2! cs (+ (v2-x (vector-ref points (sub1 point-count))) 50.0)
+                    (v2-y (vector-ref points (sub1 point-count))))
+        (set-v2! ce (- (v2-x (vector-ref points point-count)) 50.0)
+                    (v2-y (vector-ref points point-count)))
+        (vector-set! control (sub1 point-count) (cons cs ce)))
+      (set! point-count (add1 point-count)))
 
-    ;; 点聚焦/选择
-    (when (and (= sp -1) (or (not is-bezier?) (not scp)))
-      (set-box! focused-point -1)
-      (for ([i (in-range pc)])
+    ;; ---- 点聚焦/选择 ----
+    (when (and (= selected-point -1)
+               (or (not is-bezier?) (not selected-control-pt)))
+      (set! focused-point -1)
+      (for ([i (in-range point-count)])
         (when (v2-near? (vector-ref points i) (mouse-x) (mouse-y) 8.0)
-          (set-box! focused-point i)
+          (set! focused-point i)
           (when (is-mouse-button-pressed MOUSE-BUTTON-LEFT)
-            (set-box! selected-point i)))))
+            (set! selected-point i)))))
 
-    ;; 拖拽点
-    (let ([sp (unbox selected-point)])
-      (when (>= sp 0)
-        (set-v2! (vector-ref points sp) (mouse-x) (mouse-y))
+    ;; ---- 拖拽点 ----
+    (when (>= selected-point 0)
+      (set-v2! (vector-ref points selected-point) (mouse-x) (mouse-y))
+      (when (is-mouse-button-released MOUSE-BUTTON-LEFT)
+        (set! selected-point -1)))
+
+    ;; ---- Bezier 控制点 ----
+    (when (and is-bezier? (= focused-point -1))
+      (unless selected-control-pt
+        (set! focused-control-pt #f)
+        (for ([i (in-range (sub1 point-count))])
+          (let ([cp (vector-ref control i)])
+            (when cp
+              (when (v2-near? (car cp) (mouse-x) (mouse-y) 6.0)
+                (set! focused-control-pt (car cp)))
+              (when (v2-near? (cdr cp) (mouse-x) (mouse-y) 6.0)
+                (set! focused-control-pt (cdr cp))))))
+        (when (is-mouse-button-pressed MOUSE-BUTTON-LEFT)
+          (set! selected-control-pt focused-control-pt)))
+      (when selected-control-pt
+        (set-v2! selected-control-pt (mouse-x) (mouse-y))
         (when (is-mouse-button-released MOUSE-BUTTON-LEFT)
-          (set-box! selected-point -1))))
+          (set! selected-control-pt #f))))
 
-    ;; Bezier 控制点
-    (when (and is-bezier? (= (unbox focused-point) -1))
-      (let ([scp (unbox selected-control-pt)])
-        (unless scp
-          (set-box! focused-control-pt #f)
-          (for ([i (in-range (sub1 pc))])
-            (let ([cp (vector-ref control i)])
-              (when cp
-                (when (v2-near? (car cp) (mouse-x) (mouse-y) 6.0)
-                  (set-box! focused-control-pt (car cp)))
-                (when (v2-near? (cdr cp) (mouse-x) (mouse-y) 6.0)
-                  (set-box! focused-control-pt (cdr cp))))))
-          (when (is-mouse-button-pressed MOUSE-BUTTON-LEFT)
-            (set-box! selected-control-pt (unbox focused-control-pt))))
-        (let ([scp (unbox selected-control-pt)])
-          (when scp
-            (set-v2! scp (mouse-x) (mouse-y))
-            (when (is-mouse-button-released MOUSE-BUTTON-LEFT)
-              (set-box! selected-control-pt #f))))))
+    ;; ---- 滑块 / 复选框 (仅当未拖拽点时) ----
+    (unless dragging?
+      (update-slider sl-thickness)
+      (set! spline-thickness (slider-val sl-thickness)))
 
-    ;; 切换样条类型 (1-4)
-    (cond
-      [(is-key-pressed KEY-ONE)   (set-box! spline-type-active 0)]
-      [(is-key-pressed KEY-TWO)   (set-box! spline-type-active 1)]
-      [(is-key-pressed KEY-THREE) (set-box! spline-type-active 2)]
-      [(is-key-pressed KEY-FOUR)  (set-box! spline-type-active 3)])
-    (when (or (is-key-pressed KEY-ONE) (is-key-pressed KEY-TWO)
-              (is-key-pressed KEY-THREE))
-      (set-box! selected-control-pt #f))
-
-    ;; 厚度 (Q/W)
-    (when (is-key-pressed KEY-Q)
-      (set-box! spline-thickness (min 40.0 (+ (unbox spline-thickness) 1.0))))
-    ;; 绘制
+    ;; ---- 绘制 ----
     (begin-drawing)
     (clear-background RAYWHITE)
-    (define thick (unbox spline-thickness))
-    (define sta* (unbox spline-type-active))
-    (define show? (unbox show-helpers?))
 
     ;; 样条
     (cond
-      [(= sta* SPLINE-LINEAR) (draw-spline-linear points pc thick RED)]
-      [(= sta* SPLINE-BASIS) (draw-spline-basis points pc thick RED)]
-      [(= sta* SPLINE-CATMULLROM) (draw-spline-catmull-rom points pc thick RED)]
-      [(= sta* SPLINE-BEZIER)
-       (let ([inter (build-interleaved-points pc)])
-         (draw-spline-bezier-cubic inter (add1 (* 3 (sub1 pc))) thick RED))
-       (for ([i (in-range (sub1 pc))])
+      [(= spline-type-active SPLINE-LINEAR)
+       (draw-spline-linear points point-count spline-thickness RED)]
+      [(= spline-type-active SPLINE-BASIS)
+       (draw-spline-basis points point-count spline-thickness RED)]
+      [(= spline-type-active SPLINE-CATMULLROM)
+       (draw-spline-catmull-rom points point-count spline-thickness RED)]
+      [(= spline-type-active SPLINE-BEZIER)
+       (let ([inter (build-interleaved-points point-count)])
+         (draw-spline-bezier-cubic inter (add1 (* 3 (sub1 point-count)))
+                                   spline-thickness RED))
+       (for ([i (in-range (sub1 point-count))])
          (let ([cp (vector-ref control i)])
            (when cp
              (let ([cs (car cp)] [ce (cdr cp)])
                (draw-circle-v cs 6 GOLD)
                (draw-circle-v ce 6 GOLD)
-               (let ([fcp (unbox focused-control-pt)])
-                 (when (eq? fcp cs) (draw-circle-v cs 8 GREEN))
-                 (when (eq? fcp ce) (draw-circle-v ce 8 GREEN)))
+               (when (eq? focused-control-pt cs) (draw-circle-v cs 8 GREEN))
+               (when (eq? focused-control-pt ce) (draw-circle-v ce 8 GREEN))
                (draw-line-ex (vector-ref points i) cs 1.0 LIGHTGRAY)
                (draw-line-ex (vector-ref points (add1 i)) ce 1.0 LIGHTGRAY)
                (draw-line-v (vector-ref points i) cs GRAY)
                (draw-line-v ce (vector-ref points (add1 i)) GRAY)))))])
 
     ;; 辅助点
-    (when show?
-      (for ([i (in-range pc)])
+    (when show-helpers?
+      (for ([i (in-range point-count)])
         (let ([p (vector-ref points i)]
-              [r (if (= fp i) 12.0 8.0)]
-              [c (if (= fp i) BLUE DARKBLUE)])
+              [r (if (= focused-point i) 12.0 8.0)]
+              [c (if (= focused-point i) BLUE DARKBLUE)])
           (draw-circle-lines-v p r c)
-          (when (and (not (= sta* SPLINE-LINEAR))
-                     (not (= sta* SPLINE-BEZIER))
-                     (< i (sub1 pc)))
+          (when (and (not (= spline-type-active SPLINE-LINEAR))
+                     (not (= spline-type-active SPLINE-BEZIER))
+                     (< i (sub1 point-count)))
             (draw-line-v p (vector-ref points (add1 i)) GRAY))
           (draw-text (format "[~a,~a]" (fmt (v2-x p) 0) (fmt (v2-y p) 0))
                      (exact-round (v2-x p)) (+ (exact-round (v2-y p)) 10) 10 BLACK))))
 
-    ;; UI
-    (draw-text (format "~a [1-4]" (vector-ref #("LINEAR" "B-SPLINE" "CATMULL-ROM" "BEZIER") sta*)) 12 10 12 DARKGRAY)
-    (draw-text (format "Thickness [Q/W]: ~a" (fmt thick 0)) 12 40 10 DARKGRAY)
-    (draw-text (format "Helpers [E]: ~a" (if show? "ON" "OFF")) 12 60 10 DARKGRAY)
-    (draw-text (format "Points: ~a/32" pc) 12 90 10 DARKGRAY)
-    (draw-text "R-click: add  L-click: drag" 12 120 10 DARKGRAY)
+    ;; ---- UI 控件 ----
+    ;; 类型选择器
+    (define old-type spline-type-active)
+    (set! spline-type-active
+      (draw-type-selector 12 10 spline-type-active))
+    (when (not (= spline-type-active old-type))
+      (when (not (= spline-type-active SPLINE-BEZIER))
+        (set! selected-control-pt #f)))
+
+    ;; 厚度滑块
+    (draw-text "Spline thickness:" 12 130 10 DARKGRAY)
+    (draw-slider sl-thickness)
+
+    ;; 复选框
+    (unless dragging?
+      (set! show-helpers?
+        (draw-checkbox 12 170 "Show point helpers" show-helpers?)))
+
+    ;; 信息
+    (draw-text (format "Points: ~a/32" point-count) 12 200 10 DARKGRAY)
+    (draw-text "R-click: add  L-click: drag" 12 220 10 DARKGRAY)
+
     (draw-fps 10 (- (get-screen-height) 30))
     (end-drawing)
-    (main-loop)))
+    (loop)))
 
 (close-window)
-
-    (when (is-key-pressed KEY-W)
-      (set-box! spline-thickness (max 1.0 (- (unbox spline-thickness) 1.0))))
-    ;; 辅助切换 (E)
-    (when (is-key-pressed KEY-E)
-      (set-box! show-helpers? (not (unbox show-helpers?))))
 
