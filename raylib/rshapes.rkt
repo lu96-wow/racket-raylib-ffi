@@ -498,10 +498,17 @@
 
 (define rl-normal-3f
   (get-ffi-obj "rlNormal3f" T:lib (_fun _float _float _float -> _void)))
+
+(define rl-enable-backface-culling
+  (get-ffi-obj "rlEnableBackfaceCulling" T:lib (_fun -> _void)))
+
+(define rl-disable-backface-culling
+  (get-ffi-obj "rlDisableBackfaceCulling" T:lib (_fun -> _void)))
 ;; ============================================================
 ;; rlgl 绘制模式常量
 ;; ============================================================
 
+(define RL-LINES     #x0001)
 (define RL-QUADS     #x0007)
 (define RL-TRIANGLES #x0004)
 
@@ -831,6 +838,9 @@
  rl-color-4ub
  rl-normal-3f
  rl-tex-coord-2f
+ rl-enable-backface-culling
+ rl-disable-backface-culling
+ RL-LINES
  RL-QUADS
  RL-TRIANGLES
  draw-rectangle-rounded-gradient-h
