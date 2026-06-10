@@ -1,13 +1,13 @@
-SetShapesTexture 
-GetShapesTexture x
-GetShapesTextureRectangle x
+SetShapesTexture *
+GetShapesTexture *
+GetShapesTextureRectangle *
 
-DrawPixel 
-DrawPixelV 
+DrawPixel *
+DrawPixelV *
 DrawLine *
 DrawLineV *
 DrawLineEx *
-DrawLineStrip 
+DrawLineStrip *
 DrawLineBezier *
 DrawLineDashed *
 
@@ -20,9 +20,9 @@ DrawCircleLines *
 DrawCircleLinesV *
 
 DrawEllipse *
-DrawEllipseV 
+DrawEllipseV *
 DrawEllipseLines *
-DrawEllipseLinesV 
+DrawEllipseLinesV *
 
 DrawRing *
 DrawRingLines *
@@ -31,13 +31,13 @@ DrawRectangle *
 DrawRectangleV *
 DrawRectangleRec *
 DrawRectanglePro *
-DrawRectangleGradientV 
+DrawRectangleGradientV *
 DrawRectangleGradientH *
 DrawRectangleGradientEx *
 DrawRectangleLines *
 DrawRectangleLinesEx *
 DrawRectangleRounded *
-DrawRectangleRoundedLines 
+DrawRectangleRoundedLines *
 DrawRectangleRoundedLinesEx *
 
 DrawTriangle *
@@ -52,27 +52,29 @@ DrawPolyLinesEx *
 DrawSplineLinear *
 DrawSplineBasis *
 DrawSplineCatmullRom *
-DrawSplineBezierQuadratic 
+DrawSplineBezierQuadratic *
 DrawSplineBezierCubic *
 DrawSplineSegmentLinear *
 DrawSplineSegmentBasis *
 DrawSplineSegmentCatmullRom *
-DrawSplineSegmentBezierQuadratic 
+DrawSplineSegmentBezierQuadratic *
 DrawSplineSegmentBezierCubic *
-GetSplinePointLinear 
-GetSplinePointBasis 
-GetSplinePointCatmullRom 
-GetSplinePointBezierQuad 
-GetSplinePointBezierCubic 
+GetSplinePointLinear *
+GetSplinePointBasis *
+GetSplinePointCatmullRom *
+GetSplinePointBezierQuad *
+GetSplinePointBezierCubic *
 
 CheckCollisionRecs *
-CheckCollisionCircles 
-CheckCollisionCircleRec 
-CheckCollisionCircleLine 
+CheckCollisionCircles *
+CheckCollisionCircleRec *
+CheckCollisionCircleLine *
 CheckCollisionPointRec *
 CheckCollisionPointCircle *
-CheckCollisionPointTriangle 
-CheckCollisionPointLine 
-CheckCollisionPointPoly 
-CheckCollisionLines 
+CheckCollisionPointTriangle *
+CheckCollisionPointLine *
+CheckCollisionPointPoly *
+CheckCollisionLines *
 GetCollisionRec *
+DrawTriangleGradient *
+GetSplinePointBezierQuadratic *

@@ -1,70 +1,70 @@
-InitAudioDevice 
-CloseAudioDevice 
-IsAudioDeviceReady 
-SetMasterVolume 
-GetMasterVolume 
+InitAudioDevice *
+CloseAudioDevice *
+IsAudioDeviceReady *
+SetMasterVolume *
+GetMasterVolume *
 
-LoadWave 
-LoadWaveFromMemory 
-IsWaveValid 
-LoadSound 
-LoadSoundFromWave 
-LoadSoundAlias 
-IsSoundValid 
-UpdateSound 
-UnloadWave 
-UnloadSound 
-UnloadSoundAlias 
-ExportWave 
-ExportWaveAsCode 
+LoadWave *
+LoadWaveFromMemory *
+IsWaveValid *
+LoadSound *
+LoadSoundFromWave *
+LoadSoundAlias *
+IsSoundValid *
+UpdateSound *
+UnloadWave *
+UnloadSound *
+UnloadSoundAlias *
+ExportWave *
+ExportWaveAsCode *
 
-PlaySound 
-StopSound 
-PauseSound 
-ResumeSound 
-IsSoundPlaying 
-SetSoundVolume 
-SetSoundPitch 
-SetSoundPan 
-WaveCopy 
-WaveCrop 
-WaveFormat 
-LoadWaveSamples 
-UnloadWaveSamples 
+PlaySound *
+StopSound *
+PauseSound *
+ResumeSound *
+IsSoundPlaying *
+SetSoundVolume *
+SetSoundPitch *
+SetSoundPan *
+WaveCopy *
+WaveCrop *
+WaveFormat *
+LoadWaveSamples *
+UnloadWaveSamples *
 
-LoadMusicStream 
-LoadMusicStreamFromMemory 
-IsMusicValid 
-UnloadMusicStream 
-PlayMusicStream 
-IsMusicStreamPlaying 
-UpdateMusicStream 
-StopMusicStream 
-PauseMusicStream 
-ResumeMusicStream 
-SeekMusicStream 
-SetMusicVolume 
-SetMusicPitch 
-SetMusicPan 
-GetMusicTimeLength 
-GetMusicTimePlayed 
+LoadMusicStream *
+LoadMusicStreamFromMemory *
+IsMusicValid *
+UnloadMusicStream *
+PlayMusicStream *
+IsMusicStreamPlaying *
+UpdateMusicStream *
+StopMusicStream *
+PauseMusicStream *
+ResumeMusicStream *
+SeekMusicStream *
+SetMusicVolume *
+SetMusicPitch *
+SetMusicPan *
+GetMusicTimeLength *
+GetMusicTimePlayed *
 
-LoadAudioStream 
-IsAudioStreamValid 
-UnloadAudioStream 
-UpdateAudioStream 
-IsAudioStreamProcessed 
-PlayAudioStream 
-PauseAudioStream 
-ResumeAudioStream 
-IsAudioStreamPlaying 
-StopAudioStream 
-SetAudioStreamVolume 
-SetAudioStreamPitch 
-SetAudioStreamPan 
-SetAudioStreamBufferSizeDefault 
-SetAudioStreamCallback 
-AttachAudioStreamProcessor 
-DetachAudioStreamProcessor 
-AttachAudioMixedProcessor 
-DetachAudioMixedProcessor 
+LoadAudioStream *
+IsAudioStreamValid *
+UnloadAudioStream *
+UpdateAudioStream *
+IsAudioStreamProcessed *
+PlayAudioStream *
+PauseAudioStream *
+ResumeAudioStream *
+IsAudioStreamPlaying *
+StopAudioStream *
+SetAudioStreamVolume *
+SetAudioStreamPitch *
+SetAudioStreamPan *
+SetAudioStreamBufferSizeDefault *
+SetAudioStreamCallback *
+AttachAudioStreamProcessor *
+DetachAudioStreamProcessor *
+AttachAudioMixedProcessor *
+DetachAudioMixedProcessor *

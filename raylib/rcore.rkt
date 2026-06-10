@@ -933,7 +933,6 @@
 ;;   TextSubtext(const char *text, int position, int length) → const char *
 ;; ============================================================
 
-(def-ffi text-subtext "TextSubtext" (_fun _string _int _int -> _string))
 
 ;; ============================================================
 ;; 字体/文本测量 (core_text_file_loading.c)
@@ -996,6 +995,279 @@
 (def-ffi rl-set-blend-mode        "rlSetBlendMode"        (_fun _int -> _void))
 (def-ffi rl-set-blend-factors     "rlSetBlendFactors"     (_fun _int _int _int -> _void))
 (def-ffi rl-draw-render-batch-active "rlDrawRenderBatchActive" (_fun -> _void))
+
+;; ============================================================
+;; 窗口状态查询
+;; ============================================================
+
+(def-ffi is-window-ready?      "IsWindowReady"      (_fun -> _stdbool))
+(def-ffi is-window-fullscreen? "IsWindowFullscreen" (_fun -> _stdbool))
+(def-ffi is-window-hidden?     "IsWindowHidden"     (_fun -> _stdbool))
+(def-ffi is-window-minimized?  "IsWindowMinimized"  (_fun -> _stdbool))
+(def-ffi is-window-maximized?  "IsWindowMaximized"  (_fun -> _stdbool))
+(def-ffi is-window-focused?    "IsWindowFocused"    (_fun -> _stdbool))
+
+;; ============================================================
+;; 窗口设置
+;; ============================================================
+
+(def-ffi set-window-title     "SetWindowTitle"     (_fun _string -> _void))
+(def-ffi set-window-position  "SetWindowPosition"  (_fun _int _int -> _void))
+(def-ffi set-window-max-size  "SetWindowMaxSize"   (_fun _int _int -> _void))
+(def-ffi set-window-size      "SetWindowSize"      (_fun _int _int -> _void))
+(def-ffi set-window-opacity   "SetWindowOpacity"   (_fun _float -> _void))
+(def-ffi set-window-focused   "SetWindowFocused"   (_fun -> _void))
+(def-ffi get-window-handle    "GetWindowHandle"    (_fun -> _pointer))
+
+;; SetWindowIcon(Image image)
+(define set-window-icon
+  (let ([f (get-ffi-obj "SetWindowIcon" T:lib
+             (_fun (img : _image-bytes) -> _void))])
+    (lambda (image) (f image))))
+
+;; SetWindowIcons(Image *images, int count)
+(def-ffi set-window-icons "SetWindowIcons" (_fun _pointer _int -> _void))
+
+;; ============================================================
+;; 剪贴板 / 事件等待
+;; ============================================================
+
+(def-ffi enable-event-waiting  "EnableEventWaiting"  (_fun -> _void))
+(def-ffi disable-event-waiting "DisableEventWaiting" (_fun -> _void))
+
+;; GetClipboardImage(void) -> Image
+(define get-clipboard-image
+  (let ([f (get-ffi-obj "GetClipboardImage" T:lib
+             (_fun -> (img : _image-bytes)))])
+    (lambda () (f))))
+
+;; ============================================================
+;; 混合模式
+;; ============================================================
+
+(def-ffi begin-blend-mode "BeginBlendMode" (_fun _int -> _void))
+(def-ffi end-blend-mode   "EndBlendMode"   (_fun -> _void))
+
+;; ============================================================
+;; 截图 / URL / 日志
+;; ============================================================
+
+(def-ffi take-screenshot    "TakeScreenshot"    (_fun _string -> _void))
+(def-ffi open-url           "OpenURL"           (_fun _string -> _void))
+(def-ffi set-trace-log-level "SetTraceLogLevel" (_fun _int -> _void))
+;; TraceLog(int logLevel, const char *text, ...) — 可变参数, 跳过
+
+;; ============================================================
+;; 内存
+;; ============================================================
+
+(def-ffi mem-alloc   "MemAlloc"   (_fun _uint -> _pointer))
+(def-ffi mem-realloc "MemRealloc" (_fun _pointer _uint -> _pointer))
+(def-ffi mem-free    "MemFree"    (_fun _pointer -> _void))
+
+;; ============================================================
+;; 文件系统
+;; ============================================================
+
+(def-ffi file-exists?              "FileExists"              (_fun _string -> _stdbool))
+(def-ffi is-file-extension         "IsFileExtension"         (_fun _string _string -> _stdbool))
+(def-ffi get-file-length           "GetFileLength"           (_fun _string -> _int))
+(def-ffi get-file-mod-time         "GetFileModTime"          (_fun _string -> _long))
+(def-ffi get-file-extension        "GetFileExtension"        (_fun _string -> _string))
+(def-ffi get-file-name             "GetFileName"             (_fun _string -> _string))
+(def-ffi get-file-name-without-ext "GetFileNameWithoutExt"   (_fun _string -> _string))
+(def-ffi get-directory-path        "GetDirectoryPath"        (_fun _string -> _string))
+(def-ffi make-directory            "MakeDirectory"           (_fun _string -> _int))
+(def-ffi change-directory          "ChangeDirectory"         (_fun _string -> _stdbool))
+(def-ffi is-path-file?             "IsPathFile"              (_fun _string -> _stdbool))
+(def-ffi is-file-name-valid        "IsFileNameValid"         (_fun _string -> _stdbool))
+(def-ffi file-rename               "FileRename"              (_fun _string _string -> _int))
+(def-ffi file-remove               "FileRemove"              (_fun _string -> _int))
+(def-ffi file-copy                 "FileCopy"                (_fun _string _string -> _int))
+(def-ffi file-move                 "FileMove"                (_fun _string _string -> _int))
+(def-ffi file-text-replace         "FileTextReplace"         (_fun _string _string _string -> _int))
+(def-ffi file-text-find-index      "FileTextFindIndex"       (_fun _string _string -> _int))
+(def-ffi get-directory-file-count  "GetDirectoryFileCount"   (_fun _string -> _uint))
+(def-ffi get-directory-file-count-ex "GetDirectoryFileCountEx" (_fun _string _string _stdbool -> _uint))
+(def-ffi save-file-text            "SaveFileText"            (_fun _string _string -> _stdbool))
+(def-ffi unload-file-data          "UnloadFileData"          (_fun _pointer -> _void))
+
+;; LoadFileData(fileName, *dataSize) -> (values pointer size)
+(define load-file-data
+  (let ([f (get-ffi-obj "LoadFileData" T:lib
+             (_fun _string _pointer -> _pointer))])
+    (lambda (filename)
+      (let ([size-buf (malloc _int 1 'atomic)])
+        (let ([ptr (f filename size-buf)])
+          (if ptr
+              (values ptr (ptr-ref size-buf _int 0))
+              (values #f 0)))))))
+
+;; SaveFileData(fileName, data, dataSize) -> bool
+(define save-file-data
+  (let ([f (get-ffi-obj "SaveFileData" T:lib
+             (_fun _string _pointer _int -> _stdbool))])
+    (lambda (filename data-ptr data-size) (f filename data-ptr data-size))))
+
+;; ExportDataAsCode(data, dataSize, fileName) -> bool
+(define export-data-as-code
+  (let ([f (get-ffi-obj "ExportDataAsCode" T:lib
+             (_fun _pointer _int _string -> _stdbool))])
+    (lambda (data-ptr data-size filename) (f data-ptr data-size filename))))
+
+;; LoadDirectoryFiles(dirPath) -> list of strings
+(define load-directory-files
+  (let ([f (get-ffi-obj "LoadDirectoryFiles" T:lib
+             (_fun _string -> (lst : _filepathlist-bytes)))]
+        [unload-ffi (get-ffi-obj "UnloadDirectoryFiles" T:lib
+                      (_fun (lst : _filepathlist-bytes) -> _void))]
+        [tmp (malloc _pointer 'atomic)])
+    (lambda (dir-path)
+      (let* ([raw (f dir-path)]
+             [count (car raw)]
+             [paths-ptr (cadr raw)]
+             [paths
+              (for/list ([i (in-range count)])
+                (let ([cstr (ptr-ref paths-ptr _pointer i)])
+                  (if cstr
+                      (begin (ptr-set! tmp _pointer 0 cstr)
+                             (ptr-ref tmp _string))
+                      "")))])
+        (unload-ffi raw)
+        paths))))
+
+(def-ffi set-load-file-data-callback "SetLoadFileDataCallback" (_fun _pointer -> _void))
+(def-ffi set-save-file-data-callback "SetSaveFileDataCallback" (_fun _pointer -> _void))
+(def-ffi set-load-file-text-callback "SetLoadFileTextCallback" (_fun _pointer -> _void))
+(def-ffi set-save-file-text-callback "SetSaveFileTextCallback" (_fun _pointer -> _void))
+
+;; ============================================================
+;; Texture 传值类型 (供 SetShapesTexture / SetShaderValueTexture)
+;; ============================================================
+
+(define _texture-bytes (_list-struct _uint _int _int _int _int))
+
+;; ============================================================
+;; 着色器
+;; ============================================================
+
+(define load-shader-from-memory
+  (let ([f (get-ffi-obj "LoadShaderFromMemory" T:lib
+             (_fun _string _string -> (s : _shader-bytes)))])
+    (lambda (vs-code fs-code) (f vs-code fs-code))))
+
+(define is-shader-valid
+  (let ([f (get-ffi-obj "IsShaderValid" T:lib
+             (_fun (s : _shader-bytes) -> _stdbool))])
+    (lambda (shader) (f shader))))
+
+(define get-shader-location-attrib
+  (let ([f (get-ffi-obj "GetShaderLocationAttrib" T:lib
+             (_fun (s : _shader-bytes) _string -> _int))])
+    (lambda (shader attrib-name) (f shader attrib-name))))
+
+(define set-shader-value-v
+  (get-ffi-obj "SetShaderValueV" T:lib
+    (_fun (s : _shader-bytes) _int _pointer _int _int -> _void)))
+
+(define set-shader-value-matrix
+  (let ([f (get-ffi-obj "SetShaderValueMatrix" T:lib
+             (_fun (s : _shader-bytes) _int (m : _matrix-bytes) -> _void))])
+    (lambda (shader loc-index mat) (f shader loc-index mat))))
+
+(define set-shader-value-texture
+  (let ([f (get-ffi-obj "SetShaderValueTexture" T:lib
+             (_fun (s : _shader-bytes) _int (t : _texture-bytes) -> _void))])
+    (lambda (shader loc-index texture) (f shader loc-index texture))))
+
+;; ============================================================
+;; 坐标转换扩展
+;; ============================================================
+
+(define get-screen-to-world-ray-ex
+  (let ([f (get-ffi-obj "GetScreenToWorldRayEx" T:lib
+             (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) _int _int -> (r : _ray-bytes)))])
+    (lambda (position camera width height)
+      (let ([lst (f (vec2->bytes position) (camera3d->bytes camera) width height)])
+        (let ([r (malloc T:_Ray 'atomic)])
+          (ptr-set! r _float 0 (car lst)) (ptr-set! r _float 1 (cadr lst))
+          (ptr-set! r _float 2 (caddr lst)) (ptr-set! r _float 3 (cadddr lst))
+          (ptr-set! r _float 4 (car (cddddr lst)))
+          (ptr-set! r _float 5 (cadr (cddddr lst)))
+          r)))))
+
+(define get-world-to-screen-ex
+  (let ([f (get-ffi-obj "GetWorldToScreenEx" T:lib
+             (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) _int _int -> (v : _vec2-bytes)))])
+    (lambda (position camera width height)
+      (vec2-bytes->vec2 (f (vec3->bytes position) (camera3d->bytes camera) width height)))))
+
+(define get-camera-matrix-2d
+  (let ([f (get-ffi-obj "GetCameraMatrix2D" T:lib
+             (_fun (cam : _camera2d-bytes) -> (m : _matrix-bytes)))])
+    (lambda (camera) (f (camera2d->bytes camera)))))
+
+;; ============================================================
+;; UpdateCameraPro / SetShapesTexture (rcore 中的)
+;; ============================================================
+
+(define update-camera-pro
+  (let ([f (get-ffi-obj "UpdateCameraPro" T:lib
+             (_fun _pointer (mov : _vec3-bytes) (rot : _vec3-bytes) _float -> _void))])
+    (lambda (camera movement rotation zoom)
+      (f camera (vec3->bytes movement) (vec3->bytes rotation) zoom))))
+
+;; ============================================================
+;; 自动化事件 / 压缩
+;; ============================================================
+
+(define compress-data
+  (let ([f (get-ffi-obj "CompressData" T:lib
+             (_fun _pointer _int _pointer -> _pointer))])
+    (lambda (data-ptr data-size)
+      (let ([out-size (malloc _int 1 'atomic)])
+        (let ([result (f data-ptr data-size out-size)])
+          (values result (ptr-ref out-size _int 0)))))))
+
+(define decompress-data
+  (let ([f (get-ffi-obj "DecompressData" T:lib
+             (_fun _pointer _int _pointer -> _pointer))])
+    (lambda (comp-data-ptr comp-data-size)
+      (let ([out-size (malloc _int 1 'atomic)])
+        (let ([result (f comp-data-ptr comp-data-size out-size)])
+          (values result (ptr-ref out-size _int 0)))))))
+
+(define decode-data-base64
+  (let ([f (get-ffi-obj "DecodeDataBase64" T:lib
+             (_fun _string _pointer -> _pointer))])
+    (lambda (text)
+      (let ([out-size (malloc _int 1 'atomic)])
+        (let ([result (f text out-size)])
+          (values result (ptr-ref out-size _int 0)))))))
+
+(define load-automation-event-list
+  (get-ffi-obj "LoadAutomationEventList" T:lib
+    (_fun _string -> _pointer)))
+
+(def-ffi unload-automation-event-list "UnloadAutomationEventList" (_fun _pointer -> _void))
+
+(define export-automation-event-list
+  (get-ffi-obj "ExportAutomationEventList" T:lib
+    (_fun _pointer _string -> _stdbool)))
+
+(def-ffi set-automation-event-list      "SetAutomationEventList"      (_fun _pointer -> _void))
+(def-ffi set-automation-event-base-frame "SetAutomationEventBaseFrame" (_fun _int -> _void))
+(def-ffi start-automation-event-recording "StartAutomationEventRecording" (_fun -> _void))
+(def-ffi stop-automation-event-recording  "StopAutomationEventRecording"  (_fun -> _void))
+
+;; ============================================================
+;; ColorIsEqual
+;; ============================================================
+
+(define color-is-equal
+  (let ([f (get-ffi-obj "ColorIsEqual" T:lib
+             (_fun (c1 : _color-bytes) (c2 : _color-bytes) -> _stdbool))])
+    (lambda (col1 col2) (f (color->bytes col1) (color->bytes col2)))))
 
 ;; ============================================================
 ;; 导出 — 只导出当前示例需要的
@@ -1144,10 +1416,52 @@
  encode-data-base64
 
  ;; 文本 / 字体
- _font-bytes
- get-font-default measure-text-ex text-subtext
 
  ;; 文件文本加载
  load-file-text
+
+ ;; 窗口状态查询
+ is-window-ready? is-window-fullscreen? is-window-hidden?
+ is-window-minimized? is-window-maximized? is-window-focused?
+ ;; 窗口设置
+ set-window-title set-window-position set-window-max-size set-window-size
+ set-window-opacity set-window-focused get-window-handle
+ set-window-icon set-window-icons
+ ;; 剪贴板/事件
+ get-clipboard-image enable-event-waiting disable-event-waiting
+ ;; 混合模式
+ begin-blend-mode end-blend-mode
+ ;; 截图/URL/日志
+ take-screenshot open-url set-trace-log-level
+ ;; 内存
+ mem-alloc mem-realloc mem-free
+ ;; 文件系统
+ file-exists? is-file-extension get-file-length get-file-mod-time
+ get-file-extension get-file-name get-file-name-without-ext
+ get-directory-path make-directory change-directory
+ is-path-file? is-file-name-valid
+ file-rename file-remove file-copy file-move
+ file-text-replace file-text-find-index
+ get-directory-file-count get-directory-file-count-ex
+ load-file-data unload-file-data save-file-data save-file-text
+ export-data-as-code load-directory-files
+ set-load-file-data-callback set-save-file-data-callback
+ set-load-file-text-callback set-save-file-text-callback
+ ;; 着色器
+ load-shader-from-memory is-shader-valid get-shader-location-attrib
+ set-shader-value-v set-shader-value-matrix set-shader-value-texture
+ ;; 坐标转换扩展
+ get-screen-to-world-ray-ex get-world-to-screen-ex get-camera-matrix-2d
+ ;; UpdateCameraPro
+ update-camera-pro
+ ;; 压缩/编码
+ compress-data decompress-data decode-data-base64
+ ;; 自动化事件
+ load-automation-event-list unload-automation-event-list
+ export-automation-event-list
+ set-automation-event-list set-automation-event-base-frame
+ start-automation-event-recording stop-automation-event-recording
+ ;; ColorIsEqual
+ color-is-equal
 
 )

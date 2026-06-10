@@ -1,9 +1,12 @@
 UpdateCamera *
-UpdateCameraPro 
+UpdateCameraPro *
 CameraYaw *
 CameraPitch *
-SetCameraMode 
-SetCameraPanControl 
-SetCameraAltControl 
-SetCameraSmoothZoomControl 
-SetCameraMoveControls 
+CameraRoll *
+CameraMoveForward *
+CameraMoveRight *
+CameraMoveUp *
+CameraMoveToTarget *
+GetCameraForward *
+GetCameraRight *
+GetCameraUp *

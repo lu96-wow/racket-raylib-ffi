@@ -1,8 +1,8 @@
 DrawLine3D *
-DrawPoint3D 
-DrawCircle3D 
-DrawTriangle3D 
-DrawTriangleStrip3D 
+DrawPoint3D *
+DrawCircle3D *
+DrawTriangle3D *
+DrawTriangleStrip3D *
 
 DrawCube *
 DrawCubeV *
@@ -10,76 +10,76 @@ DrawCubeWires *
 DrawCubeWiresV *
 
 DrawSphere *
-DrawSphereEx 
-DrawSphereWires 
+DrawSphereEx *
+DrawSphereWires *
 
-DrawCylinder 
-DrawCylinderEx 
-DrawCylinderWires 
-DrawCylinderWiresEx 
+DrawCylinder *
+DrawCylinderEx *
+DrawCylinderWires *
+DrawCylinderWiresEx *
 
-DrawCapsule 
-DrawCapsuleWires 
+DrawCapsule *
+DrawCapsuleWires *
 
 DrawPlane *
 DrawRay *
 DrawGrid *
 
 LoadModel *
-LoadModelFromMesh 
-IsModelValid 
+LoadModelFromMesh *
+IsModelValid *
 UnloadModel *
-GetModelBoundingBox 
+GetModelBoundingBox *
 
-DrawModel 
+DrawModel *
 DrawModelEx *
-DrawModelWires 
-DrawModelWiresEx 
-DrawBoundingBox 
-DrawBillboard 
-DrawBillboardRec 
-DrawBillboardPro 
+DrawModelWires *
+DrawModelWiresEx *
+DrawBoundingBox *
+DrawBillboard *
+DrawBillboardRec *
+DrawBillboardPro *
 
-UploadMesh 
-UpdateMeshBuffer 
-UnloadMesh 
-DrawMesh 
-DrawMeshInstanced 
-GetMeshBoundingBox 
-GenMeshTangents 
-ExportMesh 
-ExportMeshAsCode 
+UploadMesh *
+UpdateMeshBuffer *
+UnloadMesh *
+DrawMesh *
+DrawMeshInstanced *
+GetMeshBoundingBox *
+GenMeshTangents *
+ExportMesh *
+ExportMeshAsCode *
 
-GenMeshPoly 
-GenMeshPlane 
-GenMeshCube 
-GenMeshSphere 
-GenMeshHemiSphere 
-GenMeshCylinder 
-GenMeshCone 
-GenMeshTorus 
-GenMeshKnot 
-GenMeshHeightmap 
-GenMeshCubicmap 
+GenMeshPoly *
+GenMeshPlane *
+GenMeshCube *
+GenMeshSphere *
+GenMeshHemiSphere *
+GenMeshCylinder *
+GenMeshCone *
+GenMeshTorus *
+GenMeshKnot *
+GenMeshHeightmap *
+GenMeshCubicmap *
 
-LoadMaterials 
-LoadMaterialDefault 
-IsMaterialValid 
-UnloadMaterial 
+LoadMaterials *
+LoadMaterialDefault *
+IsMaterialValid *
+UnloadMaterial *
 SetMaterialTexture *
-SetModelMeshMaterial 
+SetModelMeshMaterial *
 
 LoadModelAnimations *
 UpdateModelAnimation *
-UpdateModelAnimationEx 
+UpdateModelAnimationEx *
 UnloadModelAnimations *
-IsModelAnimationValid 
+IsModelAnimationValid *
 
-CheckCollisionSpheres 
-CheckCollisionBoxes 
-CheckCollisionBoxSphere 
-GetRayCollisionSphere 
+CheckCollisionSpheres *
+CheckCollisionBoxes *
+CheckCollisionBoxSphere *
+GetRayCollisionSphere *
 GetRayCollisionBox *
-GetRayCollisionMesh 
-GetRayCollisionTriangle 
-GetRayCollisionQuad 
+GetRayCollisionMesh *
+GetRayCollisionTriangle *
+GetRayCollisionQuad *

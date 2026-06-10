@@ -1,34 +1,40 @@
 #lang racket/base
 
-;; raylib camera 模块 — 相机系统
-;;
-;; 对应 C: rcamera.h
-;; 包括: UpdateCamera, UpdateCameraPro, CameraYaw, CameraPitch 等
+(require ffi/unsafe (prefix-in T: "types.rkt"))
 
-(require ffi/unsafe
-         (prefix-in T: "types.rkt"))
-
-;; ============================================================
-;; CameraYaw(Camera *camera, float angle, bool rotateAroundTarget)
-;;   camera: 裸指针 (Camera3D)
-;;   angle: 弧度
-;;   rotateAroundTarget: #t / #f
-;; ============================================================
+(define lib T:lib)
 
 (define camera-yaw
-  (get-ffi-obj "CameraYaw" T:lib
-    (_fun _pointer _float _stdbool -> _void)))
-
-;; ============================================================
-;; CameraPitch(Camera *camera, float angle, bool lockView,
-;;             bool rotateAroundTarget, bool rotateUp)
-;; ============================================================
+  (get-ffi-obj "CameraYaw" lib (_fun _pointer _float _stdbool -> _void)))
 
 (define camera-pitch
-  (get-ffi-obj "CameraPitch" T:lib
-    (_fun _pointer _float _stdbool _stdbool _stdbool -> _void)))
+  (get-ffi-obj "CameraPitch" lib (_fun _pointer _float _stdbool _stdbool _stdbool -> _void)))
+
+(define camera-roll
+  (get-ffi-obj "CameraRoll" lib (_fun _pointer _float -> _void)))
+
+(define camera-move-forward
+  (get-ffi-obj "CameraMoveForward" lib (_fun _pointer _float _stdbool -> _void)))
+
+(define camera-move-right
+  (get-ffi-obj "CameraMoveRight" lib (_fun _pointer _float _stdbool -> _void)))
+
+(define camera-move-up
+  (get-ffi-obj "CameraMoveUp" lib (_fun _pointer _float -> _void)))
+
+(define camera-move-to-target
+  (get-ffi-obj "CameraMoveToTarget" lib (_fun _pointer _float -> _void)))
+
+(define get-camera-forward
+  (get-ffi-obj "GetCameraForward" lib (_fun _pointer -> _pointer)))
+
+(define get-camera-right
+  (get-ffi-obj "GetCameraRight" lib (_fun _pointer -> _pointer)))
+
+(define get-camera-up
+  (get-ffi-obj "GetCameraUp" lib (_fun _pointer -> _pointer)))
 
 (provide
- camera-yaw
- camera-pitch)
-
+ camera-yaw camera-pitch camera-roll
+ camera-move-forward camera-move-right camera-move-up camera-move-to-target
+ get-camera-forward get-camera-right get-camera-up)

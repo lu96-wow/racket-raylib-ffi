@@ -1,12 +1,12 @@
 InitWindow *
 CloseWindow *
 WindowShouldClose *
-IsWindowReady 
-IsWindowFullscreen 
-IsWindowHidden 
-IsWindowMinimized 
-IsWindowMaximized 
-IsWindowFocused 
+IsWindowReady *
+IsWindowFullscreen *
+IsWindowHidden *
+IsWindowMinimized *
+IsWindowMaximized *
+IsWindowFocused *
 IsWindowResized *
 IsWindowState *
 SetWindowState *
@@ -16,17 +16,17 @@ ToggleBorderlessWindowed *
 MaximizeWindow *
 MinimizeWindow *
 RestoreWindow *
-SetWindowIcon 
-SetWindowIcons 
-SetWindowTitle 
-SetWindowPosition 
+SetWindowIcon *
+SetWindowIcons *
+SetWindowTitle *
+SetWindowPosition *
 SetWindowMonitor *
 SetWindowMinSize *
-SetWindowMaxSize 
-SetWindowSize 
-SetWindowOpacity 
-SetWindowFocused 
-GetWindowHandle 
+SetWindowMaxSize *
+SetWindowSize *
+SetWindowOpacity *
+SetWindowFocused *
+GetWindowHandle *
 GetScreenWidth *
 GetScreenHeight *
 GetRenderWidth *
@@ -44,9 +44,9 @@ GetWindowScaleDPI *
 GetMonitorName *
 SetClipboardText *
 GetClipboardText *
-GetClipboardImage 
-EnableEventWaiting 
-DisableEventWaiting 
+GetClipboardImage *
+EnableEventWaiting *
+DisableEventWaiting *
 
 ShowCursor *
 HideCursor *
@@ -66,8 +66,8 @@ BeginTextureMode *
 EndTextureMode *
 BeginShaderMode *
 EndShaderMode *
-BeginBlendMode 
-EndBlendMode 
+BeginBlendMode *
+EndBlendMode *
 BeginScissorMode *
 EndScissorMode *
 BeginVrStereoMode *
@@ -77,24 +77,24 @@ LoadVrStereoConfig *
 UnloadVrStereoConfig *
 
 LoadShader *
-LoadShaderFromMemory 
-IsShaderValid 
+LoadShaderFromMemory *
+IsShaderValid *
 GetShaderLocation *
-GetShaderLocationAttrib 
+GetShaderLocationAttrib *
 SetShaderValue *
-SetShaderValueV 
-SetShaderValueMatrix 
-SetShaderValueTexture 
+SetShaderValueV *
+SetShaderValueMatrix *
+SetShaderValueTexture *
 UnloadShader *
 
 GetScreenToWorldRay *
-GetScreenToWorldRayEx 
+GetScreenToWorldRayEx *
 GetWorldToScreen *
-GetWorldToScreenEx 
+GetWorldToScreenEx *
 GetWorldToScreen2D *
 GetScreenToWorld2D *
 GetCameraMatrix *
-GetCameraMatrix2D 
+GetCameraMatrix2D *
 
 SetTargetFPS *
 GetFrameTime *
@@ -110,77 +110,77 @@ GetRandomValue *
 LoadRandomSequence *
 UnloadRandomSequence *
 
-TakeScreenshot 
+TakeScreenshot *
 SetConfigFlags *
-OpenURL 
+OpenURL *
 
-SetTraceLogLevel 
-TraceLog 
+SetTraceLogLevel *
+TraceLog *
 SetTraceLogCallback *
 
-MemAlloc 
-MemRealloc 
-MemFree x
+MemAlloc *
+MemRealloc *
+MemFree *
 
-LoadFileData 
-UnloadFileData 
-SaveFileData 
-ExportDataAsCode 
+LoadFileData *
+UnloadFileData *
+SaveFileData *
+ExportDataAsCode *
 LoadFileText *
-UnloadFileText x
-SaveFileText 
-SetLoadFileDataCallback 
-SetSaveFileDataCallback 
-SetLoadFileTextCallback 
-SetSaveFileTextCallback 
-FileRename 
-FileRemove 
-FileCopy 
-FileMove 
-FileTextReplace 
-FileTextFindIndex 
-FileExists 
+UnloadFileText *
+SaveFileText *
+SetLoadFileDataCallback *
+SetSaveFileDataCallback *
+SetLoadFileTextCallback *
+SetSaveFileTextCallback *
+FileRename *
+FileRemove *
+FileCopy *
+FileMove *
+FileTextReplace *
+FileTextFindIndex *
+FileExists *
 DirectoryExists *
-IsFileExtension 
-GetFileLength 
-GetFileModTime 
-GetFileExtension 
-GetFileName 
-GetFileNameWithoutExt 
-GetDirectoryPath 
+IsFileExtension *
+GetFileLength *
+GetFileModTime *
+GetFileExtension *
+GetFileName *
+GetFileNameWithoutExt *
+GetDirectoryPath *
 GetPrevDirectoryPath *
 GetWorkingDirectory *
 GetApplicationDirectory *
-MakeDirectory 
-ChangeDirectory 
-IsPathFile 
-IsFileNameValid 
-LoadDirectoryFiles 
+MakeDirectory *
+ChangeDirectory *
+IsPathFile *
+IsFileNameValid *
+LoadDirectoryFiles *
 LoadDirectoryFilesEx *
-UnloadDirectoryFiles x
+UnloadDirectoryFiles *
 IsFileDropped *
 LoadDroppedFiles *
-UnloadDroppedFiles x
-GetDirectoryFileCount 
-GetDirectoryFileCountEx 
+UnloadDroppedFiles *
+GetDirectoryFileCount *
+GetDirectoryFileCountEx *
 
-CompressData 
-DecompressData 
+CompressData *
+DecompressData *
 EncodeDataBase64 *
-DecodeDataBase64 
+DecodeDataBase64 *
 ComputeCRC32 *
 ComputeMD5 *
 ComputeSHA1 *
 ComputeSHA256 *
 
-LoadAutomationEventList 
-UnloadAutomationEventList 
-ExportAutomationEventList 
-SetAutomationEventList 
-SetAutomationEventBaseFrame 
-StartAutomationEventRecording 
-StopAutomationEventRecording 
-PlayAutomationEvent x
+LoadAutomationEventList *
+UnloadAutomationEventList *
+ExportAutomationEventList *
+SetAutomationEventList *
+SetAutomationEventBaseFrame *
+StartAutomationEventRecording *
+StopAutomationEventRecording *
+PlayAutomationEvent *
 
 IsKeyPressed *
 IsKeyPressedRepeat *
@@ -235,7 +235,7 @@ GetGesturePinchVector *
 GetGesturePinchAngle *
 
 UpdateCamera *
-UpdateCameraPro 
+UpdateCameraPro *
 
 DrawText *
 DrawLine *
@@ -245,11 +245,11 @@ TextSubtext *
 Fade *
 ColorAlpha *
 ColorFromHSV *
-ColorIsEqual
-SetShapesTexture 
-GetShapesTexture x
-GetShapesTextureRectangle x
-SetMaterialTexture x
+ColorIsEqual *
+SetShapesTexture *
+GetShapesTexture *
+GetShapesTextureRectangle *
+SetMaterialTexture *
 LoadImageFromScreen *
 UnloadImage *
 ExportImage *

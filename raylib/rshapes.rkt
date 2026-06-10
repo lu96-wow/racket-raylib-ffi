@@ -771,6 +771,19 @@
 ;; 导出
 ;; ============================================================
 
+
+;; ============================================================
+;; DrawTriangleGradient(Vector2 v1, Vector2 v2, Vector2 v3,
+;;                      Color c1, Color c2, Color c3)
+;; ============================================================
+
+(define draw-triangle-gradient
+  (let ([f (get-ffi-obj "DrawTriangleGradient" T:lib
+             (_fun (v1 : C:_vec2-bytes) (v2 : C:_vec2-bytes) (v3 : C:_vec2-bytes)
+                   (c1 : C:_color-bytes) (c2 : C:_color-bytes) (c3 : C:_color-bytes) -> _void))])
+    (lambda (v1 v2 v3 c1 c2 c3)
+      (f (C:vec2->bytes v1) (C:vec2->bytes v2) (C:vec2->bytes v3)
+         (C:color->bytes c1) (C:color->bytes c2) (C:color->bytes c3)))))
 (provide
  draw-circle-v
  draw-rectangle
@@ -829,4 +842,5 @@
  draw-spline-segment-linear
  draw-spline-segment-basis
  draw-spline-segment-catmull-rom
- draw-spline-segment-bezier-cubic)
+ draw-spline-segment-bezier-cubic
+ draw-triangle-gradient)

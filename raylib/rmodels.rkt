@@ -8,7 +8,8 @@
 
 (require ffi/unsafe
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt"))
+         (prefix-in C: "rcore.rkt")
+         (prefix-in TX: "rtextures.rkt"))
 
 ;; ============================================================
 ;; 3D 方块绘制 (core_3d_camera_mode.c)
@@ -233,6 +234,320 @@
 (define (model-animation-keyframe-count anim-ptr)
   ;; name(32) + boneCount(4) = offset 36
   (ptr-ref anim-ptr _int 9))  ;; byte offset 32 (name) + 4 (boneCount) = element index 8? No...
+;; ============================================================
+;; 3D 基本形状绘制
+;; ============================================================
+
+(define draw-point-3d
+  (let ([f (get-ffi-obj "DrawPoint3D" T:lib
+             (_fun (pos : C:_vec3-bytes) (col : C:_color-bytes) -> _void))])
+    (lambda (position color)
+      (f (C:vec3->bytes position) (C:color->bytes color)))))
+
+(define draw-circle-3d
+  (let ([f (get-ffi-obj "DrawCircle3D" T:lib
+             (_fun (c : C:_vec3-bytes) _float (rot : C:_vec3-bytes) _float (col : C:_color-bytes) -> _void))])
+    (lambda (center radius rotation-axis rotation-angle color)
+      (f (C:vec3->bytes center) radius (C:vec3->bytes rotation-axis) rotation-angle (C:color->bytes color)))))
+
+(define draw-triangle-3d
+  (let ([f (get-ffi-obj "DrawTriangle3D" T:lib
+             (_fun (v1 : C:_vec3-bytes) (v2 : C:_vec3-bytes) (v3 : C:_vec3-bytes) (col : C:_color-bytes) -> _void))])
+    (lambda (v1 v2 v3 color)
+      (f (C:vec3->bytes v1) (C:vec3->bytes v2) (C:vec3->bytes v3) (C:color->bytes color)))))
+
+(define draw-triangle-strip-3d
+  (let ([f (get-ffi-obj "DrawTriangleStrip3D" T:lib
+             (_fun _pointer _int (col : C:_color-bytes) -> _void))])
+    (lambda (points-ptr point-count color)
+      (f points-ptr point-count (C:color->bytes color)))))
+
+;; ============================================================
+;; 球体/圆柱/胶囊 绘制
+;; ============================================================
+
+(define draw-sphere-ex
+  (let ([f (get-ffi-obj "DrawSphereEx" T:lib
+             (_fun (c : C:_vec3-bytes) _float _int _int (col : C:_color-bytes) -> _void))])
+    (lambda (center radius rings slices color)
+      (f (C:vec3->bytes center) radius rings slices (C:color->bytes color)))))
+
+(define draw-sphere-wires
+  (let ([f (get-ffi-obj "DrawSphereWires" T:lib
+             (_fun (c : C:_vec3-bytes) _float _int _int (col : C:_color-bytes) -> _void))])
+    (lambda (center radius rings slices color)
+      (f (C:vec3->bytes center) radius rings slices (C:color->bytes color)))))
+
+(define draw-cylinder
+  (let ([f (get-ffi-obj "DrawCylinder" T:lib
+             (_fun (pos : C:_vec3-bytes) _float _float _float _int (col : C:_color-bytes) -> _void))])
+    (lambda (position radius-top radius-bottom height slices color)
+      (f (C:vec3->bytes position) radius-top radius-bottom height slices (C:color->bytes color)))))
+
+(define draw-cylinder-ex
+  (let ([f (get-ffi-obj "DrawCylinderEx" T:lib
+             (_fun (s : C:_vec3-bytes) (e : C:_vec3-bytes) _float _float _int (col : C:_color-bytes) -> _void))])
+    (lambda (start-pos end-pos radius-start radius-end slices color)
+      (f (C:vec3->bytes start-pos) (C:vec3->bytes end-pos) radius-start radius-end slices (C:color->bytes color)))))
+
+(define draw-cylinder-wires
+  (let ([f (get-ffi-obj "DrawCylinderWires" T:lib
+             (_fun (pos : C:_vec3-bytes) _float _float _float _int (col : C:_color-bytes) -> _void))])
+    (lambda (position radius-top radius-bottom height slices color)
+      (f (C:vec3->bytes position) radius-top radius-bottom height slices (C:color->bytes color)))))
+
+(define draw-cylinder-wires-ex
+  (let ([f (get-ffi-obj "DrawCylinderWiresEx" T:lib
+             (_fun (s : C:_vec3-bytes) (e : C:_vec3-bytes) _float _float _int (col : C:_color-bytes) -> _void))])
+    (lambda (start-pos end-pos radius-start radius-end slices color)
+      (f (C:vec3->bytes start-pos) (C:vec3->bytes end-pos) radius-start radius-end slices (C:color->bytes color)))))
+
+(define draw-capsule
+  (let ([f (get-ffi-obj "DrawCapsule" T:lib
+             (_fun (s : C:_vec3-bytes) (e : C:_vec3-bytes) _float _int _int (col : C:_color-bytes) -> _void))])
+    (lambda (start-pos end-pos radius slices rings color)
+      (f (C:vec3->bytes start-pos) (C:vec3->bytes end-pos) radius slices rings (C:color->bytes color)))))
+
+(define draw-capsule-wires
+  (let ([f (get-ffi-obj "DrawCapsuleWires" T:lib
+             (_fun (s : C:_vec3-bytes) (e : C:_vec3-bytes) _float _int _int (col : C:_color-bytes) -> _void))])
+    (lambda (start-pos end-pos radius slices rings color)
+      (f (C:vec3->bytes start-pos) (C:vec3->bytes end-pos) radius slices rings (C:color->bytes color)))))
+;; ============================================================
+;; 模型加载/操作
+;; ============================================================
+
+(define load-model-from-mesh
+  (let ([f (get-ffi-obj "LoadModelFromMesh" T:lib
+             (_fun _pointer -> (m : _model-bytes)))])
+    (lambda (mesh-ptr) (f mesh-ptr))))
+
+(define is-model-valid
+  (let ([f (get-ffi-obj "IsModelValid" T:lib
+             (_fun (m : _model-bytes) -> _stdbool))])
+    (lambda (model) (f model))))
+
+(define get-model-bounding-box
+  (let ([f (get-ffi-obj "GetModelBoundingBox" T:lib
+             (_fun (m : _model-bytes) -> (bb : C:_bounding-box-bytes)))])
+    (lambda (model) (f model))))
+
+(define (set-model-mesh-material model-ptr mesh-index material-index)
+  ((get-ffi-obj "SetModelMeshMaterial" T:lib (_fun _pointer _int _int -> _void))
+   model-ptr mesh-index material-index))
+
+;; ============================================================
+;; DrawModel 变体
+;; ============================================================
+
+(define draw-model
+  (let ([f (get-ffi-obj "DrawModel" T:lib
+             (_fun (m : _model-bytes) (pos : C:_vec3-bytes) _float (c : C:_color-bytes) -> _void))])
+    (lambda (model position scale tint)
+      (f model (C:vec3->bytes position) scale (C:color->bytes tint)))))
+
+(define draw-model-wires
+  (let ([f (get-ffi-obj "DrawModelWires" T:lib
+             (_fun (m : _model-bytes) (pos : C:_vec3-bytes) _float (c : C:_color-bytes) -> _void))])
+    (lambda (model position scale tint)
+      (f model (C:vec3->bytes position) scale (C:color->bytes tint)))))
+
+(define draw-model-wires-ex
+  (let ([f (get-ffi-obj "DrawModelWiresEx" T:lib
+             (_fun (m : _model-bytes) (pos : C:_vec3-bytes) _float _float (c : C:_color-bytes) -> _void))])
+    (lambda (model position scale wire-width tint)
+      (f model (C:vec3->bytes position) scale wire-width (C:color->bytes tint)))))
+
+(define draw-bounding-box
+  (let ([f (get-ffi-obj "DrawBoundingBox" T:lib
+             (_fun (bb : C:_bounding-box-bytes) (c : C:_color-bytes) -> _void))])
+    (lambda (box color)
+      (f (C:bounding-box->bytes box) (C:color->bytes color)))))
+
+(define draw-billboard
+  (let ([f (get-ffi-obj "DrawBillboard" T:lib
+             (_fun (c : C:_camera3d-bytes) (t : TX:_texture-bytes)
+                   (pos : C:_vec3-bytes) _float (col : C:_color-bytes) -> _void))])
+    (lambda (camera texture position size tint)
+      (f (C:camera3d->bytes camera) texture (C:vec3->bytes position) size (C:color->bytes tint)))))
+
+(define draw-billboard-rec
+  (let ([f (get-ffi-obj "DrawBillboardRec" T:lib
+             (_fun (c : C:_camera3d-bytes) (t : TX:_texture-bytes)
+                   (src : C:_rect-bytes) (pos : C:_vec3-bytes) (size : C:_vec2-bytes) (col : C:_color-bytes) -> _void))])
+    (lambda (camera texture source position size tint)
+      (f (C:camera3d->bytes camera) texture (C:rect->bytes source)
+         (C:vec3->bytes position) (C:vec2->bytes size) (C:color->bytes tint)))))
+
+(define draw-billboard-pro
+  (let ([f (get-ffi-obj "DrawBillboardPro" T:lib
+             (_fun (c : C:_camera3d-bytes) (t : TX:_texture-bytes)
+                   (src : C:_rect-bytes) (pos : C:_vec3-bytes) (up : C:_vec3-bytes)
+                   (size : C:_vec2-bytes) (orig : C:_vec2-bytes) _float (col : C:_color-bytes) -> _void))])
+    (lambda (camera texture source position up size origin rotation tint)
+      (f (C:camera3d->bytes camera) texture (C:rect->bytes source)
+         (C:vec3->bytes position) (C:vec3->bytes up)
+         (C:vec2->bytes size) (C:vec2->bytes origin) rotation (C:color->bytes tint)))))
+
+;; ============================================================
+;; 网格加载/操作
+;; ============================================================
+
+(define (upload-mesh mesh-ptr dynamic?)
+  ((get-ffi-obj "UploadMesh" T:lib (_fun _pointer _stdbool -> _void)) mesh-ptr dynamic?))
+
+(define (update-mesh-buffer mesh-ptr index data-ptr data-size offset)
+  ((get-ffi-obj "UpdateMeshBuffer" T:lib (_fun _pointer _int _pointer _int _int -> _void))
+   mesh-ptr index data-ptr data-size offset))
+
+(define (unload-mesh mesh-ptr)
+  ((get-ffi-obj "UnloadMesh" T:lib (_fun _pointer -> _void)) mesh-ptr))
+
+(define (draw-mesh mesh-ptr material-ptr transform-matrix-ptr)
+  ((get-ffi-obj "DrawMesh" T:lib (_fun _pointer _pointer _pointer -> _void))
+   mesh-ptr material-ptr transform-matrix-ptr))
+
+(define (draw-mesh-instanced mesh-ptr material-ptr transforms-ptr instances)
+  ((get-ffi-obj "DrawMeshInstanced" T:lib (_fun _pointer _pointer _pointer _int -> _void))
+   mesh-ptr material-ptr transforms-ptr instances))
+
+(define (export-mesh mesh-ptr file-name)
+  ((get-ffi-obj "ExportMesh" T:lib (_fun _pointer _string -> _stdbool))
+   mesh-ptr file-name))
+
+(define (export-mesh-as-code mesh-ptr file-name)
+  ((get-ffi-obj "ExportMeshAsCode" T:lib (_fun _pointer _string -> _stdbool))
+   mesh-ptr file-name))
+
+(define (gen-mesh-tangents mesh-ptr)
+  ((get-ffi-obj "GenMeshTangents" T:lib (_fun _pointer -> _void)) mesh-ptr))
+
+(define get-mesh-bounding-box
+  (let ([f (get-ffi-obj "GetMeshBoundingBox" T:lib
+             (_fun _pointer -> (bb : C:_bounding-box-bytes)))])
+    (lambda (mesh-ptr) (f mesh-ptr))))
+
+;; ============================================================
+;; GenMesh* — 生成网格
+;; ============================================================
+
+(define gen-mesh-poly
+  (let ([f (get-ffi-obj "GenMeshPoly" T:lib (_fun _int _float -> _pointer))])
+    (lambda (sides radius) (f sides radius))))
+
+(define gen-mesh-plane
+  (let ([f (get-ffi-obj "GenMeshPlane" T:lib (_fun _float _float _int _int -> _pointer))])
+    (lambda (width length res-x res-z) (f width length res-x res-z))))
+
+(define gen-mesh-cube
+  (let ([f (get-ffi-obj "GenMeshCube" T:lib (_fun _float _float _float -> _pointer))])
+    (lambda (width height length) (f width height length))))
+
+(define gen-mesh-sphere
+  (let ([f (get-ffi-obj "GenMeshSphere" T:lib (_fun _float _int _int -> _pointer))])
+    (lambda (radius rings slices) (f radius rings slices))))
+
+(define gen-mesh-hemi-sphere
+  (let ([f (get-ffi-obj "GenMeshHemiSphere" T:lib (_fun _float _int _int -> _pointer))])
+    (lambda (radius rings slices) (f radius rings slices))))
+
+(define gen-mesh-cylinder
+  (let ([f (get-ffi-obj "GenMeshCylinder" T:lib (_fun _float _float _int -> _pointer))])
+    (lambda (radius height slices) (f radius height slices))))
+
+(define gen-mesh-cone
+  (let ([f (get-ffi-obj "GenMeshCone" T:lib (_fun _float _float _int -> _pointer))])
+    (lambda (radius height slices) (f radius height slices))))
+
+(define gen-mesh-torus
+  (let ([f (get-ffi-obj "GenMeshTorus" T:lib (_fun _float _float _int _int -> _pointer))])
+    (lambda (radius size rad-seg sides) (f radius size rad-seg sides))))
+
+(define gen-mesh-knot
+  (let ([f (get-ffi-obj "GenMeshKnot" T:lib (_fun _float _float _int _int -> _pointer))])
+    (lambda (radius size rad-seg sides) (f radius size rad-seg sides))))
+
+(define gen-mesh-heightmap
+  (let ([f (get-ffi-obj "GenMeshHeightmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> _pointer))])
+    (lambda (image size) (f image (C:vec3->bytes size)))))
+
+(define gen-mesh-cubicmap
+  (let ([f (get-ffi-obj "GenMeshCubicmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> _pointer))])
+    (lambda (image size) (f image (C:vec3->bytes size)))))
+
+;; ============================================================
+;; 材质加载
+;; ============================================================
+
+(define load-materials
+  (let ([f (get-ffi-obj "LoadMaterials" T:lib (_fun _string _pointer -> _pointer))])
+    (lambda (file-name)
+      (let ([count-buf (malloc _int 1 'atomic)])
+        (let ([result (f file-name count-buf)])
+          (values result (ptr-ref count-buf _int 0)))))))
+
+(define load-material-default
+  (get-ffi-obj "LoadMaterialDefault" T:lib (_fun -> _pointer)))
+
+(define (is-material-valid material-ptr)
+  ((get-ffi-obj "IsMaterialValid" T:lib (_fun _pointer -> _stdbool)) material-ptr))
+
+(define (unload-material material-ptr)
+  ((get-ffi-obj "UnloadMaterial" T:lib (_fun _pointer -> _void)) material-ptr))
+
+(define (update-model-animation-ex model animation anim-index frame)
+  ((get-ffi-obj "UpdateModelAnimationEx" T:lib (_fun _pointer _pointer _int _int -> _void))
+   model animation anim-index frame))
+
+(define (is-model-animation-valid model-ptr anim-ptr)
+  ((get-ffi-obj "IsModelAnimationValid" T:lib (_fun _pointer _pointer -> _stdbool))
+   model-ptr anim-ptr))
+;; ============================================================
+;; 碰撞检测
+;; ============================================================
+
+(define check-collision-spheres
+  (let ([f (get-ffi-obj "CheckCollisionSpheres" T:lib
+             (_fun (c1 : C:_vec3-bytes) _float (c2 : C:_vec3-bytes) _float -> _stdbool))])
+    (lambda (center1 radius1 center2 radius2)
+      (f (C:vec3->bytes center1) radius1 (C:vec3->bytes center2) radius2))))
+
+(define check-collision-boxes
+  (let ([f (get-ffi-obj "CheckCollisionBoxes" T:lib
+             (_fun (b1 : C:_bounding-box-bytes) (b2 : C:_bounding-box-bytes) -> _stdbool))])
+    (lambda (box1 box2)
+      (f (C:bounding-box->bytes box1) (C:bounding-box->bytes box2)))))
+
+(define check-collision-box-sphere
+  (let ([f (get-ffi-obj "CheckCollisionBoxSphere" T:lib
+             (_fun (box : C:_bounding-box-bytes) (c : C:_vec3-bytes) _float -> _stdbool))])
+    (lambda (box center radius)
+      (f (C:bounding-box->bytes box) (C:vec3->bytes center) radius))))
+
+(define get-ray-collision-sphere
+  (let ([f (get-ffi-obj "GetRayCollisionSphere" T:lib
+             (_fun (r : C:_ray-bytes) (c : C:_vec3-bytes) _float -> (rc : C:_ray-collision-bytes)))])
+    (lambda (ray center radius)
+      (f (C:ray->bytes ray) (C:vec3->bytes center) radius))))
+
+(define get-ray-collision-mesh
+  (let ([f (get-ffi-obj "GetRayCollisionMesh" T:lib
+             (_fun (r : C:_ray-bytes) _pointer (tr : C:_matrix-bytes) -> (rc : C:_ray-collision-bytes)))])
+    (lambda (ray mesh-ptr transform)
+      (f (C:ray->bytes ray) mesh-ptr transform))))
+
+(define get-ray-collision-triangle
+  (let ([f (get-ffi-obj "GetRayCollisionTriangle" T:lib
+             (_fun (r : C:_ray-bytes) (v1 : C:_vec3-bytes) (v2 : C:_vec3-bytes) (v3 : C:_vec3-bytes) -> (rc : C:_ray-collision-bytes)))])
+    (lambda (ray v1 v2 v3)
+      (f (C:ray->bytes ray) (C:vec3->bytes v1) (C:vec3->bytes v2) (C:vec3->bytes v3)))))
+
+(define get-ray-collision-quad
+  (let ([f (get-ffi-obj "GetRayCollisionQuad" T:lib
+             (_fun (r : C:_ray-bytes) (v1 : C:_vec3-bytes) (v2 : C:_vec3-bytes) (v3 : C:_vec3-bytes) (v4 : C:_vec3-bytes) -> (rc : C:_ray-collision-bytes)))])
+    (lambda (ray v1 v2 v3 v4)
+      (f (C:ray->bytes ray) (C:vec3->bytes v1) (C:vec3->bytes v2) (C:vec3->bytes v3) (C:vec3->bytes v4)))))
+
 (provide
  draw-cube
  draw-cube-wires
@@ -243,9 +558,69 @@
  draw-ray
  get-ray-collision-box
  _model-bytes
- load-model unload-model
+ load-model
+ unload-model
  draw-model-ex
  _model-animation-bytes
- load-model-animations update-model-animation unload-model-animations
- model-animation-name model-animation-keyframe-count)
-
+ load-model-animations
+ update-model-animation
+ unload-model-animations
+ model-animation-name
+ model-animation-keyframe-count
+ draw-point-3d
+ draw-circle-3d
+ draw-triangle-3d
+ draw-triangle-strip-3d
+ draw-sphere-ex
+ draw-sphere-wires
+ draw-cylinder
+ draw-cylinder-ex
+ draw-cylinder-wires
+ draw-cylinder-wires-ex
+ draw-capsule
+ draw-capsule-wires
+ load-model-from-mesh
+ is-model-valid
+ get-model-bounding-box
+ set-model-mesh-material
+ draw-model
+ draw-model-wires
+ draw-model-wires-ex
+ draw-bounding-box
+ draw-billboard
+ draw-billboard-rec
+ draw-billboard-pro
+ upload-mesh
+ update-mesh-buffer
+ unload-mesh
+ draw-mesh
+ draw-mesh-instanced
+ export-mesh
+ export-mesh-as-code
+ gen-mesh-tangents
+ get-mesh-bounding-box
+ gen-mesh-poly
+ gen-mesh-plane
+ gen-mesh-cube
+ gen-mesh-sphere
+ gen-mesh-hemi-sphere
+ gen-mesh-cylinder
+ gen-mesh-cone
+ gen-mesh-torus
+ gen-mesh-knot
+ gen-mesh-heightmap
+ gen-mesh-cubicmap
+ load-materials
+ load-material-default
+ is-material-valid
+ unload-material
+ update-model-animation-ex
+ is-model-animation-valid
+ check-collision-spheres
+ check-collision-boxes
+ check-collision-box-sphere
+ get-ray-collision-sphere
+ get-ray-collision-mesh
+ get-ray-collision-triangle
+ get-ray-collision-quad
+)

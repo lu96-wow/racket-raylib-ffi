@@ -259,10 +259,235 @@
          (C:color->bytes tint)))))
 
 ;; ============================================================
-;; 导出
+;; GenImage* — 生成图像 (返回 Image by value)
 ;; ============================================================
 
+(define gen-image-gradient-linear
+  (let ([f (get-ffi-obj "GenImageGradientLinear" T:lib
+             (_fun _int _int _int (c1 : C:_color-bytes) (c2 : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (lambda (w h dir start end) (f w h dir (C:color->bytes start) (C:color->bytes end)))))
 
+(define gen-image-gradient-radial
+  (let ([f (get-ffi-obj "GenImageGradientRadial" T:lib
+             (_fun _int _int _float (c1 : C:_color-bytes) (c2 : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (lambda (w h density inner outer) (f w h density (C:color->bytes inner) (C:color->bytes outer)))))
+
+(define gen-image-gradient-square
+  (let ([f (get-ffi-obj "GenImageGradientSquare" T:lib
+             (_fun _int _int _float (c1 : C:_color-bytes) (c2 : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (lambda (w h density inner outer) (f w h density (C:color->bytes inner) (C:color->bytes outer)))))
+
+(define gen-image-white-noise
+  (let ([f (get-ffi-obj "GenImageWhiteNoise" T:lib
+             (_fun _int _int _float -> (img : C:_image-bytes)))])
+    (lambda (w h factor) (f w h factor))))
+
+(define gen-image-perlin-noise
+  (let ([f (get-ffi-obj "GenImagePerlinNoise" T:lib
+             (_fun _int _int _int _int _float -> (img : C:_image-bytes)))])
+    (lambda (w h offset-x offset-y scale) (f w h offset-x offset-y scale))))
+
+(define gen-image-cellular
+  (let ([f (get-ffi-obj "GenImageCellular" T:lib
+             (_fun _int _int _int -> (img : C:_image-bytes)))])
+    (lambda (w h tile-size) (f w h tile-size))))
+
+(define gen-image-text
+  (let ([f (get-ffi-obj "GenImageText" T:lib
+             (_fun _int _int _string -> (img : C:_image-bytes)))])
+    (lambda (w h text) (f w h text))))
+
+;; ============================================================
+;; Image 加载 / 导出
+;; ============================================================
+
+(define load-image-raw
+  (let ([f (get-ffi-obj "LoadImageRaw" T:lib
+             (_fun _string _int _int _int _int -> (img : C:_image-bytes)))])
+    (lambda (filename w h format header-size) (f filename w h format header-size))))
+
+(define load-image-anim
+  (let ([f (get-ffi-obj "LoadImageAnim" T:lib
+             (_fun _string _pointer -> (img : C:_image-bytes)))])
+    (lambda (filename)
+      (let ([frames-buf (malloc _int 1 'atomic)])
+        (let ([img (f filename frames-buf)])
+          (values img (ptr-ref frames-buf _int 0)))))))
+
+(define load-image-anim-from-memory
+  (let ([f (get-ffi-obj "LoadImageAnimFromMemory" T:lib
+             (_fun _string _pointer _int _pointer -> (img : C:_image-bytes)))])
+    (lambda (file-type data-ptr data-size)
+      (let ([frames-buf (malloc _int 1 'atomic)])
+        (let ([img (f file-type data-ptr data-size frames-buf)])
+          (values img (ptr-ref frames-buf _int 0)))))))
+
+(define load-image-from-memory
+  (let ([f (get-ffi-obj "LoadImageFromMemory" T:lib
+             (_fun _string _pointer _int -> (img : C:_image-bytes)))])
+    (lambda (file-type data-ptr data-size) (f file-type data-ptr data-size))))
+
+(define load-image-from-texture
+  (let ([f (get-ffi-obj "LoadImageFromTexture" T:lib
+             (_fun (t : _texture-bytes) -> (img : C:_image-bytes)))])
+    (lambda (texture) (f texture))))
+
+(define is-image-valid
+  (let ([f (get-ffi-obj "IsImageValid" T:lib
+             (_fun (img : C:_image-bytes) -> _stdbool))])
+    (lambda (image) (f image))))
+
+(define export-image-to-memory
+  (let ([f (get-ffi-obj "ExportImageToMemory" T:lib
+             (_fun (img : C:_image-bytes) _string _pointer -> _pointer))])
+    (lambda (image file-type)
+      (let ([size-buf (malloc _int 1 'atomic)])
+        (let ([result (f image file-type size-buf)])
+          (values result (ptr-ref size-buf _int 0)))))))
+
+(define export-image-as-code
+  (get-ffi-obj "ExportImageAsCode" T:lib
+    (_fun (img : C:_image-bytes) _string -> _stdbool)))
+
+;; ============================================================
+;; Image 复制/操作
+;; ============================================================
+
+(define image-copy
+  (let ([f (get-ffi-obj "ImageCopy" T:lib
+             (_fun (img : C:_image-bytes) -> (out : C:_image-bytes)))])
+    (lambda (image) (f image))))
+
+(define image-from-image
+  (let ([f (get-ffi-obj "ImageFromImage" T:lib
+             (_fun (img : C:_image-bytes) (r : C:_rect-bytes) -> (out : C:_image-bytes)))])
+    (lambda (image rec) (f image (C:rect->bytes rec)))))
+
+(define image-from-channel
+  (let ([f (get-ffi-obj "ImageFromChannel" T:lib
+             (_fun (img : C:_image-bytes) _int -> (out : C:_image-bytes)))])
+    (lambda (image channel) (f image channel))))
+
+(define image-text
+  (let ([f (get-ffi-obj "ImageText" T:lib
+             (_fun _string _int (c : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (lambda (text font-size color) (f text font-size (C:color->bytes color)))))
+
+(define image-text-ex
+  (let ([f (get-ffi-obj "ImageTextEx" T:lib
+             (_fun _pointer _string _float _float (c : C:_color-bytes) -> (img : C:_image-bytes)))])
+    (lambda (font-ptr text font-size spacing tint)
+      (f font-ptr text font-size spacing (C:color->bytes tint)))))
+
+(define (image-format image-ptr new-format)
+  ((get-ffi-obj "ImageFormat" T:lib (_fun _pointer _int -> _void)) image-ptr new-format))
+
+(define (image-to-pot image-ptr fill-color)
+  ((get-ffi-obj "ImageToPOT" T:lib (_fun _pointer (c : C:_color-bytes) -> _void))
+   image-ptr (C:color->bytes fill-color)))
+
+(define (image-crop image-ptr crop-rec)
+  ((get-ffi-obj "ImageCrop" T:lib (_fun _pointer (r : C:_rect-bytes) -> _void))
+   image-ptr (C:rect->bytes crop-rec)))
+
+(define (image-alpha-crop image-ptr threshold)
+  ((get-ffi-obj "ImageAlphaCrop" T:lib (_fun _pointer _float -> _void)) image-ptr threshold))
+
+(define (image-alpha-clear image-ptr color threshold)
+  ((get-ffi-obj "ImageAlphaClear" T:lib (_fun _pointer (c : C:_color-bytes) _float -> _void))
+   image-ptr (C:color->bytes color) threshold))
+
+(define (image-alpha-mask image-ptr mask-image)
+  ((get-ffi-obj "ImageAlphaMask" T:lib (_fun _pointer _pointer -> _void)) image-ptr mask-image))
+
+(define (image-alpha-premultiply image-ptr)
+  ((get-ffi-obj "ImageAlphaPremultiply" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-blur-gaussian image-ptr blur-size)
+  ((get-ffi-obj "ImageBlurGaussian" T:lib (_fun _pointer _int -> _void)) image-ptr blur-size))
+
+(define (image-kernel-convolution image-ptr kernel-ptr kernel-size)
+  ((get-ffi-obj "ImageKernelConvolution" T:lib (_fun _pointer _pointer _int -> _void))
+   image-ptr kernel-ptr kernel-size))
+
+(define (image-resize image-ptr new-w new-h)
+  ((get-ffi-obj "ImageResize" T:lib (_fun _pointer _int _int -> _void)) image-ptr new-w new-h))
+
+(define (image-resize-nn image-ptr new-w new-h)
+  ((get-ffi-obj "ImageResizeNN" T:lib (_fun _pointer _int _int -> _void)) image-ptr new-w new-h))
+
+(define (image-resize-canvas image-ptr new-w new-h offset-x offset-y fill-color)
+  ((get-ffi-obj "ImageResizeCanvas" T:lib (_fun _pointer _int _int _int _int (c : C:_color-bytes) -> _void))
+   image-ptr new-w new-h offset-x offset-y (C:color->bytes fill-color)))
+
+(define (image-mipmaps image-ptr)
+  ((get-ffi-obj "ImageMipmaps" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-dither image-ptr rb gb bb ab)
+  ((get-ffi-obj "ImageDither" T:lib (_fun _pointer _int _int _int _int -> _void)) image-ptr rb gb bb ab))
+
+(define (image-flip-vertical image-ptr)
+  ((get-ffi-obj "ImageFlipVertical" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-flip-horizontal image-ptr)
+  ((get-ffi-obj "ImageFlipHorizontal" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-rotate-cw image-ptr)
+  ((get-ffi-obj "ImageRotateCW" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-rotate-ccw image-ptr)
+  ((get-ffi-obj "ImageRotateCCW" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-color-tint image-ptr color)
+  ((get-ffi-obj "ImageColorTint" T:lib (_fun _pointer (c : C:_color-bytes) -> _void))
+   image-ptr (C:color->bytes color)))
+
+(define (image-color-invert image-ptr)
+  ((get-ffi-obj "ImageColorInvert" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-color-grayscale image-ptr)
+  ((get-ffi-obj "ImageColorGrayscale" T:lib (_fun _pointer -> _void)) image-ptr))
+
+(define (image-color-contrast image-ptr contrast)
+  ((get-ffi-obj "ImageColorContrast" T:lib (_fun _pointer _int -> _void)) image-ptr contrast))
+
+(define (image-color-brightness image-ptr brightness)
+  ((get-ffi-obj "ImageColorBrightness" T:lib (_fun _pointer _int -> _void)) image-ptr brightness))
+
+(define (image-color-replace image-ptr color replace-color)
+  ((get-ffi-obj "ImageColorReplace" T:lib (_fun _pointer (c : C:_color-bytes) (r : C:_color-bytes) -> _void))
+   image-ptr (C:color->bytes color) (C:color->bytes replace-color)))
+
+(define load-image-colors
+  (get-ffi-obj "LoadImageColors" T:lib (_fun (img : C:_image-bytes) -> _pointer)))
+
+(define load-image-palette
+  (let ([f (get-ffi-obj "LoadImagePalette" T:lib
+             (_fun (img : C:_image-bytes) _int _pointer -> _pointer))])
+    (lambda (image max-pal-size)
+      (let ([count-buf (malloc _int 1 'atomic)])
+        (let ([result (f image max-pal-size count-buf)])
+          (values result (ptr-ref count-buf _int 0)))))))
+
+(define (unload-image-colors colors-ptr)
+  ((get-ffi-obj "UnloadImageColors" T:lib (_fun _pointer -> _void)) colors-ptr))
+
+(define (unload-image-palette palette-ptr)
+  ((get-ffi-obj "UnloadImagePalette" T:lib (_fun _pointer -> _void)) palette-ptr))
+
+(define get-image-alpha-border
+  (let ([f (get-ffi-obj "GetImageAlphaBorder" T:lib
+             (_fun (img : C:_image-bytes) _float -> (r : C:_rect-bytes)))])
+    (lambda (image threshold)
+      (C:rect-bytes->rect (f image threshold)))))
+
+(define get-image-color
+  (let ([f (get-ffi-obj "GetImageColor" T:lib
+             (_fun (img : C:_image-bytes) _int _int -> (c : C:_color-bytes)))])
+    (lambda (image x y) (f image x y))))
+;; ============================================================
+;; 导出
+;; ============================================================
 ;; ============================================================
 ;; SetMaterialTexture(Material *material, int mapType, Texture2D texture)
 ;; ============================================================
@@ -272,6 +497,151 @@
              (_fun _pointer _int (t : _texture-bytes) -> _void))])
     (lambda (material-ptr map-type texture)
       (f material-ptr map-type texture))))
+;; ============================================================
+;; Image 绘制函数
+;; ============================================================
+
+(define (image-clear-background dst-ptr color)
+  ((get-ffi-obj "ImageClearBackground" T:lib (_fun _pointer (c : C:_color-bytes) -> _void))
+   dst-ptr (C:color->bytes color)))
+
+(define (image-draw-pixel dst-ptr x y color)
+  ((get-ffi-obj "ImageDrawPixel" T:lib (_fun _pointer _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr x y (C:color->bytes color)))
+
+(define (image-draw-pixel-v dst-ptr pos color)
+  ((get-ffi-obj "ImageDrawPixelV" T:lib (_fun _pointer (p : C:_vec2-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes pos) (C:color->bytes color)))
+
+(define (image-draw-line dst-ptr sx sy ex ey color)
+  ((get-ffi-obj "ImageDrawLine" T:lib (_fun _pointer _int _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr sx sy ex ey (C:color->bytes color)))
+
+(define (image-draw-line-v dst-ptr start end color)
+  ((get-ffi-obj "ImageDrawLineV" T:lib (_fun _pointer (s : C:_vec2-bytes) (e : C:_vec2-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes start) (C:vec2->bytes end) (C:color->bytes color)))
+
+(define (image-draw-line-ex dst-ptr start end thick color)
+  ((get-ffi-obj "ImageDrawLineEx" T:lib (_fun _pointer (s : C:_vec2-bytes) (e : C:_vec2-bytes) _int (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes start) (C:vec2->bytes end) thick (C:color->bytes color)))
+
+(define (image-draw-circle dst-ptr cx cy r color)
+  ((get-ffi-obj "ImageDrawCircle" T:lib (_fun _pointer _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr cx cy r (C:color->bytes color)))
+
+(define (image-draw-circle-v dst-ptr center r color)
+  ((get-ffi-obj "ImageDrawCircleV" T:lib (_fun _pointer (c : C:_vec2-bytes) _int (col : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes center) r (C:color->bytes color)))
+
+(define (image-draw-circle-lines dst-ptr cx cy r color)
+  ((get-ffi-obj "ImageDrawCircleLines" T:lib (_fun _pointer _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr cx cy r (C:color->bytes color)))
+
+(define (image-draw-circle-lines-v dst-ptr center r color)
+  ((get-ffi-obj "ImageDrawCircleLinesV" T:lib (_fun _pointer (c : C:_vec2-bytes) _int (col : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes center) r (C:color->bytes color)))
+
+(define (image-draw-rectangle dst-ptr x y w h color)
+  ((get-ffi-obj "ImageDrawRectangle" T:lib (_fun _pointer _int _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr x y w h (C:color->bytes color)))
+
+(define (image-draw-rectangle-v dst-ptr pos size color)
+  ((get-ffi-obj "ImageDrawRectangleV" T:lib (_fun _pointer (p : C:_vec2-bytes) (s : C:_vec2-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes pos) (C:vec2->bytes size) (C:color->bytes color)))
+
+(define (image-draw-rectangle-rec dst-ptr rec color)
+  ((get-ffi-obj "ImageDrawRectangleRec" T:lib (_fun _pointer (r : C:_rect-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:rect->bytes rec) (C:color->bytes color)))
+
+(define (image-draw-rectangle-lines dst-ptr x y w h color)
+  ((get-ffi-obj "ImageDrawRectangleLines" T:lib (_fun _pointer _int _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr x y w h (C:color->bytes color)))
+
+(define (image-draw-rectangle-lines-ex dst-ptr rec thick color)
+  ((get-ffi-obj "ImageDrawRectangleLinesEx" T:lib (_fun _pointer (r : C:_rect-bytes) _int (c : C:_color-bytes) -> _void))
+   dst-ptr (C:rect->bytes rec) thick (C:color->bytes color)))
+
+(define (image-draw-triangle dst-ptr v1 v2 v3 color)
+  ((get-ffi-obj "ImageDrawTriangle" T:lib
+    (_fun _pointer (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes) (p3 : C:_vec2-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes v1) (C:vec2->bytes v2) (C:vec2->bytes v3) (C:color->bytes color)))
+
+(define (image-draw-triangle-ex dst-ptr v1 v2 v3 c1 c2 c3)
+  ((get-ffi-obj "ImageDrawTriangleGradient" T:lib
+    (_fun _pointer (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes) (p3 : C:_vec2-bytes)
+          (col1 : C:_color-bytes) (col2 : C:_color-bytes) (col3 : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes v1) (C:vec2->bytes v2) (C:vec2->bytes v3)
+   (C:color->bytes c1) (C:color->bytes c2) (C:color->bytes c3)))
+
+(define (image-draw-triangle-lines dst-ptr v1 v2 v3 color)
+  ((get-ffi-obj "ImageDrawTriangleLines" T:lib
+    (_fun _pointer (p1 : C:_vec2-bytes) (p2 : C:_vec2-bytes) (p3 : C:_vec2-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr (C:vec2->bytes v1) (C:vec2->bytes v2) (C:vec2->bytes v3) (C:color->bytes color)))
+
+(define (image-draw-triangle-fan dst-ptr points-ptr point-count color)
+  ((get-ffi-obj "ImageDrawTriangleFan" T:lib (_fun _pointer _pointer _int (c : C:_color-bytes) -> _void))
+   dst-ptr points-ptr point-count (C:color->bytes color)))
+
+(define (image-draw-triangle-strip dst-ptr points-ptr point-count color)
+  ((get-ffi-obj "ImageDrawTriangleStrip" T:lib (_fun _pointer _pointer _int (c : C:_color-bytes) -> _void))
+   dst-ptr points-ptr point-count (C:color->bytes color)))
+
+(define (image-draw dst-ptr src-image src-rec dst-rec tint)
+  ((get-ffi-obj "ImageDraw" T:lib
+    (_fun _pointer (src : C:_image-bytes) (sr : C:_rect-bytes) (dr : C:_rect-bytes) (c : C:_color-bytes) -> _void))
+   dst-ptr src-image (C:rect->bytes src-rec) (C:rect->bytes dst-rec) (C:color->bytes tint)))
+
+(define (image-draw-text dst-ptr text x y font-size color)
+  ((get-ffi-obj "ImageDrawText" T:lib (_fun _pointer _string _int _int _int (c : C:_color-bytes) -> _void))
+   dst-ptr text x y font-size (C:color->bytes color)))
+
+(define (image-draw-text-ex dst-ptr font-ptr text pos font-size spacing tint)
+  ((get-ffi-obj "ImageDrawTextEx" T:lib
+    (_fun _pointer _pointer _string (p : C:_vec2-bytes) _float _float (c : C:_color-bytes) -> _void))
+   dst-ptr font-ptr text (C:vec2->bytes pos) font-size spacing (C:color->bytes tint)))
+
+;; ============================================================
+;; 纹理扩展
+;; ============================================================
+
+(define load-texture-cubemap
+  (let ([f (get-ffi-obj "LoadTextureCubemap" T:lib
+             (_fun (img : C:_image-bytes) _int -> (t : _texture-bytes)))])
+    (lambda (image layout) (f image layout))))
+
+(define is-texture-valid
+  (let ([f (get-ffi-obj "IsTextureValid" T:lib
+             (_fun (t : _texture-bytes) -> _stdbool))])
+    (lambda (texture) (f texture))))
+
+(define is-render-texture-valid
+  (let ([f (get-ffi-obj "IsRenderTextureValid" T:lib
+             (_fun (rt : _render-texture-bytes) -> _stdbool))])
+    (lambda (render-texture) (f render-texture))))
+
+(define (update-texture-rec texture ptr rec)
+  ((get-ffi-obj "UpdateTextureRec" T:lib (_fun (t : _texture-bytes) (r : C:_rect-bytes) _pointer -> _void))
+   texture (C:rect->bytes rec) ptr))
+
+(define (gen-texture-mipmaps texture-ptr)
+  ((get-ffi-obj "GenTextureMipmaps" T:lib (_fun _pointer -> _void)) texture-ptr))
+
+(define (set-texture-wrap texture wrap)
+  ((get-ffi-obj "SetTextureWrap" T:lib (_fun (t : _texture-bytes) _int -> _void)) texture wrap))
+
+(define draw-texture-v
+  (let ([f (get-ffi-obj "DrawTextureV" T:lib
+             (_fun (t : _texture-bytes) (pos : C:_vec2-bytes) (c : C:_color-bytes) -> _void))])
+    (lambda (texture position tint)
+      (f texture (C:vec2->bytes position) (C:color->bytes tint)))))
+
+(define draw-texture-n-patch
+  (let ([f (get-ffi-obj "DrawTextureNPatch" T:lib
+             (_fun (t : _texture-bytes) _pointer (dst : C:_rect-bytes)
+                   (orig : C:_vec2-bytes) _float (c : C:_color-bytes) -> _void))])
+    (lambda (texture n-patch-info-ptr dest origin rotation tint)
+      (f texture n-patch-info-ptr (C:rect->bytes dest)
+         (C:vec2->bytes origin) rotation (C:color->bytes tint)))))
 (provide
  _texture-bytes _render-texture-bytes
  load-texture unload-texture draw-texture
