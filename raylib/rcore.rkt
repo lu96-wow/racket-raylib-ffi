@@ -1321,7 +1321,7 @@
  get-screen-width get-screen-height
  get-render-width get-render-height get-window-scale-dpi
  get-screen-to-world-2d get-world-to-screen-2d
- get-screen-to-world-ray get-world-to-screen measure-text
+ get-screen-to-world-ray get-world-to-screen measure-text measure-text-ex get-font-default
 
  ;; 3D 网格 / rlgl 矩阵操作
  draw-grid

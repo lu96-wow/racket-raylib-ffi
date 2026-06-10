@@ -649,9 +649,43 @@
  begin-texture-mode end-texture-mode
  draw-texture-rec
  set-texture-filter
- draw-texture-pro
+ draw-texture-pro draw-texture-v draw-texture-ex
  gen-image-checked load-texture-from-image
- load-image image-rotate
- gen-image-color update-texture draw-texture-ex
- set-material-texture)
+ load-image load-image-from-texture
+ image-rotate image-crop image-flip-vertical image-flip-horizontal
+ image-resize image-resize-nn image-resize-canvas
+ image-draw image-draw-pixel image-draw-circle-lines image-draw-rectangle
+ image-draw-text image-draw-text-ex
+ image-to-pot image-alpha-crop image-alpha-clear
+ image-alpha-mask image-alpha-premultiply image-blur-gaussian
+ image-kernel-convolution image-dither
+ image-rotate-cw image-rotate-ccw image-color-tint
+ image-color-invert image-color-grayscale image-color-contrast
+ image-color-brightness image-color-replace
+ gen-image-color gen-image-gradient-linear
+ gen-image-gradient-radial gen-image-gradient-square
+ gen-image-white-noise gen-image-perlin-noise gen-image-cellular
+ gen-image-text
+ update-texture update-texture-rec
+ is-image-valid is-texture-valid is-render-texture-valid
+ export-image-to-memory export-image-as-code
+ image-copy image-from-image image-from-channel
+ image-text image-text-ex
+ load-image-raw load-image-anim load-image-anim-from-memory
+ load-image-from-memory load-image-colors load-image-palette
+ unload-image-colors unload-image-palette
+ get-image-alpha-border get-image-color
+ set-material-texture
+ gen-texture-mipmaps set-texture-wrap
+ load-texture-cubemap
+ ;; image-draw-line / image-draw-circle / image-draw-rectangle-lines 等绘制函数
+ image-draw-line image-draw-circle image-draw-rectangle-lines
+ image-draw-triangle image-draw-triangle-lines
+ image-clear-background
+ draw-texture-n-patch
+ image-draw-pixel-v image-draw-circle-v image-draw-circle-lines-v
+ image-draw-rectangle-v image-draw-rectangle-rec image-draw-rectangle-lines-ex
+ image-draw-triangle-fan image-draw-triangle-strip
+ image-draw-line-v image-draw-line-ex
+ image-draw-triangle-ex)
 

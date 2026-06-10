@@ -1,0 +1,142 @@
+#lang racket/base
+
+;; raylib [text] example - font sdf (Racket FFI 翻译)
+;;
+;; 对应 C: examples/text/text_font_sdf.c
+
+(require "../../raylib/raylib.rkt")
+
+;; ============================================================
+;; GLSL 版本
+;; ============================================================
+
+(define GLSL-VERSION 330)
+
+;; ============================================================
+;; 初始化
+;; ============================================================
+
+(define screen-width 800)
+(define screen-height 450)
+
+(init-window screen-width screen-height
+  "raylib [text] example - font sdf")
+
+(define msg "Signed Distance Fields")
+
+;; Loading file to memory
+(define-values (file-data file-size)
+  (load-file-data "resources/anonymous_pro_bold.ttf"))
+
+;; Default font generation from TTF font
+(define font-default (get-font-default))
+;; The font-default returned is just the default font, we need to load from TTF
+;; Actually, in C they create a custom font from file data
+
+;; SDF font generation from TTF font
+;; Load font glyphs with SDF mode
+(define default-glyphs (load-font-data file-data file-size 16 0 95 FONT-DEFAULT))
+(define default-atlas (gen-image-font-atlas default-glyphs #f 95 16 4 0))
+(define default-texture (load-texture-from-image default-atlas))
+(unload-image default-atlas)
+
+(define sdf-glyphs (load-font-data file-data file-size 16 0 0 FONT-SDF))
+(define sdf-atlas (gen-image-font-atlas sdf-glyphs #f 95 16 0 1))
+(define sdf-texture (load-texture-from-image sdf-atlas))
+(unload-image sdf-atlas)
+
+;; Free file data
+(unload-file-data file-data)
+
+;; Load SDF required shader (we use default vertex shader)
+(define shader (load-shader 0 (format "resources/shaders/glsl~a/sdf.fs" GLSL-VERSION)))
+(set-texture-filter sdf-texture TEXTURE-FILTER-BILINEAR)  ; Required for SDF font
+
+;; Build font structures manually
+;; Font struct: baseSize glyphCount glyphPadding tex-id tex-w tex-h tex-mip tex-fmt recs-ptr glyphs-ptr
+(define font-default-struct
+  (list 16 95 0
+        (list-ref default-texture 0)   ; tex id
+        (list-ref default-texture 1)   ; tex width
+        (list-ref default-texture 2)   ; tex height
+        (list-ref default-texture 3)   ; tex mipmaps
+        (list-ref default-texture 4)   ; tex format
+        #f                             ; recs ptr (not needed for basic drawing)
+        default-glyphs))
+
+(define font-sdf-struct
+  (list 16 95 0
+        (list-ref sdf-texture 0)       ; tex id
+        (list-ref sdf-texture 1)       ; tex width
+        (list-ref sdf-texture 2)       ; tex height
+        (list-ref sdf-texture 3)       ; tex mipmaps
+        (list-ref sdf-texture 4)       ; tex format
+        #f                             ; recs ptr
+        sdf-glyphs))
+
+(define font-position (vector2 40.0 (- (/ screen-height 2.0) 50.0)))
+(define font-size (box 16.0))
+(define current-font (box 0))  ; 0 - fontDefault, 1 - fontSDF
+
+(set-target-fps 60)
+
+;; ============================================================
+;; 主循环
+;; ============================================================
+
+(let loop ()
+  (unless (window-should-close?)
+    ;; 更新
+    (set-box! font-size (+ (unbox font-size) (* (get-mouse-wheel-move) 8.0)))
+
+    (when (< (unbox font-size) 6.0)
+      (set-box! font-size 6.0))
+
+    (if (is-key-down KEY-SPACE)
+        (set-box! current-font 1)
+        (set-box! current-font 0))
+
+    (let ([text-size
+           (if (= (unbox current-font) 0)
+               (measure-text-ex font-default-struct msg (unbox font-size) 0.0)
+               (measure-text-ex font-sdf-struct msg (unbox font-size) 0.0))])
+      (set-vector2-x! font-position (- (/ (get-screen-width) 2.0) (/ (vector2-x text-size) 2.0)))
+      (set-vector2-y! font-position (- (+ (/ (get-screen-height) 2.0) 80.0) (/ (vector2-y text-size) 2.0))))
+
+    ;; 绘制
+    (begin-drawing)
+
+    (clear-background RAYWHITE)
+
+    (if (= (unbox current-font) 1)
+        (begin
+          ;; NOTE: SDF fonts require a custom SDF shader to compute fragment color
+          (begin-shader-mode shader)
+          (draw-text-ex font-sdf-struct msg font-position (unbox font-size) 0.0 BLACK)
+          (end-shader-mode)
+          (draw-texture sdf-texture 10 10 BLACK))
+        (begin
+          (draw-text-ex font-default-struct msg font-position (unbox font-size) 0.0 BLACK)
+          (draw-texture default-texture 10 10 BLACK)))
+
+    (if (= (unbox current-font) 1)
+        (draw-text "SDF!" 320 20 80 RED)
+        (draw-text "default font" 315 40 30 GRAY))
+
+    (draw-text "FONT SIZE: 16.0" (- (get-screen-width) 240) 20 20 DARKGRAY)
+    (draw-text (format "RENDER SIZE: ~a" (unbox font-size)) (- (get-screen-width) 240) 50 20 DARKGRAY)
+    (draw-text "Use MOUSE WHEEL to SCALE TEXT!" (- (get-screen-width) 240) 90 10 DARKGRAY)
+    (draw-text "HOLD SPACE to USE SDF FONT VERSION!" 340 (- (get-screen-height) 30) 20 MAROON)
+
+    (end-drawing)
+
+    (loop)))
+
+;; ============================================================
+;; 清理
+;; ============================================================
+
+(unload-font-data default-glyphs 95)
+(unload-font-data sdf-glyphs 95)
+(unload-shader shader)
+(close-window)
