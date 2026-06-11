@@ -4,7 +4,8 @@
 ;;
 ;; 对应 C: examples/text/text_inline_styling.c
 
-(require "../../raylib/raylib.rkt")
+(require racket/format
+         "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 辅助: Hex 字符串 -> Color
@@ -29,6 +30,19 @@
   (define text-len (string-length text))
   (define scale-factor (/ font-size (exact->inexact (car font))))
   (define back-rec-padding 4)
+
+  ;; 获取字符的实际水平步进（匹配 C 的 increaseX 计算）
+  ;; get-glyph-info 现在返回 list: (value offsetX offsetY advanceX img-data img-w img-h img-mip img-fmt)
+  (define (codepoint-advance codepoint)
+    (let ([glyph-info (get-glyph-info font codepoint)])  ; get-glyph-info 接受 codepoint
+      (if glyph-info
+          (let ([advance-x (list-ref glyph-info 3)])  ;; GlyphInfo.advanceX (现在按值返回)
+            (if (zero? advance-x)
+                (let* ([rec (get-glyph-atlas-rec font codepoint)]
+                       [rec-w (rectangle-w rec)])
+                  (+ (* rec-w scale-factor) spacing))
+                (+ (* advance-x scale-factor) spacing)))
+          (+ font-size spacing))))  ;; fallback: 如果未找到字形
 
   (let main-loop ([i 0]
                   [text-offset-x 0.0]
@@ -67,21 +81,23 @@
                   (main-loop (+ i 1) text-offset-x text-offset-y col-front col-back)))]
            [else
             ;; 普通 '[' 字符，绘制它
-            (let ([codepoint (char->integer ch)])
+            (let ([codepoint (char->integer ch)]
+                  [step-x (codepoint-advance (char->integer ch))])
               (draw-text-codepoint font codepoint
                                    (vector2 (+ (vector2-x position) text-offset-x)
                                             (+ (vector2-y position) text-offset-y))
                                    font-size col-front)
-              (main-loop (+ i 1) (+ text-offset-x spacing font-size) text-offset-y col-front col-back))])]
+              (main-loop (+ i 1) (+ text-offset-x step-x) text-offset-y col-front col-back))])]
         [else
          ;; 普通字符
-         (let ([codepoint (char->integer ch)])
+         (let* ([codepoint (char->integer ch)]
+                [step-x (codepoint-advance codepoint)])
            ;; 背景绘制
            (when (> (ptr-ref col-back _ubyte 3) 0)
              (draw-rectangle-rec
               (rectangle (+ (vector2-x position) text-offset-x)
                          (- (+ (vector2-y position) text-offset-y) back-rec-padding)
-                         (+ font-size spacing)
+                         step-x
                          (+ font-size (* 2 back-rec-padding)))
               col-back))
            ;; 字符绘制
@@ -90,7 +106,7 @@
                                   (vector2 (+ (vector2-x position) text-offset-x)
                                            (+ (vector2-y position) text-offset-y))
                                   font-size col-front))
-           (main-loop (+ i 1) (+ text-offset-x spacing font-size) text-offset-y col-front col-back))]))))
+           (main-loop (+ i 1) (+ text-offset-x step-x) text-offset-y col-front col-back))]))))
 
 ;; ============================================================
 ;; 初始化

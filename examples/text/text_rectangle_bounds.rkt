@@ -1,15 +1,80 @@
 #lang racket/base
 
-;; raylib [text] example - rectangle bounds (Racket FFI 翻译 简化版)
+;; raylib [text] example - rectangle bounds (Racket FFI 翻译)
 ;;
 ;; 对应 C: examples/text/text_rectangle_bounds.c
-;;
-;; 注意: C 原版包含 DrawTextBoxed/DrawTextBoxedSelectable 自定义函数，
-;; 涉及低层字体 glyph 访问 (font.glyphs[index].advanceX, font.recs[index].width)、
-;; GetCodepoint、单词换行测量等复杂逻辑。
-;; 本示例展示容器缩放和基本文本绘制功能。
 
 (require "../../raylib/raylib.rkt")
+
+;; ============================================================
+;; DrawTextBoxed — 在矩形容器内绘制文本（支持换行/自动换行/裁剪）
+;; ============================================================
+
+(define (draw-text-boxed font text rec font-size spacing word-wrap? tint)
+  (define text-len (string-length text))
+  (define base-size (exact->inexact (car font)))
+  (define scale-factor (/ font-size base-size))
+  (define line-height (* (+ base-size (/ base-size 2)) scale-factor))
+
+  ;; 获取字符的 glyph 宽度
+  ;; get-glyph-info 返回 list: (value offsetX offsetY advanceX img-data img-w img-h img-mip img-fmt)
+  (define (glyph-width codepoint)
+    (let ([info (get-glyph-info font codepoint)])
+      (if (and info (pair? info))
+          (let ([adv (list-ref info 3)])           ;; advanceX
+            (* (if (zero? adv)
+                   (rectangle-w (get-glyph-atlas-rec font codepoint))
+                   adv)
+               scale-factor))
+          0.0)))
+
+  ;; 测量一行文本能放多少字符，返回行尾索引
+  (define (measure-line start)
+    (let loop ([i start] [w 0.0] [last-space -1])
+      (cond [(>= i text-len) i]
+            [(char=? (string-ref text i) #\newline) i]
+            [(char=? (string-ref text i) #\space)
+             (loop (+ i 1) (+ w (glyph-width 32) spacing) i)]
+            [(char=? (string-ref text i) #\tab)
+             (loop (+ i 1) (+ w (glyph-width 32) (* 4 spacing)) i)]
+            [else
+             (let* ([ch (char->integer (string-ref text i))]
+                    [gw (glyph-width ch)]
+                    [new-w (+ w gw spacing)])
+               (if (> new-w (rectangle-w rec))
+                   (if word-wrap? (if (> last-space start) last-space i) i)
+                   (loop (+ i 1) new-w last-space)))])))
+
+  ;; 绘制一行（从 start 到 end）
+  (define (draw-line start end y-offset)
+    (let loop ([i start] [x-offset 0.0])
+      (when (< i end)
+        (let ([ch (string-ref text i)])
+          (cond [(char=? ch #\newline) (void)]
+                [(char=? ch #\space)
+                 (loop (+ i 1) (+ x-offset (glyph-width 32) spacing))]
+                [(char=? ch #\tab)
+                 (loop (+ i 1) (+ x-offset (glyph-width 32) (* 4 spacing)))]
+                [else
+                 (let ([cp (char->integer ch)])
+                   (draw-text-codepoint font cp
+                     (vector2 (+ (rectangle-x rec) x-offset)
+                              (+ (rectangle-y rec) y-offset))
+                     font-size tint)
+                   (loop (+ i 1) (+ x-offset (glyph-width cp) spacing)))])))))
+
+  ;; 主循环：逐行处理
+  (let main-loop ([i 0] [y-offset 0.0])
+    (when (< i text-len)
+      (let* ([next (measure-line i)]
+             [end (if (<= next i) (+ i 1) next)])
+        (unless (> (+ y-offset line-height) (rectangle-h rec))
+          (draw-line i end y-offset)
+          (let ([new-i (if (and (< end text-len)
+                                (char=? (string-ref text end) #\newline))
+                           (+ end 1)
+                           end)])
+            (main-loop new-i (+ y-offset line-height))))))))
 
 ;; ============================================================
 ;; 初始化
@@ -95,11 +160,13 @@
     ;; 绘制容器边框
     (draw-rectangle-lines-ex container 3.0 border-color)
 
-    ;; 在容器内绘制文本
-    (draw-text text
-               (+ (inexact->exact (rectangle-x container)) 8)
-               (+ (inexact->exact (rectangle-y container)) 8)
-               20 GRAY)
+    ;; 在容器内绘制文本（使用自定义 DrawTextBoxed）
+    (draw-text-boxed font text
+                     (rectangle (+ (rectangle-x container) 4)
+                                (+ (rectangle-y container) 4)
+                                (- (rectangle-w container) 4)
+                                (- (rectangle-h container) 4))
+                     20.0 2.0 (unbox word-wrap?) GRAY)
 
     ;; 绘制缩放器
     (draw-rectangle-rec resizer border-color)

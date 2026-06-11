@@ -4,7 +4,8 @@
 ;;
 ;; 对应 C: examples/text/text_format_text.c
 
-(require "../../raylib/raylib.rkt")
+(require racket/format
+         "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 初始化
@@ -33,10 +34,16 @@
 
     (clear-background RAYWHITE)
 
-    (draw-text (format "Score: ~a" score) 200 80 20 RED)
-    (draw-text (format "HiScore: ~a" hiscore) 200 120 20 GREEN)
-    (draw-text (format "Lives: ~a" lives) 200 160 40 BLUE)
-    (draw-text (format "Elapsed Time: ~ams" (* (get-frame-time) 1000.0)) 200 220 20 BLACK)
+    ;; C: TextFormat("Score: %08i", score)          → 零填充8位
+    (draw-text (format "Score: ~a" (~r score #:min-width 8 #:pad-string "0")) 200 80 20 RED)
+    ;; C: TextFormat("HiScore: %08i", hiscore)
+    (draw-text (format "HiScore: ~a" (~r hiscore #:min-width 8 #:pad-string "0")) 200 120 20 GREEN)
+    ;; C: TextFormat("Lives: %02i", lives)           → 零填充2位
+    (draw-text (format "Lives: ~a" (~r lives #:min-width 2 #:pad-string "0")) 200 160 40 BLUE)
+    ;; C: TextFormat("Elapsed Time: %02.02f ms", ...) → 整数≥2位+精确2位小数
+    (draw-text (format "Elapsed Time: ~ams"
+                       (real->decimal-string (* (get-frame-time) 1000.0) 2))
+               200 220 20 BLACK)
 
     (end-drawing)
 

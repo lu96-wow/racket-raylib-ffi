@@ -7,6 +7,13 @@
 (require "../../raylib/raylib.rkt")
 
 ;; ============================================================
+;; 资源路径
+;; ============================================================
+
+(define resource-dir
+  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
+
+;; ============================================================
 ;; 初始化
 ;; ============================================================
 
@@ -21,9 +28,9 @@
 (define msg3 "...and a THIRD one! GREAT! :D")
 
 ;; NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-(define font1 (load-font "resources/custom_mecha.png"))          ; Font loading
-(define font2 (load-font "resources/custom_alagard.png"))        ; Font loading
-(define font3 (load-font "resources/custom_jupiter_crash.png"))  ; Font loading
+(define font1 (load-font (string-append resource-dir "custom_mecha.png")))          ; Font loading
+(define font2 (load-font (string-append resource-dir "custom_alagard.png")))        ; Font loading
+(define font3 (load-font (string-append resource-dir "custom_jupiter_crash.png")))  ; Font loading
 
 (define font-base1 (exact->inexact (car font1)))
 (define font-base2 (exact->inexact (car font2)))

@@ -119,9 +119,13 @@
              (_fun (font : _font-bytes) _int -> _int))])
     (lambda (font codepoint) (f font codepoint))))
 
+;; GlyphInfo 按值返回：value, offsetX, offsetY, advanceX, img-data, img-w, img-h, img-mip, img-fmt
+(define _glyph-info-bytes
+  (_list-struct _int _int _int _int _pointer _int _int _int _int))
+
 (define get-glyph-info
   (let ([f (get-ffi-obj "GetGlyphInfo" lib
-             (_fun (font : _font-bytes) _int -> _pointer))])
+             (_fun (font : _font-bytes) _int -> (g : _glyph-info-bytes)))])
     (lambda (font codepoint) (f font codepoint))))
 
 (define get-glyph-atlas-rec

@@ -4,7 +4,8 @@
 ;;
 ;; 对应 C: examples/text/text_words_alignment.c
 
-(require "../../raylib/raylib.rkt")
+(require ffi/unsafe
+         "../../raylib/raylib.rkt")
 
 ;; ============================================================
 ;; 对齐枚举
