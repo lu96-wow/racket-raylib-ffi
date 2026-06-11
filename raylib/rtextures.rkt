@@ -642,12 +642,16 @@
     (lambda (texture position tint)
       (f texture (C:vec2->bytes position) (C:color->bytes tint)))))
 
+;; NPatchInfo 传值类型: Rectangle source (4 floats) + 5 ints
+(define _npatch-info-bytes
+  (_list-struct _float _float _float _float _int _int _int _int _int))
+
 (define draw-texture-n-patch
   (let ([f (get-ffi-obj "DrawTextureNPatch" T:lib
-             (_fun (t : _texture-bytes) _pointer (dst : C:_rect-bytes)
+             (_fun (t : _texture-bytes) (n : _npatch-info-bytes) (dst : C:_rect-bytes)
                    (orig : C:_vec2-bytes) _float (c : C:_color-bytes) -> _void))])
-    (lambda (texture n-patch-info-ptr dest origin rotation tint)
-      (f texture n-patch-info-ptr (C:rect->bytes dest)
+    (lambda (texture n-patch-info dest origin rotation tint)
+      (f texture n-patch-info (C:rect->bytes dest)
          (C:vec2->bytes origin) rotation (C:color->bytes tint)))))
 (provide
  _texture-bytes _render-texture-bytes
