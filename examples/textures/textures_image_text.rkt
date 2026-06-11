@@ -75,9 +75,9 @@
 (define font (load-font-ex (string-append resource-dir "KAISG.ttf") 64 #f 0))
 
 ;; 用自定义字体在图像上绘制文字
-(let ([p (image-list->ptr parrots)]
-      [fp (font-list->ptr font)])
-  (image-draw-text-ex p fp "[Parrots font drawing]"
+;; NOTE: image-draw-text-ex 的 Font 参数按值传递（_font-bytes），直接传 font list
+(let ([p (image-list->ptr parrots)])
+  (image-draw-text-ex p font "[Parrots font drawing]"
                       (vector2 20.0 20.0)
                       (exact->inexact (list-ref font 0))  ;; font.baseSize
                       0.0 RED)

@@ -21,7 +21,8 @@
 
 (require ffi/unsafe
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt"))
+         (prefix-in C: "rcore.rkt")
+         (only-in "rtext.rkt" _font-bytes))
 
 ;; ============================================================
 ;; Texture 传值类型
@@ -595,10 +596,12 @@
   ((get-ffi-obj "ImageDrawText" T:lib (_fun _pointer _string _int _int _int (c : C:_color-bytes) -> _void))
    dst-ptr text x y font-size (C:color->bytes color)))
 
-(define (image-draw-text-ex dst-ptr font-ptr text pos font-size spacing tint)
+;; ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+;; NOTE: Font 按值传递，需用 _font-bytes（与 DrawTextEx 一致）
+(define (image-draw-text-ex dst-ptr font text pos font-size spacing tint)
   ((get-ffi-obj "ImageDrawTextEx" T:lib
-    (_fun _pointer _pointer _string (p : C:_vec2-bytes) _float _float (c : C:_color-bytes) -> _void))
-   dst-ptr font-ptr text (C:vec2->bytes pos) font-size spacing (C:color->bytes tint)))
+    (_fun _pointer (font : _font-bytes) _string (p : C:_vec2-bytes) _float _float (c : C:_color-bytes) -> _void))
+   dst-ptr font text (C:vec2->bytes pos) font-size spacing (C:color->bytes tint)))
 
 ;; ============================================================
 ;; 纹理扩展
