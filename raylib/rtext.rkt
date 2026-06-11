@@ -43,15 +43,21 @@
              (_fun (font : _font-bytes) -> _stdbool))])
     (lambda (font) (f font))))
 
+;; LoadFontData(const unsigned char *fileData, int dataSize, int fontSize,
+;;              int *codepoints, int codepointCount, int type, int *glyphCount) -> GlyphInfo*
+;; NOTE: glyphCount 是输出参数（int*），调用方需传 malloc 分配的 int 缓冲区
 (define load-font-data
   (let ([f (get-ffi-obj "LoadFontData" lib
-             (_fun _pointer _int _int _pointer _int _int -> _pointer))])
-    (lambda (data-ptr data-size font-size codepoints-ptr codepoint-count type)
-      (f data-ptr data-size font-size codepoints-ptr codepoint-count type))))
+             (_fun _pointer _int _int _pointer _int _int _pointer -> _pointer))])
+    (lambda (data-ptr data-size font-size codepoints-ptr codepoint-count type glyph-count-ptr)
+      (f data-ptr data-size font-size codepoints-ptr codepoint-count type glyph-count-ptr))))
 
+;; GenImageFontAtlas(const GlyphInfo *glyphs, Rectangle **glyphRecs, int glyphsCount,
+;;                   int fontSize, int padding, int packMethod) -> Image
+;; NOTE: 返回 Image 按值，不是指针
 (define gen-image-font-atlas
   (let ([f (get-ffi-obj "GenImageFontAtlas" lib
-             (_fun _pointer _pointer _int _int _int _int -> _pointer))])
+             (_fun _pointer _pointer _int _int _int _int -> (img : C:_image-bytes)))])
     (lambda (glyphs-ptr recs-ptr glyph-count font-size padding pack-method)
       (f glyphs-ptr recs-ptr glyph-count font-size padding pack-method))))
 

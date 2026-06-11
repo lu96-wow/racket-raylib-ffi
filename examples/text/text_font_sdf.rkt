@@ -4,7 +4,15 @@
 ;;
 ;; 对应 C: examples/text/text_font_sdf.c
 
-(require "../../raylib/raylib.rkt")
+(require ffi/unsafe
+         "../../raylib/raylib.rkt")
+
+;; ============================================================
+;; 资源路径
+;; ============================================================
+
+(define resource-dir
+  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
 
 ;; ============================================================
 ;; GLSL 版本
@@ -26,7 +34,7 @@
 
 ;; Loading file to memory
 (define-values (file-data file-size)
-  (load-file-data "resources/anonymous_pro_bold.ttf"))
+  (load-file-data (string-append resource-dir "anonymous_pro_bold.ttf")))
 
 ;; Default font generation from TTF font
 (define font-default (get-font-default))
@@ -35,21 +43,32 @@
 
 ;; SDF font generation from TTF font
 ;; Load font glyphs with SDF mode
-(define default-glyphs (load-font-data file-data file-size 16 0 95 FONT-DEFAULT))
-(define default-atlas (gen-image-font-atlas default-glyphs #f 95 16 4 0))
+;; NOTE: load-font-data 的第7个参数 glyphCount 是 int* 输出参数
+;; NOTE: gen-image-font-atlas 的第2个参数 glyphRecs 是 Rectangle** 输出参数，不能传 #f
+(define default-glyph-count (malloc _int 1 'atomic))
+(ptr-set! default-glyph-count _int 0 95)
+(define default-glyphs (load-font-data file-data file-size 16 #f 95 FONT-DEFAULT default-glyph-count))
+(define default-recs-out (malloc _pointer 1 'atomic))
+(define default-atlas (gen-image-font-atlas default-glyphs default-recs-out 95 16 4 0))
 (define default-texture (load-texture-from-image default-atlas))
 (unload-image default-atlas)
+(define default-recs (ptr-ref default-recs-out _pointer 0))
 
-(define sdf-glyphs (load-font-data file-data file-size 16 0 0 FONT-SDF))
-(define sdf-atlas (gen-image-font-atlas sdf-glyphs #f 95 16 0 1))
+(define sdf-glyph-count (malloc _int 1 'atomic))
+(ptr-set! sdf-glyph-count _int 0 95)
+(define sdf-glyphs (load-font-data file-data file-size 16 #f 0 FONT-SDF sdf-glyph-count))
+(define sdf-recs-out (malloc _pointer 1 'atomic))
+(define sdf-atlas (gen-image-font-atlas sdf-glyphs sdf-recs-out 95 16 0 1))
 (define sdf-texture (load-texture-from-image sdf-atlas))
 (unload-image sdf-atlas)
+(define sdf-recs (ptr-ref sdf-recs-out _pointer 0))
 
 ;; Free file data
 (unload-file-data file-data)
 
-;; Load SDF required shader (we use default vertex shader)
-(define shader (load-shader 0 (format "resources/shaders/glsl~a/sdf.fs" GLSL-VERSION)))
+;; Load SDF required shader (we use default vertex shader, so pass #f = NULL for vs)
+(define shader (load-shader #f (string-append resource-dir
+                                              "shaders/glsl" (number->string GLSL-VERSION) "/sdf.fs")))
 (set-texture-filter sdf-texture TEXTURE-FILTER-BILINEAR)  ; Required for SDF font
 
 ;; Build font structures manually
@@ -61,7 +80,7 @@
         (list-ref default-texture 2)   ; tex height
         (list-ref default-texture 3)   ; tex mipmaps
         (list-ref default-texture 4)   ; tex format
-        #f                             ; recs ptr (not needed for basic drawing)
+        default-recs                   ; recs ptr (from GenImageFontAtlas)
         default-glyphs))
 
 (define font-sdf-struct
@@ -71,7 +90,7 @@
         (list-ref sdf-texture 2)       ; tex height
         (list-ref sdf-texture 3)       ; tex mipmaps
         (list-ref sdf-texture 4)       ; tex format
-        #f                             ; recs ptr
+        sdf-recs                       ; recs ptr (from GenImageFontAtlas)
         sdf-glyphs))
 
 (define font-position (vector2 40.0 (- (/ screen-height 2.0) 50.0)))

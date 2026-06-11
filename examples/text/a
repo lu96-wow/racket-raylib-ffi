@@ -1,13 +1,5 @@
 3d drawing 没有字体
 
-=== text_font_sdf.rkt ===
-cpointer-accessor: contract violation
-  expected: cpointer?
-  given: 0
-  context...:
-   body of "/home/debian/raylib/racket-raylib-ffi/examples/text/text_font_sdf.rkt"
-WARNING: FILEIO: [resources/anonymous_pro_bold.ttf] Failed to open file
-
 === text_font_spritefont.rkt ===
 WARNING: FILEIO: [resources/custom_mecha.png] Failed to open file
 WARNING: FILEIO: [resources/custom_alagard.png] Failed to open file
