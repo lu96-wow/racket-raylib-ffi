@@ -8,7 +8,8 @@
          racket/math
          (prefix-in T: "types.rkt")
          (prefix-in C: "rcore.rkt")
-         (prefix-in TX: "rtextures.rkt"))
+         (prefix-in TX: "rtextures.rkt")
+         "rlgl.rkt")
 
 ;; ============================================================
 ;; 圆形绘制 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
@@ -475,42 +476,12 @@
     (λ () (C:rect-bytes->rect (f)))))
 
 ;; ============================================================
-;; rlgl 低层绘制函数 (shapes_rectangle_advanced.c)
+;; rlgl 函数和常量现在统一从 rlgl.rkt 提供
+;; (rl-begin, rl-end, rl-vertex-2f, rl-tex-coord-2f,
+;;  rl-color-4ub, rl-normal-3f, rl-set-texture,
+;;  rl-enable/disable-backface-culling,
+;;  RL-LINES, RL-QUADS, RL-TRIANGLES)
 ;; ============================================================
-
-(define rl-set-texture
-  (get-ffi-obj "rlSetTexture" T:lib (_fun _uint -> _void)))
-
-(define rl-begin
-  (get-ffi-obj "rlBegin" T:lib (_fun _int -> _void)))
-
-(define rl-end
-  (get-ffi-obj "rlEnd" T:lib (_fun -> _void)))
-
-(define rl-vertex-2f
-  (get-ffi-obj "rlVertex2f" T:lib (_fun _float _float -> _void)))
-
-(define rl-tex-coord-2f
-  (get-ffi-obj "rlTexCoord2f" T:lib (_fun _float _float -> _void)))
-
-(define rl-color-4ub
-  (get-ffi-obj "rlColor4ub" T:lib (_fun _ubyte _ubyte _ubyte _ubyte -> _void)))
-
-(define rl-normal-3f
-  (get-ffi-obj "rlNormal3f" T:lib (_fun _float _float _float -> _void)))
-
-(define rl-enable-backface-culling
-  (get-ffi-obj "rlEnableBackfaceCulling" T:lib (_fun -> _void)))
-
-(define rl-disable-backface-culling
-  (get-ffi-obj "rlDisableBackfaceCulling" T:lib (_fun -> _void)))
-;; ============================================================
-;; rlgl 绘制模式常量
-;; ============================================================
-
-(define RL-LINES     #x0001)
-(define RL-QUADS     #x0007)
-(define RL-TRIANGLES #x0004)
 
 ;; ============================================================
 ;; 渐变圆角矩形绘制 (shapes_rectangle_advanced.c — 自定义函数)
@@ -831,18 +802,11 @@
  draw-rectangle-gradient-ex
  get-shapes-texture
  get-shapes-texture-rectangle
- rl-set-texture
- rl-begin
- rl-end
- rl-vertex-2f
- rl-color-4ub
- rl-normal-3f
- rl-tex-coord-2f
- rl-enable-backface-culling
- rl-disable-backface-culling
- RL-LINES
- RL-QUADS
- RL-TRIANGLES
+ ;; rlgl 函数和常量现在从 rlgl.rkt 统一提供
+ ;; rl-set-texture rl-begin rl-end rl-vertex-2f rl-color-4ub
+ ;; rl-normal-3f rl-tex-coord-2f
+ ;; rl-enable-backface-culling rl-disable-backface-culling
+ ;; RL-LINES RL-QUADS RL-TRIANGLES
  draw-rectangle-rounded-gradient-h
  vec2-vector->float-buf
  draw-spline-linear

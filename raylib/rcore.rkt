@@ -10,7 +10,8 @@
 
 (require ffi/unsafe
          (for-syntax racket/base)
-         (prefix-in T: "types.rkt"))
+         (prefix-in T: "types.rkt")
+         "rlgl.rkt")
 
 ;; ============================================================
 ;; 宏: def-ffi     — 直接传指针 / 基础类型（无包装）
@@ -63,7 +64,7 @@
   (_list-struct _float _float))
 
 (define (vec2->bytes v)
-  (list (ptr-ref v _float 0)   ;; offset 0 = first float (x)
+  (list (ptr-ref v _float 0) ;; offset 0 = first float (x)
         (ptr-ref v _float 1))) ;; offset 1 = second float (y, at byte 4)
 
 ;; 将 C 侧返回的 (list x y) 转换回 Vector2 指针
@@ -81,11 +82,11 @@
   (_list-struct _float _float _float _float _float _float))
 
 (define (camera2d->bytes cam)
-  (list (ptr-ref cam _float 0)   ;; off-x
-        (ptr-ref cam _float 1)   ;; off-y
-        (ptr-ref cam _float 2)   ;; tar-x
-        (ptr-ref cam _float 3)   ;; tar-y
-        (ptr-ref cam _float 4)   ;; rotation
+  (list (ptr-ref cam _float 0) ;; off-x
+        (ptr-ref cam _float 1) ;; off-y
+        (ptr-ref cam _float 2) ;; tar-x
+        (ptr-ref cam _float 3) ;; tar-y
+        (ptr-ref cam _float 4) ;; rotation
         (ptr-ref cam _float 5))) ;; zoom
 
 ;; ============================================================
@@ -93,8 +94,8 @@
 ;; ============================================================
 
 (def-ffi/unwrap begin-mode-2d "BeginMode2D"
-  (_fun (c : _camera2d-bytes) -> _void)
-  camera2d->bytes)
+                (_fun (c : _camera2d-bytes) -> _void)
+                camera2d->bytes)
 
 (def-ffi end-mode-2d "EndMode2D" (_fun -> _void))
 
@@ -106,13 +107,13 @@
 
 (define get-screen-to-world-2d
   (let ([f (get-ffi-obj "GetScreenToWorld2D" T:lib
-             (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
+                        (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
     (λ (position camera)
       (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
 
 (define get-world-to-screen-2d
   (let ([f (get-ffi-obj "GetWorldToScreen2D" T:lib
-             (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
+                        (_fun (pos : _vec2-bytes) (cam : _camera2d-bytes) -> (v : _vec2-bytes)))])
     (λ (position camera)
       (vec2-bytes->vec2 (f (vec2->bytes position) (camera2d->bytes camera))))))
 
@@ -147,17 +148,17 @@
                 _float _float _float _float _int))
 
 (define (camera3d->bytes cam)
-  (list (ptr-ref cam _float 0)   ;; pos-x
-        (ptr-ref cam _float 1)   ;; pos-y
-        (ptr-ref cam _float 2)   ;; pos-z
-        (ptr-ref cam _float 3)   ;; tar-x
-        (ptr-ref cam _float 4)   ;; tar-y
-        (ptr-ref cam _float 5)   ;; tar-z
-        (ptr-ref cam _float 6)   ;; up-x
-        (ptr-ref cam _float 7)   ;; up-y
-        (ptr-ref cam _float 8)   ;; up-z
-        (ptr-ref cam _float 9)   ;; fovy
-        (ptr-ref cam _int 10)))  ;; projection (10th int at byte 40)
+  (list (ptr-ref cam _float 0) ;; pos-x
+        (ptr-ref cam _float 1) ;; pos-y
+        (ptr-ref cam _float 2) ;; pos-z
+        (ptr-ref cam _float 3) ;; tar-x
+        (ptr-ref cam _float 4) ;; tar-y
+        (ptr-ref cam _float 5) ;; tar-z
+        (ptr-ref cam _float 6) ;; up-x
+        (ptr-ref cam _float 7) ;; up-y
+        (ptr-ref cam _float 8) ;; up-z
+        (ptr-ref cam _float 9) ;; fovy
+        (ptr-ref cam _int 10))) ;; projection (10th int at byte 40)
 
 ;; Matrix 传值类型 (textures_framebuffer_rendering.c)
 ;; Matrix = 16 floats, 64 字节
@@ -170,7 +171,7 @@
 ;; GetCameraMatrix(Camera camera) -> Matrix
 (define get-camera-matrix
   (let ([f (get-ffi-obj "GetCameraMatrix" T:lib
-             (_fun (c : _camera3d-bytes) -> (m : _matrix-bytes)))])
+                        (_fun (c : _camera3d-bytes) -> (m : _matrix-bytes)))])
     (λ (camera)
       (f (camera3d->bytes camera)))))
 
@@ -180,8 +181,8 @@
 ;; ============================================================
 
 (def-ffi/unwrap begin-mode-3d "BeginMode3D"
-  (_fun (c : _camera3d-bytes) -> _void)
-  camera3d->bytes)
+                (_fun (c : _camera3d-bytes) -> _void)
+                camera3d->bytes)
 
 (def-ffi end-mode-3d "EndMode3D" (_fun -> _void))
 
@@ -196,14 +197,8 @@
 
 (def-ffi draw-grid "DrawGrid" (_fun _int _float -> _void))
 
-;; ============================================================
-;; rlgl 矩阵操作 (core_2d_camera_mouse_zoom.c)
-;; ============================================================
-
-(def-ffi rl-push-matrix  "rlPushMatrix"  (_fun -> _void))
-(def-ffi rl-pop-matrix   "rlPopMatrix"   (_fun -> _void))
-(def-ffi rl-translate-f  "rlTranslatef"  (_fun _float _float _float -> _void))
-(def-ffi rl-rotate-f     "rlRotatef"     (_fun _float _float _float _float -> _void))
+;; rlgl 矩阵操作现在从 rlgl.rkt 统一提供
+;; rl-push-matrix, rl-pop-matrix, rl-translate-f, rl-rotate-f
 
 ;; ============================================================
 ;; 绘制 — 2D 线条 (core_2d_camera.c)
@@ -212,7 +207,7 @@
 
 (define draw-line
   (let ([f (get-ffi-obj "DrawLine" T:lib
-             (_fun _int _int _int _int (c : _color-bytes) -> _void))])
+                        (_fun _int _int _int _int (c : _color-bytes) -> _void))])
     (λ (start-x start-y end-x end-y color)
       (f start-x start-y end-x end-y (color->bytes color)))))
 
@@ -249,13 +244,13 @@
 
 (define set-trace-log-callback
   (get-ffi-obj "SetTraceLogCallback" T:lib
-    (_fun _pointer -> _void)))
+               (_fun _pointer -> _void)))
 
 ;; C 标准库 vsnprintf — 展开 va_list 到字符串缓冲区
 ;; int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 (define vsnprintf
   (get-ffi-obj "vsnprintf" #f
-    (_fun _pointer _int _string _pointer -> _int)))
+               (_fun _pointer _int _string _pointer -> _int)))
 
 ;; ============================================================
 ;; 剪贴板 (core_clipboard_text.c)
@@ -268,42 +263,42 @@
 ;; 文件系统 (core_directory_files.c, core_drop_files.c)
 ;; ============================================================
 
-(def-ffi get-working-directory   "GetWorkingDirectory"   (_fun -> _string))
-(def-ffi get-prev-directory-path "GetPrevDirectoryPath"  (_fun _string -> _string))
-(def-ffi directory-exists?       "DirectoryExists"       (_fun _string -> _stdbool))
+(def-ffi get-working-directory "GetWorkingDirectory" (_fun -> _string))
+(def-ffi get-prev-directory-path "GetPrevDirectoryPath" (_fun _string -> _string))
+(def-ffi directory-exists? "DirectoryExists" (_fun _string -> _stdbool))
 
 ;; 显示器/窗口信息 (core_monitor_detector.c)
 ;; ============================================================
 
-(def-ffi get-monitor-count              "GetMonitorCount"              (_fun -> _int))
-(def-ffi get-current-monitor            "GetCurrentMonitor"            (_fun -> _int))
-(def-ffi get-monitor-width              "GetMonitorWidth"              (_fun _int -> _int))
-(def-ffi get-monitor-height             "GetMonitorHeight"             (_fun _int -> _int))
-(def-ffi get-monitor-physical-width     "GetMonitorPhysicalWidth"      (_fun _int -> _int))
-(def-ffi get-monitor-physical-height    "GetMonitorPhysicalHeight"     (_fun _int -> _int))
-(def-ffi get-monitor-refresh-rate       "GetMonitorRefreshRate"        (_fun _int -> _int))
-(def-ffi get-monitor-name               "GetMonitorName"               (_fun _int -> _string))
-(def-ffi set-window-monitor             "SetWindowMonitor"             (_fun _int -> _void))
+(def-ffi get-monitor-count "GetMonitorCount" (_fun -> _int))
+(def-ffi get-current-monitor "GetCurrentMonitor" (_fun -> _int))
+(def-ffi get-monitor-width "GetMonitorWidth" (_fun _int -> _int))
+(def-ffi get-monitor-height "GetMonitorHeight" (_fun _int -> _int))
+(def-ffi get-monitor-physical-width "GetMonitorPhysicalWidth" (_fun _int -> _int))
+(def-ffi get-monitor-physical-height "GetMonitorPhysicalHeight" (_fun _int -> _int))
+(def-ffi get-monitor-refresh-rate "GetMonitorRefreshRate" (_fun _int -> _int))
+(def-ffi get-monitor-name "GetMonitorName" (_fun _int -> _string))
+(def-ffi set-window-monitor "SetWindowMonitor" (_fun _int -> _void))
 
 (define get-monitor-position
   (let ([f (get-ffi-obj "GetMonitorPosition" T:lib
-             (_fun _int -> (v : _vec2-bytes)))])
+                        (_fun _int -> (v : _vec2-bytes)))])
     (λ (monitor) (vec2-bytes->vec2 (f monitor)))))
 
 (define get-window-position
   (let ([f (get-ffi-obj "GetWindowPosition" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 
-(def-ffi toggle-fullscreen          "ToggleFullscreen"          (_fun -> _void))
-(def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed"  (_fun -> _void))
-(def-ffi is-window-state?           "IsWindowState"             (_fun _uint -> _stdbool))
-(def-ffi set-window-state           "SetWindowState"            (_fun _uint -> _void))
-(def-ffi clear-window-state         "ClearWindowState"          (_fun _uint -> _void))
-(def-ffi minimize-window            "MinimizeWindow"            (_fun -> _void))
-(def-ffi maximize-window            "MaximizeWindow"            (_fun -> _void))
-(def-ffi restore-window             "RestoreWindow"             (_fun -> _void))
+(def-ffi toggle-fullscreen "ToggleFullscreen" (_fun -> _void))
+(def-ffi toggle-borderless-windowed "ToggleBorderlessWindowed" (_fun -> _void))
+(def-ffi is-window-state? "IsWindowState" (_fun _uint -> _stdbool))
+(def-ffi set-window-state "SetWindowState" (_fun _uint -> _void))
+(def-ffi clear-window-state "ClearWindowState" (_fun _uint -> _void))
+(def-ffi minimize-window "MinimizeWindow" (_fun -> _void))
+(def-ffi maximize-window "MaximizeWindow" (_fun -> _void))
+(def-ffi restore-window "RestoreWindow" (_fun -> _void))
 
 ;; ============================================================
 ;; 绘制上下文 (core_basic_window.c)
@@ -316,12 +311,12 @@
 (def-ffi end-drawing "EndDrawing" (_fun -> _void))
 
 (def-ffi/unwrap clear-background "ClearBackground"
-  (_fun (c : _color-bytes) -> _void)
-  color->bytes)
+                (_fun (c : _color-bytes) -> _void)
+                color->bytes)
 
 (define draw-text
   (let ([f (get-ffi-obj "DrawText" T:lib
-             (_fun _string _int _int _int (c : _color-bytes) -> _void))])
+                        (_fun _string _int _int _int (c : _color-bytes) -> _void))])
     (λ (text x y fontSize c)
       (f text x y fontSize (color->bytes c)))))
 
@@ -338,60 +333,60 @@
 ;; 输入 — 键盘 (core_delta_time.c, core_input_keys.c, core_input_mouse.c)
 ;; ============================================================
 
-(def-ffi is-key-pressed        "IsKeyPressed"        (_fun _int -> _stdbool))
-(def-ffi is-key-down           "IsKeyDown"           (_fun _int -> _stdbool))
-(def-ffi is-key-pressed-repeat "IsKeyPressedRepeat"  (_fun _int -> _stdbool))
-(def-ffi is-key-released       "IsKeyReleased"       (_fun _int -> _stdbool))
-(def-ffi is-key-up             "IsKeyUp"             (_fun _int -> _stdbool))
+(def-ffi is-key-pressed "IsKeyPressed" (_fun _int -> _stdbool))
+(def-ffi is-key-down "IsKeyDown" (_fun _int -> _stdbool))
+(def-ffi is-key-pressed-repeat "IsKeyPressedRepeat" (_fun _int -> _stdbool))
+(def-ffi is-key-released "IsKeyReleased" (_fun _int -> _stdbool))
+(def-ffi is-key-up "IsKeyUp" (_fun _int -> _stdbool))
 
-(def-ffi get-key-pressed       "GetKeyPressed"       (_fun -> _int))
-(def-ffi get-char-pressed      "GetCharPressed"      (_fun -> _int))
-(def-ffi get-key-name          "GetKeyName"          (_fun _int -> _string))
-(def-ffi set-exit-key          "SetExitKey"          (_fun _int -> _void))
+(def-ffi get-key-pressed "GetKeyPressed" (_fun -> _int))
+(def-ffi get-char-pressed "GetCharPressed" (_fun -> _int))
+(def-ffi get-key-name "GetKeyName" (_fun _int -> _string))
+(def-ffi set-exit-key "SetExitKey" (_fun _int -> _void))
 
 ;; ============================================================
 ;; 输入 — 鼠标 (core_input_mouse.c, core_input_mouse_wheel.c)
 ;; ============================================================
 
-(def-ffi is-mouse-button-pressed  "IsMouseButtonPressed"  (_fun _int -> _stdbool))
-(def-ffi is-mouse-button-down     "IsMouseButtonDown"     (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-pressed "IsMouseButtonPressed" (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-down "IsMouseButtonDown" (_fun _int -> _stdbool))
 (def-ffi is-mouse-button-released "IsMouseButtonReleased" (_fun _int -> _stdbool))
-(def-ffi is-mouse-button-up       "IsMouseButtonUp"       (_fun _int -> _stdbool))
+(def-ffi is-mouse-button-up "IsMouseButtonUp" (_fun _int -> _stdbool))
 
-(def-ffi get-mouse-x  "GetMouseX"  (_fun -> _int))
-(def-ffi get-mouse-y  "GetMouseY"  (_fun -> _int))
+(def-ffi get-mouse-x "GetMouseX" (_fun -> _int))
+(def-ffi get-mouse-y "GetMouseY" (_fun -> _int))
 
 (define get-mouse-position
   (let ([f (get-ffi-obj "GetMousePosition" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 (define get-mouse-delta
   (let ([f (get-ffi-obj "GetMouseDelta" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 (def-ffi set-mouse-position "SetMousePosition" (_fun _int _int -> _void))
-(def-ffi set-mouse-offset   "SetMouseOffset"   (_fun _int _int -> _void))
-(def-ffi set-mouse-scale    "SetMouseScale"    (_fun _float _float -> _void))
+(def-ffi set-mouse-offset "SetMouseOffset" (_fun _int _int -> _void))
+(def-ffi set-mouse-scale "SetMouseScale" (_fun _float _float -> _void))
 
 ;; ============================================================
 ;; 屏幕信息 (core_2d_camera_mouse_zoom.c)
 ;; ============================================================
 
-(def-ffi get-screen-width  "GetScreenWidth"  (_fun -> _int))
+(def-ffi get-screen-width "GetScreenWidth" (_fun -> _int))
 (def-ffi get-screen-height "GetScreenHeight" (_fun -> _int))
-(def-ffi get-render-width  "GetRenderWidth"  (_fun -> _int))
+(def-ffi get-render-width "GetRenderWidth" (_fun -> _int))
 (def-ffi get-render-height "GetRenderHeight" (_fun -> _int))
 
 (define get-window-scale-dpi
   (let ([f (get-ffi-obj "GetWindowScaleDPI" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 (define get-mouse-wheel-move-v
   (let ([f (get-ffi-obj "GetMouseWheelMoveV" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 (def-ffi set-mouse-cursor "SetMouseCursor" (_fun _int -> _void))
@@ -400,11 +395,11 @@
 ;; 输入 — cursor 可见性 (core_input_mouse.c)
 ;; ============================================================
 
-(def-ffi is-cursor-hidden?  "IsCursorHidden"  (_fun -> _stdbool))
-(def-ffi show-cursor        "ShowCursor"      (_fun -> _void))
-(def-ffi hide-cursor        "HideCursor"      (_fun -> _void))
-(def-ffi enable-cursor      "EnableCursor"    (_fun -> _void))
-(def-ffi disable-cursor     "DisableCursor"   (_fun -> _void))
+(def-ffi is-cursor-hidden? "IsCursorHidden" (_fun -> _stdbool))
+(def-ffi show-cursor "ShowCursor" (_fun -> _void))
+(def-ffi hide-cursor "HideCursor" (_fun -> _void))
+(def-ffi enable-cursor "EnableCursor" (_fun -> _void))
+(def-ffi disable-cursor "DisableCursor" (_fun -> _void))
 (def-ffi is-cursor-on-screen? "IsCursorOnScreen" (_fun -> _stdbool))
 
 ;; ============================================================
@@ -443,11 +438,11 @@
 
 (define _load-random-sequence-ffi
   (get-ffi-obj "LoadRandomSequence" T:lib
-    (_fun _uint _int _int -> _pointer)))
+               (_fun _uint _int _int -> _pointer)))
 
 (define _unload-random-sequence-ffi
   (get-ffi-obj "UnloadRandomSequence" T:lib
-    (_fun _pointer -> _void)))
+               (_fun _pointer -> _void)))
 
 (define (load-random-sequence count min max)
   (let* ([ptr (_load-random-sequence-ffi count min max)]
@@ -460,30 +455,30 @@
 ;; 输入 — 手柄 / gamepad (core_input_gamepad.c)
 ;; ============================================================
 
-(def-ffi is-gamepad-available?    "IsGamepadAvailable"    (_fun _int -> _stdbool))
-(def-ffi get-gamepad-name         "GetGamepadName"        (_fun _int -> _string))
+(def-ffi is-gamepad-available? "IsGamepadAvailable" (_fun _int -> _stdbool))
+(def-ffi get-gamepad-name "GetGamepadName" (_fun _int -> _string))
 (def-ffi is-gamepad-button-pressed "IsGamepadButtonPressed" (_fun _int _int -> _stdbool))
-(def-ffi is-gamepad-button-down   "IsGamepadButtonDown"   (_fun _int _int -> _stdbool))
+(def-ffi is-gamepad-button-down "IsGamepadButtonDown" (_fun _int _int -> _stdbool))
 (def-ffi is-gamepad-button-released "IsGamepadButtonReleased" (_fun _int _int -> _stdbool))
-(def-ffi is-gamepad-button-up     "IsGamepadButtonUp"     (_fun _int _int -> _stdbool))
+(def-ffi is-gamepad-button-up "IsGamepadButtonUp" (_fun _int _int -> _stdbool))
 (def-ffi get-gamepad-button-pressed "GetGamepadButtonPressed" (_fun -> _int))
-(def-ffi get-gamepad-axis-count   "GetGamepadAxisCount"   (_fun _int -> _int))
+(def-ffi get-gamepad-axis-count "GetGamepadAxisCount" (_fun _int -> _int))
 (def-ffi get-gamepad-axis-movement "GetGamepadAxisMovement" (_fun _int _int -> _float))
-(def-ffi set-gamepad-mappings     "SetGamepadMappings"    (_fun _string -> _int))
-(def-ffi set-gamepad-vibration    "SetGamepadVibration"   (_fun _int _float _float _float -> _void))
+(def-ffi set-gamepad-mappings "SetGamepadMappings" (_fun _string -> _int))
+(def-ffi set-gamepad-vibration "SetGamepadVibration" (_fun _int _float _float _float -> _void))
 
 ;; ============================================================
 ;; 输入 — 触摸 (core_input_multitouch.c, core_input_gestures.c)
 ;; ============================================================
 
-(def-ffi get-touch-x          "GetTouchX"          (_fun -> _int))
-(def-ffi get-touch-y          "GetTouchY"          (_fun -> _int))
-(def-ffi get-touch-point-id   "GetTouchPointId"    (_fun _int -> _int))
+(def-ffi get-touch-x "GetTouchX" (_fun -> _int))
+(def-ffi get-touch-y "GetTouchY" (_fun -> _int))
+(def-ffi get-touch-point-id "GetTouchPointId" (_fun _int -> _int))
 (def-ffi get-touch-point-count "GetTouchPointCount" (_fun -> _int))
 
 (define get-touch-position
   (let ([f (get-ffi-obj "GetTouchPosition" T:lib
-             (_fun _int -> (v : _vec2-bytes)))])
+                        (_fun _int -> (v : _vec2-bytes)))])
     (λ (index) (vec2-bytes->vec2 (f index)))))
 
 ;; ============================================================
@@ -493,7 +488,7 @@
 
 (define fade
   (let ([f (get-ffi-obj "Fade" T:lib
-             (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
+                        (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
     (λ (color alpha)
       (let ([lst (f (color->bytes color) alpha)])
         (let ([c (malloc T:_Color 'atomic)])
@@ -507,21 +502,21 @@
 ;; 输入 — 手势 (core_input_gestures.c)
 ;; ============================================================
 
-(def-ffi set-gestures-enabled    "SetGesturesEnabled"    (_fun _uint -> _void))
-(def-ffi is-gesture-detected?    "IsGestureDetected"     (_fun _uint -> _stdbool))
-(def-ffi get-gesture-detected    "GetGestureDetected"    (_fun -> _int))
+(def-ffi set-gestures-enabled "SetGesturesEnabled" (_fun _uint -> _void))
+(def-ffi is-gesture-detected? "IsGestureDetected" (_fun _uint -> _stdbool))
+(def-ffi get-gesture-detected "GetGestureDetected" (_fun -> _int))
 (def-ffi get-gesture-hold-duration "GetGestureHoldDuration" (_fun -> _float))
-(def-ffi get-gesture-drag-angle  "GetGestureDragAngle"   (_fun -> _float))
-(def-ffi get-gesture-pinch-angle "GetGesturePinchAngle"  (_fun -> _float))
+(def-ffi get-gesture-drag-angle "GetGestureDragAngle" (_fun -> _float))
+(def-ffi get-gesture-pinch-angle "GetGesturePinchAngle" (_fun -> _float))
 
 (define get-gesture-drag-vector
   (let ([f (get-ffi-obj "GetGestureDragVector" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 (define get-gesture-pinch-vector
   (let ([f (get-ffi-obj "GetGesturePinchVector" T:lib
-             (_fun -> (v : _vec2-bytes)))])
+                        (_fun -> (v : _vec2-bytes)))])
     (λ () (vec2-bytes->vec2 (f)))))
 
 ;; ============================================================
@@ -563,7 +558,7 @@
 
 (define get-screen-to-world-ray
   (let ([f (get-ffi-obj "GetScreenToWorldRay" T:lib
-             (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) -> (r : _ray-bytes)))])
+                        (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) -> (r : _ray-bytes)))])
     (λ (position camera)
       (let ([lst (f (vec2->bytes position) (camera3d->bytes camera))])
         (let ([r (malloc T:_Ray 'atomic)])
@@ -590,7 +585,7 @@
 
 (define get-world-to-screen
   (let ([f (get-ffi-obj "GetWorldToScreen" T:lib
-             (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) -> (v : _vec2-bytes)))])
+                        (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) -> (v : _vec2-bytes)))])
     (λ (position camera)
       (vec2-bytes->vec2 (f (vec3->bytes position) (camera3d->bytes camera))))))
 
@@ -622,10 +617,10 @@
 ;; 返回干净的 Racket 字符串列表（无需手动释放 C 内存）
 (define load-dropped-files
   (let ([load-ffi (get-ffi-obj "LoadDroppedFiles" T:lib
-                    (_fun -> (lst : _filepathlist-bytes)))]
+                               (_fun -> (lst : _filepathlist-bytes)))]
         [unload-ffi (get-ffi-obj "UnloadDroppedFiles" T:lib
-                      (_fun (lst : _filepathlist-bytes) -> _void))]
-        [tmp (malloc _pointer 'atomic)])  ;; char* -> Racket string temp buffer
+                                 (_fun (lst : _filepathlist-bytes) -> _void))]
+        [tmp (malloc _pointer 'atomic)]) ;; char* -> Racket string temp buffer
     (lambda ()
       (let* ([raw (load-ffi)]
              [count (car raw)]
@@ -640,8 +635,8 @@
                         (ptr-set! tmp _pointer 0 cstr)
                         (ptr-ref tmp _string))
                       "")))])
-        (unload-ffi raw)   ;; free C memory immediately
-        paths))))          ;; return clean Racket string list
+        (unload-ffi raw) ;; free C memory immediately
+        paths)))) ;; return clean Racket string list
 
 ;; ============================================================
 ;; LoadDirectoryFilesEx (core_directory_files.c)
@@ -651,9 +646,9 @@
 
 (define load-directory-files-ex
   (let ([load-ffi (get-ffi-obj "LoadDirectoryFilesEx" T:lib
-                    (_fun _string _string _stdbool -> (lst : _filepathlist-bytes)))]
+                               (_fun _string _string _stdbool -> (lst : _filepathlist-bytes)))]
         [unload-ffi (get-ffi-obj "UnloadDirectoryFiles" T:lib
-                      (_fun (lst : _filepathlist-bytes) -> _void))]
+                                 (_fun (lst : _filepathlist-bytes) -> _void))]
         [tmp (malloc _pointer 'atomic)])
     (lambda (base-path filter scan-subdirs?)
       (let* ([raw (load-ffi base-path filter scan-subdirs?)]
@@ -682,13 +677,13 @@
 ;; LoadImageFromScreen(void) -> Image
 (define load-image-from-screen
   (let ([f (get-ffi-obj "LoadImageFromScreen" T:lib
-             (_fun -> (img : _image-bytes)))])
+                        (_fun -> (img : _image-bytes)))])
     (lambda () (f))))
 
 ;; UnloadImage(Image image) -> void
 (define unload-image
   (let ([f (get-ffi-obj "UnloadImage" T:lib
-             (_fun (img : _image-bytes) -> _void))])
+                        (_fun (img : _image-bytes) -> _void))])
     (lambda (img) (f img))))
 
 ;; GetApplicationDirectory(void) -> const char *
@@ -697,7 +692,7 @@
 ;; ExportImage(Image image, const char *fileName) -> bool
 (define export-image
   (let ([f (get-ffi-obj "ExportImage" T:lib
-             (_fun (i : _image-bytes) _string -> _stdbool))])
+                        (_fun (i : _image-bytes) _string -> _stdbool))])
     (lambda (img filename) (f img filename))))
 
 ;; ============================================================
@@ -711,30 +706,30 @@
 
 (define load-shader
   (let ([f (get-ffi-obj "LoadShader" T:lib
-             (_fun _string _string -> (s : _shader-bytes)))])
+                        (_fun _string _string -> (s : _shader-bytes)))])
     (lambda (vs-filename fs-filename) (f vs-filename fs-filename))))
 
 (define unload-shader
   (let ([f (get-ffi-obj "UnloadShader" T:lib
-             (_fun (s : _shader-bytes) -> _void))])
+                        (_fun (s : _shader-bytes) -> _void))])
     (lambda (shader) (f shader))))
 
 (define get-shader-location
   (let ([f (get-ffi-obj "GetShaderLocation" T:lib
-             (_fun (s : _shader-bytes) _string -> _int))])
+                        (_fun (s : _shader-bytes) _string -> _int))])
     (lambda (shader uniform-name) (f shader uniform-name))))
 
 ;; SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType)
 ;; value 是 void*，需由调用方提供正确类型的数据指针
 (define set-shader-value
   (let ([f (get-ffi-obj "SetShaderValue" T:lib
-             (_fun (s : _shader-bytes) _int _pointer _int -> _void))])
+                        (_fun (s : _shader-bytes) _int _pointer _int -> _void))])
     (lambda (shader loc-index value uniform-type)
       (f shader loc-index value uniform-type))))
 
 (define begin-shader-mode
   (let ([f (get-ffi-obj "BeginShaderMode" T:lib
-             (_fun (s : _shader-bytes) -> _void))])
+                        (_fun (s : _shader-bytes) -> _void))])
     (lambda (shader) (f shader))))
 
 (define end-shader-mode
@@ -768,46 +763,46 @@
 ;;   float lensDistortionValues[4], chromaAbCorrection[4]
 (define _vrdeviceinfo-bytes
   (_list-struct _int _int
-               _float _float _float _float _float
-               _float _float _float _float
-               _float _float _float _float))
+                _float _float _float _float _float
+                _float _float _float _float
+                _float _float _float _float))
 
 ;; VrStereoConfig 传值类型: 76 字段 = 304 字节
 ;;   2x Matrix (每 Matrix 16 floats) + 6x float[2]
 (define _vrstereoconfig-bytes
   (_list-struct
-   ;; projection[0]: 16 floats
-   _float _float _float _float _float _float _float _float
-   _float _float _float _float _float _float _float _float
-   ;; projection[1]: 16 floats
-   _float _float _float _float _float _float _float _float
-   _float _float _float _float _float _float _float _float
-   ;; viewOffset[0]: 16 floats
-   _float _float _float _float _float _float _float _float
-   _float _float _float _float _float _float _float _float
-   ;; viewOffset[1]: 16 floats
-   _float _float _float _float _float _float _float _float
-   _float _float _float _float _float _float _float _float
-   ;; leftLensCenter[2], rightLensCenter[2]
-   _float _float _float _float
-   ;; leftScreenCenter[2], rightScreenCenter[2]
-   _float _float _float _float
-   ;; scale[2], scaleIn[2]
-   _float _float _float _float))
+    ;; projection[0]: 16 floats
+    _float _float _float _float _float _float _float _float
+    _float _float _float _float _float _float _float _float
+    ;; projection[1]: 16 floats
+    _float _float _float _float _float _float _float _float
+    _float _float _float _float _float _float _float _float
+    ;; viewOffset[0]: 16 floats
+    _float _float _float _float _float _float _float _float
+    _float _float _float _float _float _float _float _float
+    ;; viewOffset[1]: 16 floats
+    _float _float _float _float _float _float _float _float
+    _float _float _float _float _float _float _float _float
+    ;; leftLensCenter[2], rightLensCenter[2]
+    _float _float _float _float
+    ;; leftScreenCenter[2], rightScreenCenter[2]
+    _float _float _float _float
+    ;; scale[2], scaleIn[2]
+    _float _float _float _float))
 
 (define load-vr-stereo-config
   (let ([f (get-ffi-obj "LoadVrStereoConfig" T:lib
-             (_fun (dev : _vrdeviceinfo-bytes) -> (cfg : _vrstereoconfig-bytes)))])
+                        (_fun (dev : _vrdeviceinfo-bytes) -> (cfg : _vrstereoconfig-bytes)))])
     (lambda (device) (f device))))
 
 (define unload-vr-stereo-config
   (let ([f (get-ffi-obj "UnloadVrStereoConfig" T:lib
-             (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+                        (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
     (lambda (config) (f config))))
 
 (define begin-vr-stereo-mode
   (let ([f (get-ffi-obj "BeginVrStereoMode" T:lib
-             (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+                        (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
     (lambda (config) (f config))))
 
 (define end-vr-stereo-mode
@@ -826,7 +821,7 @@
 ;; raylib-racket/automation.rkt 中有对应的 struct 包装版本
 (define play-automation-event
   (get-ffi-obj "PlayAutomationEvent" T:lib
-    (_fun (evt : _automation-event-bytes) -> _void)))
+               (_fun (evt : _automation-event-bytes) -> _void)))
 ;; ============================================================
 ;; Hash 计算 (core_compute_hash.c)
 ;;   ComputeCRC32(data, dataSize) → unsigned int
@@ -875,7 +870,7 @@
 ;; encode-data-base64: 用 _pointer 接收返回值，手动转字符串再释放
 (define %encode-data-base64-raw
   (get-ffi-obj "EncodeDataBase64" T:lib
-    (_fun _bytes _int _pointer -> _pointer)))
+               (_fun _bytes _int _pointer -> _pointer)))
 
 (define (encode-data-base64 data data-size)
   (let ([out-size-buf (malloc _int 1 'atomic)]
@@ -890,7 +885,7 @@
             (let ([racket-str (ptr-ref tmp _string)])
               ;; 释放 C 内存
               (let ([mem-free (get-ffi-obj "MemFree" T:lib
-                                (_fun _pointer -> _void))])
+                                           (_fun _pointer -> _void))])
                 (mem-free cstr))
               racket-str))))))
 
@@ -942,13 +937,13 @@
 
 (define get-font-default
   (let ([f (get-ffi-obj "GetFontDefault" T:lib
-             (_fun -> (font : _font-bytes)))])
+                        (_fun -> (font : _font-bytes)))])
     (λ () (f))))
 
 (define measure-text-ex
   (let ([f (get-ffi-obj "MeasureTextEx" T:lib
-             (_fun (font : _font-bytes) _string _float _float
-                   -> (v : _vec2-bytes)))])
+                        (_fun (font : _font-bytes) _string _float _float
+                              -> (v : _vec2-bytes)))])
     (λ (font text font-size spacing)
       (vec2-bytes->vec2 (f font text font-size spacing)))))
 
@@ -959,7 +954,7 @@
 
 (define color-alpha
   (let ([f (get-ffi-obj "ColorAlpha" T:lib
-             (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
+                        (_fun (c : _color-bytes) _float -> (v : _color-bytes)))])
     (λ (color alpha)
       (let ([lst (f (color->bytes color) alpha)])
         (let ([c (malloc T:_Color 'atomic)])
@@ -976,7 +971,7 @@
 
 (define color-from-hsv
   (let ([f (get-ffi-obj "ColorFromHSV" T:lib
-             (_fun _float _float _float -> (v : _color-bytes)))])
+                        (_fun _float _float _float -> (v : _color-bytes)))])
     (λ (hue saturation value)
       (let ([lst (f hue saturation value)])
         (let ([c (malloc T:_Color 'atomic)])
@@ -990,39 +985,36 @@
 ;; rlgl 函数 (shapes_top_down_lights.c)
 ;; rlSetBlendMode(int mode) / rlSetBlendFactors(int sf, int df, int eq)
 ;; rlDrawRenderBatchActive(void)
-;; ============================================================
-
-(def-ffi rl-set-blend-mode        "rlSetBlendMode"        (_fun _int -> _void))
-(def-ffi rl-set-blend-factors     "rlSetBlendFactors"     (_fun _int _int _int -> _void))
-(def-ffi rl-draw-render-batch-active "rlDrawRenderBatchActive" (_fun -> _void))
+;; rl-set-blend-mode, rl-set-blend-factors, rl-draw-render-batch-active
+;; 现在从 rlgl.rkt 统一提供
 
 ;; ============================================================
 ;; 窗口状态查询
 ;; ============================================================
 
-(def-ffi is-window-ready?      "IsWindowReady"      (_fun -> _stdbool))
+(def-ffi is-window-ready? "IsWindowReady" (_fun -> _stdbool))
 (def-ffi is-window-fullscreen? "IsWindowFullscreen" (_fun -> _stdbool))
-(def-ffi is-window-hidden?     "IsWindowHidden"     (_fun -> _stdbool))
-(def-ffi is-window-minimized?  "IsWindowMinimized"  (_fun -> _stdbool))
-(def-ffi is-window-maximized?  "IsWindowMaximized"  (_fun -> _stdbool))
-(def-ffi is-window-focused?    "IsWindowFocused"    (_fun -> _stdbool))
+(def-ffi is-window-hidden? "IsWindowHidden" (_fun -> _stdbool))
+(def-ffi is-window-minimized? "IsWindowMinimized" (_fun -> _stdbool))
+(def-ffi is-window-maximized? "IsWindowMaximized" (_fun -> _stdbool))
+(def-ffi is-window-focused? "IsWindowFocused" (_fun -> _stdbool))
 
 ;; ============================================================
 ;; 窗口设置
 ;; ============================================================
 
-(def-ffi set-window-title     "SetWindowTitle"     (_fun _string -> _void))
-(def-ffi set-window-position  "SetWindowPosition"  (_fun _int _int -> _void))
-(def-ffi set-window-max-size  "SetWindowMaxSize"   (_fun _int _int -> _void))
-(def-ffi set-window-size      "SetWindowSize"      (_fun _int _int -> _void))
-(def-ffi set-window-opacity   "SetWindowOpacity"   (_fun _float -> _void))
-(def-ffi set-window-focused   "SetWindowFocused"   (_fun -> _void))
-(def-ffi get-window-handle    "GetWindowHandle"    (_fun -> _pointer))
+(def-ffi set-window-title "SetWindowTitle" (_fun _string -> _void))
+(def-ffi set-window-position "SetWindowPosition" (_fun _int _int -> _void))
+(def-ffi set-window-max-size "SetWindowMaxSize" (_fun _int _int -> _void))
+(def-ffi set-window-size "SetWindowSize" (_fun _int _int -> _void))
+(def-ffi set-window-opacity "SetWindowOpacity" (_fun _float -> _void))
+(def-ffi set-window-focused "SetWindowFocused" (_fun -> _void))
+(def-ffi get-window-handle "GetWindowHandle" (_fun -> _pointer))
 
 ;; SetWindowIcon(Image image)
 (define set-window-icon
   (let ([f (get-ffi-obj "SetWindowIcon" T:lib
-             (_fun (img : _image-bytes) -> _void))])
+                        (_fun (img : _image-bytes) -> _void))])
     (lambda (image) (f image))))
 
 ;; SetWindowIcons(Image *images, int count)
@@ -1032,13 +1024,13 @@
 ;; 剪贴板 / 事件等待
 ;; ============================================================
 
-(def-ffi enable-event-waiting  "EnableEventWaiting"  (_fun -> _void))
+(def-ffi enable-event-waiting "EnableEventWaiting" (_fun -> _void))
 (def-ffi disable-event-waiting "DisableEventWaiting" (_fun -> _void))
 
 ;; GetClipboardImage(void) -> Image
 (define get-clipboard-image
   (let ([f (get-ffi-obj "GetClipboardImage" T:lib
-             (_fun -> (img : _image-bytes)))])
+                        (_fun -> (img : _image-bytes)))])
     (lambda () (f))))
 
 ;; ============================================================
@@ -1046,14 +1038,14 @@
 ;; ============================================================
 
 (def-ffi begin-blend-mode "BeginBlendMode" (_fun _int -> _void))
-(def-ffi end-blend-mode   "EndBlendMode"   (_fun -> _void))
+(def-ffi end-blend-mode "EndBlendMode" (_fun -> _void))
 
 ;; ============================================================
 ;; 截图 / URL / 日志
 ;; ============================================================
 
-(def-ffi take-screenshot    "TakeScreenshot"    (_fun _string -> _void))
-(def-ffi open-url           "OpenURL"           (_fun _string -> _void))
+(def-ffi take-screenshot "TakeScreenshot" (_fun _string -> _void))
+(def-ffi open-url "OpenURL" (_fun _string -> _void))
 (def-ffi set-trace-log-level "SetTraceLogLevel" (_fun _int -> _void))
 ;; TraceLog(int logLevel, const char *text, ...) — 可变参数, 跳过
 
@@ -1061,41 +1053,41 @@
 ;; 内存
 ;; ============================================================
 
-(def-ffi mem-alloc   "MemAlloc"   (_fun _uint -> _pointer))
+(def-ffi mem-alloc "MemAlloc" (_fun _uint -> _pointer))
 (def-ffi mem-realloc "MemRealloc" (_fun _pointer _uint -> _pointer))
-(def-ffi mem-free    "MemFree"    (_fun _pointer -> _void))
+(def-ffi mem-free "MemFree" (_fun _pointer -> _void))
 
 ;; ============================================================
 ;; 文件系统
 ;; ============================================================
 
-(def-ffi file-exists?              "FileExists"              (_fun _string -> _stdbool))
-(def-ffi is-file-extension         "IsFileExtension"         (_fun _string _string -> _stdbool))
-(def-ffi get-file-length           "GetFileLength"           (_fun _string -> _int))
-(def-ffi get-file-mod-time         "GetFileModTime"          (_fun _string -> _long))
-(def-ffi get-file-extension        "GetFileExtension"        (_fun _string -> _string))
-(def-ffi get-file-name             "GetFileName"             (_fun _string -> _string))
-(def-ffi get-file-name-without-ext "GetFileNameWithoutExt"   (_fun _string -> _string))
-(def-ffi get-directory-path        "GetDirectoryPath"        (_fun _string -> _string))
-(def-ffi make-directory            "MakeDirectory"           (_fun _string -> _int))
-(def-ffi change-directory          "ChangeDirectory"         (_fun _string -> _stdbool))
-(def-ffi is-path-file?             "IsPathFile"              (_fun _string -> _stdbool))
-(def-ffi is-file-name-valid        "IsFileNameValid"         (_fun _string -> _stdbool))
-(def-ffi file-rename               "FileRename"              (_fun _string _string -> _int))
-(def-ffi file-remove               "FileRemove"              (_fun _string -> _int))
-(def-ffi file-copy                 "FileCopy"                (_fun _string _string -> _int))
-(def-ffi file-move                 "FileMove"                (_fun _string _string -> _int))
-(def-ffi file-text-replace         "FileTextReplace"         (_fun _string _string _string -> _int))
-(def-ffi file-text-find-index      "FileTextFindIndex"       (_fun _string _string -> _int))
-(def-ffi get-directory-file-count  "GetDirectoryFileCount"   (_fun _string -> _uint))
+(def-ffi file-exists? "FileExists" (_fun _string -> _stdbool))
+(def-ffi is-file-extension "IsFileExtension" (_fun _string _string -> _stdbool))
+(def-ffi get-file-length "GetFileLength" (_fun _string -> _int))
+(def-ffi get-file-mod-time "GetFileModTime" (_fun _string -> _long))
+(def-ffi get-file-extension "GetFileExtension" (_fun _string -> _string))
+(def-ffi get-file-name "GetFileName" (_fun _string -> _string))
+(def-ffi get-file-name-without-ext "GetFileNameWithoutExt" (_fun _string -> _string))
+(def-ffi get-directory-path "GetDirectoryPath" (_fun _string -> _string))
+(def-ffi make-directory "MakeDirectory" (_fun _string -> _int))
+(def-ffi change-directory "ChangeDirectory" (_fun _string -> _stdbool))
+(def-ffi is-path-file? "IsPathFile" (_fun _string -> _stdbool))
+(def-ffi is-file-name-valid "IsFileNameValid" (_fun _string -> _stdbool))
+(def-ffi file-rename "FileRename" (_fun _string _string -> _int))
+(def-ffi file-remove "FileRemove" (_fun _string -> _int))
+(def-ffi file-copy "FileCopy" (_fun _string _string -> _int))
+(def-ffi file-move "FileMove" (_fun _string _string -> _int))
+(def-ffi file-text-replace "FileTextReplace" (_fun _string _string _string -> _int))
+(def-ffi file-text-find-index "FileTextFindIndex" (_fun _string _string -> _int))
+(def-ffi get-directory-file-count "GetDirectoryFileCount" (_fun _string -> _uint))
 (def-ffi get-directory-file-count-ex "GetDirectoryFileCountEx" (_fun _string _string _stdbool -> _uint))
-(def-ffi save-file-text            "SaveFileText"            (_fun _string _string -> _stdbool))
-(def-ffi unload-file-data          "UnloadFileData"          (_fun _pointer -> _void))
+(def-ffi save-file-text "SaveFileText" (_fun _string _string -> _stdbool))
+(def-ffi unload-file-data "UnloadFileData" (_fun _pointer -> _void))
 
 ;; LoadFileData(fileName, *dataSize) -> (values pointer size)
 (define load-file-data
   (let ([f (get-ffi-obj "LoadFileData" T:lib
-             (_fun _string _pointer -> _pointer))])
+                        (_fun _string _pointer -> _pointer))])
     (lambda (filename)
       (let ([size-buf (malloc _int 1 'atomic)])
         (let ([ptr (f filename size-buf)])
@@ -1106,21 +1098,21 @@
 ;; SaveFileData(fileName, data, dataSize) -> bool
 (define save-file-data
   (let ([f (get-ffi-obj "SaveFileData" T:lib
-             (_fun _string _pointer _int -> _stdbool))])
+                        (_fun _string _pointer _int -> _stdbool))])
     (lambda (filename data-ptr data-size) (f filename data-ptr data-size))))
 
 ;; ExportDataAsCode(data, dataSize, fileName) -> bool
 (define export-data-as-code
   (let ([f (get-ffi-obj "ExportDataAsCode" T:lib
-             (_fun _pointer _int _string -> _stdbool))])
+                        (_fun _pointer _int _string -> _stdbool))])
     (lambda (data-ptr data-size filename) (f data-ptr data-size filename))))
 
 ;; LoadDirectoryFiles(dirPath) -> list of strings
 (define load-directory-files
   (let ([f (get-ffi-obj "LoadDirectoryFiles" T:lib
-             (_fun _string -> (lst : _filepathlist-bytes)))]
+                        (_fun _string -> (lst : _filepathlist-bytes)))]
         [unload-ffi (get-ffi-obj "UnloadDirectoryFiles" T:lib
-                      (_fun (lst : _filepathlist-bytes) -> _void))]
+                                 (_fun (lst : _filepathlist-bytes) -> _void))]
         [tmp (malloc _pointer 'atomic)])
     (lambda (dir-path)
       (let* ([raw (f dir-path)]
@@ -1131,7 +1123,7 @@
                 (let ([cstr (ptr-ref paths-ptr _pointer i)])
                   (if cstr
                       (begin (ptr-set! tmp _pointer 0 cstr)
-                             (ptr-ref tmp _string))
+                        (ptr-ref tmp _string))
                       "")))])
         (unload-ffi raw)
         paths))))
@@ -1153,31 +1145,31 @@
 
 (define load-shader-from-memory
   (let ([f (get-ffi-obj "LoadShaderFromMemory" T:lib
-             (_fun _string _string -> (s : _shader-bytes)))])
+                        (_fun _string _string -> (s : _shader-bytes)))])
     (lambda (vs-code fs-code) (f vs-code fs-code))))
 
 (define is-shader-valid
   (let ([f (get-ffi-obj "IsShaderValid" T:lib
-             (_fun (s : _shader-bytes) -> _stdbool))])
+                        (_fun (s : _shader-bytes) -> _stdbool))])
     (lambda (shader) (f shader))))
 
 (define get-shader-location-attrib
   (let ([f (get-ffi-obj "GetShaderLocationAttrib" T:lib
-             (_fun (s : _shader-bytes) _string -> _int))])
+                        (_fun (s : _shader-bytes) _string -> _int))])
     (lambda (shader attrib-name) (f shader attrib-name))))
 
 (define set-shader-value-v
   (get-ffi-obj "SetShaderValueV" T:lib
-    (_fun (s : _shader-bytes) _int _pointer _int _int -> _void)))
+               (_fun (s : _shader-bytes) _int _pointer _int _int -> _void)))
 
 (define set-shader-value-matrix
   (let ([f (get-ffi-obj "SetShaderValueMatrix" T:lib
-             (_fun (s : _shader-bytes) _int (m : _matrix-bytes) -> _void))])
+                        (_fun (s : _shader-bytes) _int (m : _matrix-bytes) -> _void))])
     (lambda (shader loc-index mat) (f shader loc-index mat))))
 
 (define set-shader-value-texture
   (let ([f (get-ffi-obj "SetShaderValueTexture" T:lib
-             (_fun (s : _shader-bytes) _int (t : _texture-bytes) -> _void))])
+                        (_fun (s : _shader-bytes) _int (t : _texture-bytes) -> _void))])
     (lambda (shader loc-index texture) (f shader loc-index texture))))
 
 ;; ============================================================
@@ -1186,7 +1178,7 @@
 
 (define get-screen-to-world-ray-ex
   (let ([f (get-ffi-obj "GetScreenToWorldRayEx" T:lib
-             (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) _int _int -> (r : _ray-bytes)))])
+                        (_fun (pos : _vec2-bytes) (cam : _camera3d-bytes) _int _int -> (r : _ray-bytes)))])
     (lambda (position camera width height)
       (let ([lst (f (vec2->bytes position) (camera3d->bytes camera) width height)])
         (let ([r (malloc T:_Ray 'atomic)])
@@ -1198,13 +1190,13 @@
 
 (define get-world-to-screen-ex
   (let ([f (get-ffi-obj "GetWorldToScreenEx" T:lib
-             (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) _int _int -> (v : _vec2-bytes)))])
+                        (_fun (pos : _vec3-bytes) (cam : _camera3d-bytes) _int _int -> (v : _vec2-bytes)))])
     (lambda (position camera width height)
       (vec2-bytes->vec2 (f (vec3->bytes position) (camera3d->bytes camera) width height)))))
 
 (define get-camera-matrix-2d
   (let ([f (get-ffi-obj "GetCameraMatrix2D" T:lib
-             (_fun (cam : _camera2d-bytes) -> (m : _matrix-bytes)))])
+                        (_fun (cam : _camera2d-bytes) -> (m : _matrix-bytes)))])
     (lambda (camera) (f (camera2d->bytes camera)))))
 
 ;; ============================================================
@@ -1213,7 +1205,7 @@
 
 (define update-camera-pro
   (let ([f (get-ffi-obj "UpdateCameraPro" T:lib
-             (_fun _pointer (mov : _vec3-bytes) (rot : _vec3-bytes) _float -> _void))])
+                        (_fun _pointer (mov : _vec3-bytes) (rot : _vec3-bytes) _float -> _void))])
     (lambda (camera movement rotation zoom)
       (f camera (vec3->bytes movement) (vec3->bytes rotation) zoom))))
 
@@ -1223,7 +1215,7 @@
 
 (define compress-data
   (let ([f (get-ffi-obj "CompressData" T:lib
-             (_fun _pointer _int _pointer -> _pointer))])
+                        (_fun _pointer _int _pointer -> _pointer))])
     (lambda (data-ptr data-size)
       (let ([out-size (malloc _int 1 'atomic)])
         (let ([result (f data-ptr data-size out-size)])
@@ -1231,7 +1223,7 @@
 
 (define decompress-data
   (let ([f (get-ffi-obj "DecompressData" T:lib
-             (_fun _pointer _int _pointer -> _pointer))])
+                        (_fun _pointer _int _pointer -> _pointer))])
     (lambda (comp-data-ptr comp-data-size)
       (let ([out-size (malloc _int 1 'atomic)])
         (let ([result (f comp-data-ptr comp-data-size out-size)])
@@ -1239,7 +1231,7 @@
 
 (define decode-data-base64
   (let ([f (get-ffi-obj "DecodeDataBase64" T:lib
-             (_fun _string _pointer -> _pointer))])
+                        (_fun _string _pointer -> _pointer))])
     (lambda (text)
       (let ([out-size (malloc _int 1 'atomic)])
         (let ([result (f text out-size)])
@@ -1247,18 +1239,18 @@
 
 (define load-automation-event-list
   (get-ffi-obj "LoadAutomationEventList" T:lib
-    (_fun _string -> _pointer)))
+               (_fun _string -> _pointer)))
 
 (def-ffi unload-automation-event-list "UnloadAutomationEventList" (_fun _pointer -> _void))
 
 (define export-automation-event-list
   (get-ffi-obj "ExportAutomationEventList" T:lib
-    (_fun _pointer _string -> _stdbool)))
+               (_fun _pointer _string -> _stdbool)))
 
-(def-ffi set-automation-event-list      "SetAutomationEventList"      (_fun _pointer -> _void))
+(def-ffi set-automation-event-list "SetAutomationEventList" (_fun _pointer -> _void))
 (def-ffi set-automation-event-base-frame "SetAutomationEventBaseFrame" (_fun _int -> _void))
 (def-ffi start-automation-event-recording "StartAutomationEventRecording" (_fun -> _void))
-(def-ffi stop-automation-event-recording  "StopAutomationEventRecording"  (_fun -> _void))
+(def-ffi stop-automation-event-recording "StopAutomationEventRecording" (_fun -> _void))
 
 ;; ============================================================
 ;; ColorIsEqual
@@ -1266,7 +1258,7 @@
 
 (define color-is-equal
   (let ([f (get-ffi-obj "ColorIsEqual" T:lib
-             (_fun (c1 : _color-bytes) (c2 : _color-bytes) -> _stdbool))])
+                        (_fun (c1 : _color-bytes) (c2 : _color-bytes) -> _stdbool))])
     (lambda (col1 col2) (f (color->bytes col1) (color->bytes col2)))))
 
 ;; ============================================================
@@ -1274,194 +1266,189 @@
 ;; ============================================================
 
 (provide
- ;; 宏（供其他模块用）
- def-ffi def-ffi/unwrap
+  ;; 宏（供其他模块用）
+  def-ffi def-ffi/unwrap
 
- ;; 传值辅助（供其他模块用）
- _color-bytes color->bytes
- _vec2-bytes vec2->bytes vec2-bytes->vec2
- _rect-bytes rect->bytes rect-bytes->rect
- _automation-event-bytes
- _camera2d-bytes camera2d->bytes
- _vec3-bytes vec3->bytes vec3-bytes->vec3
- _camera3d-bytes camera3d->bytes
- _ray-bytes ray->bytes
- _bounding-box-bytes bounding-box->bytes
- _ray-collision-bytes
- _filepathlist-bytes
- _image-bytes
- _shader-bytes
- _matrix-bytes
- _vrdeviceinfo-bytes
- _vrstereoconfig-bytes
+  ;; 传值辅助（供其他模块用）
+  _color-bytes color->bytes
+  _vec2-bytes vec2->bytes vec2-bytes->vec2
+  _rect-bytes rect->bytes rect-bytes->rect
+  _automation-event-bytes
+  _camera2d-bytes camera2d->bytes
+  _vec3-bytes vec3->bytes vec3-bytes->vec3
+  _camera3d-bytes camera3d->bytes
+  _ray-bytes ray->bytes
+  _bounding-box-bytes bounding-box->bytes
+  _ray-collision-bytes
+  _filepathlist-bytes
+  _image-bytes
+  _shader-bytes
+  _matrix-bytes
+  _vrdeviceinfo-bytes
+  _vrstereoconfig-bytes
 
- ;; 窗口
- init-window close-window window-should-close? set-target-fps
- toggle-fullscreen toggle-borderless-windowed
- is-window-state? set-window-state clear-window-state
- minimize-window maximize-window restore-window set-window-min-size
- is-window-resized?
- get-monitor-count get-current-monitor get-monitor-position get-monitor-name
- get-monitor-width get-monitor-height
- get-monitor-physical-width get-monitor-physical-height
- get-monitor-refresh-rate set-window-monitor get-window-position
- set-trace-log-callback vsnprintf
+  ;; 窗口
+  init-window close-window window-should-close? set-target-fps
+  toggle-fullscreen toggle-borderless-windowed
+  is-window-state? set-window-state clear-window-state
+  minimize-window maximize-window restore-window set-window-min-size
+  is-window-resized?
+  get-monitor-count get-current-monitor get-monitor-position get-monitor-name
+  get-monitor-width get-monitor-height
+  get-monitor-physical-width get-monitor-physical-height
+  get-monitor-refresh-rate set-window-monitor get-window-position
+  set-trace-log-callback vsnprintf
 
- ;; 绘制
- begin-drawing end-drawing
- clear-background draw-text draw-line
+  ;; 绘制
+  begin-drawing end-drawing
+  clear-background draw-text draw-line
 
- ;; 2D 相机
- begin-mode-2d end-mode-2d
+  ;; 2D 相机
+  begin-mode-2d end-mode-2d
 
- ;; 3D 相机
- begin-mode-3d end-mode-3d update-camera get-camera-matrix
+  ;; 3D 相机
+  begin-mode-3d end-mode-3d update-camera get-camera-matrix
 
- ;; 屏幕信息 / 坐标转换
- get-screen-width get-screen-height
- get-render-width get-render-height get-window-scale-dpi
- get-screen-to-world-2d get-world-to-screen-2d
- get-screen-to-world-ray get-world-to-screen measure-text measure-text-ex get-font-default
+  ;; 屏幕信息 / 坐标转换
+  get-screen-width get-screen-height
+  get-render-width get-render-height get-window-scale-dpi
+  get-screen-to-world-2d get-world-to-screen-2d
+  get-screen-to-world-ray get-world-to-screen measure-text measure-text-ex get-font-default
 
- ;; 3D 网格 / rlgl 矩阵操作
- draw-grid
- rl-push-matrix rl-pop-matrix rl-translate-f rl-rotate-f
+  ;; 3D 网格 (rlgl 矩阵/blend 现在从 rlgl.rkt 统一提供)
+  draw-grid
 
- ;; rlgl blend
- rl-set-blend-mode rl-set-blend-factors rl-draw-render-batch-active
+  ;; 随机
+  get-random-value set-random-seed
 
- ;; 随机
- get-random-value set-random-seed
+  ;; 计时
+  get-frame-time get-fps get-mouse-wheel-move draw-fps
 
- ;; 计时
- get-frame-time get-fps get-mouse-wheel-move draw-fps
+  ;; 输入 — 键盘
+  is-key-pressed is-key-down is-key-pressed-repeat
+  is-key-released is-key-up
+  get-key-pressed get-char-pressed get-key-name set-exit-key
 
- ;; 输入 — 键盘
- is-key-pressed is-key-down is-key-pressed-repeat
- is-key-released is-key-up
- get-key-pressed get-char-pressed get-key-name set-exit-key
+  ;; 输入 — 鼠标
+  is-mouse-button-pressed is-mouse-button-down
+  is-mouse-button-released is-mouse-button-up
+  get-mouse-x get-mouse-y get-mouse-position get-mouse-delta
+  set-mouse-position set-mouse-offset set-mouse-scale
+  get-mouse-wheel-move-v set-mouse-cursor
 
- ;; 输入 — 鼠标
- is-mouse-button-pressed is-mouse-button-down
- is-mouse-button-released is-mouse-button-up
- get-mouse-x get-mouse-y get-mouse-position get-mouse-delta
- set-mouse-position set-mouse-offset set-mouse-scale
- get-mouse-wheel-move-v set-mouse-cursor
+  ;; 输入 — cursor 可见性
+  is-cursor-hidden? show-cursor hide-cursor
+  enable-cursor disable-cursor is-cursor-on-screen?
 
- ;; 输入 — cursor 可见性
- is-cursor-hidden? show-cursor hide-cursor
- enable-cursor disable-cursor is-cursor-on-screen?
+  ;; 输入 — 事件轮询
+  poll-input-events
 
- ;; 输入 — 事件轮询
- poll-input-events
+  ;; 输入 — 剪贴板
+  set-clipboard-text get-clipboard-text
 
- ;; 输入 — 剪贴板
- set-clipboard-text get-clipboard-text
+  ;; 输入 — 拖放文件
+  is-file-dropped load-dropped-files
 
- ;; 输入 — 拖放文件
- is-file-dropped load-dropped-files
+  ;; 文件系统
+  get-working-directory get-prev-directory-path directory-exists?
+  load-directory-files-ex
 
- ;; 文件系统
- get-working-directory get-prev-directory-path directory-exists?
- load-directory-files-ex
+  ;; 图像/截图
+  load-image-from-screen unload-image get-application-directory export-image
 
- ;; 图像/截图
- load-image-from-screen unload-image get-application-directory export-image
+  ;; 着色器
+  load-shader unload-shader
+  get-shader-location set-shader-value
+  begin-shader-mode end-shader-mode
 
- ;; 着色器
- load-shader unload-shader
- get-shader-location set-shader-value
- begin-shader-mode end-shader-mode
+  ;; VR 立体渲染
+  malloc-float-vec2 malloc-float-vec4
+  load-vr-stereo-config unload-vr-stereo-config
+  begin-vr-stereo-mode end-vr-stereo-mode
 
- ;; VR 立体渲染
- malloc-float-vec2 malloc-float-vec4
- load-vr-stereo-config unload-vr-stereo-config
- begin-vr-stereo-mode end-vr-stereo-mode
+  ;; 配置
+  set-config-flags
 
- ;; 配置
- set-config-flags
+  ;; Scissor mode
+  begin-scissor-mode end-scissor-mode
 
- ;; Scissor mode
- begin-scissor-mode end-scissor-mode
+  ;; 帧控制 / 时间
+  get-time swap-screen-buffer wait-time
 
- ;; 帧控制 / 时间
- get-time swap-screen-buffer wait-time
+  ;; 随机序列
+  load-random-sequence
 
- ;; 随机序列
- load-random-sequence
+  ;; 输入 — 手柄
+  is-gamepad-available? get-gamepad-name
+  is-gamepad-button-pressed is-gamepad-button-down
+  is-gamepad-button-released is-gamepad-button-up
+  get-gamepad-button-pressed
+  get-gamepad-axis-count get-gamepad-axis-movement
+  set-gamepad-mappings set-gamepad-vibration
 
- ;; 输入 — 手柄
- is-gamepad-available? get-gamepad-name
- is-gamepad-button-pressed is-gamepad-button-down
- is-gamepad-button-released is-gamepad-button-up
- get-gamepad-button-pressed
- get-gamepad-axis-count get-gamepad-axis-movement
- set-gamepad-mappings set-gamepad-vibration
+  ;; 输入 — 触摸
+  get-touch-x get-touch-y
+  get-touch-point-id get-touch-point-count
+  get-touch-position
 
- ;; 输入 — 触摸
- get-touch-x get-touch-y
- get-touch-point-id get-touch-point-count
- get-touch-position
+  ;; 颜色工具
+  fade color-alpha color-from-hsv color=?
 
- ;; 颜色工具
- fade color-alpha color-from-hsv color=?
+  ;; 输入 — 手势
+  set-gestures-enabled is-gesture-detected? get-gesture-detected
+  get-gesture-hold-duration get-gesture-drag-vector get-gesture-drag-angle
+  get-gesture-pinch-vector get-gesture-pinch-angle
 
- ;; 输入 — 手势
- set-gestures-enabled is-gesture-detected? get-gesture-detected
- get-gesture-hold-duration get-gesture-drag-vector get-gesture-drag-angle
- get-gesture-pinch-vector get-gesture-pinch-angle
+  ;; 数据编码 / Hash
+  compute-crc32 compute-md5 compute-sha1 compute-sha256
+  encode-data-base64
 
- ;; 数据编码 / Hash
- compute-crc32 compute-md5 compute-sha1 compute-sha256
- encode-data-base64
+  ;; 文本 / 字体
 
- ;; 文本 / 字体
+  ;; 文件文本加载
+  load-file-text
 
- ;; 文件文本加载
- load-file-text
-
- ;; 窗口状态查询
- is-window-ready? is-window-fullscreen? is-window-hidden?
- is-window-minimized? is-window-maximized? is-window-focused?
- ;; 窗口设置
- set-window-title set-window-position set-window-max-size set-window-size
- set-window-opacity set-window-focused get-window-handle
- set-window-icon set-window-icons
- ;; 剪贴板/事件
- get-clipboard-image enable-event-waiting disable-event-waiting
- ;; 混合模式
- begin-blend-mode end-blend-mode
- ;; 截图/URL/日志
- take-screenshot open-url set-trace-log-level
- ;; 内存
- mem-alloc mem-realloc mem-free
- ;; 文件系统
- file-exists? is-file-extension get-file-length get-file-mod-time
- get-file-extension get-file-name get-file-name-without-ext
- get-directory-path make-directory change-directory
- is-path-file? is-file-name-valid
- file-rename file-remove file-copy file-move
- file-text-replace file-text-find-index
- get-directory-file-count get-directory-file-count-ex
- load-file-data unload-file-data save-file-data save-file-text
- export-data-as-code load-directory-files
- set-load-file-data-callback set-save-file-data-callback
- set-load-file-text-callback set-save-file-text-callback
- ;; 着色器
- load-shader-from-memory is-shader-valid get-shader-location-attrib
- set-shader-value-v set-shader-value-matrix set-shader-value-texture
- ;; 坐标转换扩展
- get-screen-to-world-ray-ex get-world-to-screen-ex get-camera-matrix-2d
- ;; UpdateCameraPro
- update-camera-pro
- ;; 压缩/编码
- compress-data decompress-data decode-data-base64
- ;; 自动化事件
- load-automation-event-list unload-automation-event-list
- export-automation-event-list
- set-automation-event-list set-automation-event-base-frame
- start-automation-event-recording stop-automation-event-recording
- ;; ColorIsEqual
- color-is-equal
-
-)
+  ;; 窗口状态查询
+  is-window-ready? is-window-fullscreen? is-window-hidden?
+  is-window-minimized? is-window-maximized? is-window-focused?
+  ;; 窗口设置
+  set-window-title set-window-position set-window-max-size set-window-size
+  set-window-opacity set-window-focused get-window-handle
+  set-window-icon set-window-icons
+  ;; 剪贴板/事件
+  get-clipboard-image enable-event-waiting disable-event-waiting
+  ;; 混合模式
+  begin-blend-mode end-blend-mode
+  ;; 截图/URL/日志
+  take-screenshot open-url set-trace-log-level
+  ;; 内存
+  mem-alloc mem-realloc mem-free
+  ;; 文件系统
+  file-exists? is-file-extension get-file-length get-file-mod-time
+  get-file-extension get-file-name get-file-name-without-ext
+  get-directory-path make-directory change-directory
+  is-path-file? is-file-name-valid
+  file-rename file-remove file-copy file-move
+  file-text-replace file-text-find-index
+  get-directory-file-count get-directory-file-count-ex
+  load-file-data unload-file-data save-file-data save-file-text
+  export-data-as-code load-directory-files
+  set-load-file-data-callback set-save-file-data-callback
+  set-load-file-text-callback set-save-file-text-callback
+  ;; 着色器
+  load-shader-from-memory is-shader-valid get-shader-location-attrib
+  set-shader-value-v set-shader-value-matrix set-shader-value-texture
+  ;; 坐标转换扩展
+  get-screen-to-world-ray-ex get-world-to-screen-ex get-camera-matrix-2d
+  ;; UpdateCameraPro
+  update-camera-pro
+  ;; 压缩/编码
+  compress-data decompress-data decode-data-base64
+  ;; 自动化事件
+  load-automation-event-list unload-automation-event-list
+  export-automation-event-list
+  set-automation-event-list set-automation-event-base-frame
+  start-automation-event-recording stop-automation-event-recording
+  ;; ColorIsEqual
+  color-is-equal
+  )
