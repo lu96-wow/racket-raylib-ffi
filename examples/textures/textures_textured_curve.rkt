@@ -16,7 +16,7 @@
 (require "../../raylib/raylib.rkt")
 
 (define resource-dir
-  (path->string (build-path (current-directory) "../examples/textures/resources/")))
+  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 全局状态
