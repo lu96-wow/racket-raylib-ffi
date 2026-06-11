@@ -590,8 +590,11 @@
 ;; Blend 模式 (rlgl)
 ;; ============================================================
 
-(define BLEND-ALPHA      0)
-(define BLEND-CUSTOM     6)
+(define BLEND-ALPHA          0)
+(define BLEND-ADDITIVE       1)
+(define BLEND-MULTIPLIED     2)
+(define BLEND-ADD-COLORS     3)
+(define BLEND-CUSTOM         6)
 (define RLGL-SRC-ALPHA   #x0302)
 (define RLGL-MIN         #x8007)
 (define RLGL-MAX         #x8008)
@@ -733,7 +736,7 @@
  SHADER-UNIFORM-FLOAT SHADER-UNIFORM-VEC2
  SHADER-UNIFORM-VEC3 SHADER-UNIFORM-VEC4
  SHADER-UNIFORM-INT
- BLEND-ALPHA BLEND-CUSTOM
+ BLEND-ALPHA BLEND-ADDITIVE BLEND-MULTIPLIED BLEND-ADD-COLORS BLEND-CUSTOM
  RLGL-SRC-ALPHA RLGL-MIN RLGL-MAX
  MATERIAL-MAP-DIFFUSE
 )

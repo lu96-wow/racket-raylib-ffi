@@ -399,7 +399,11 @@
    image-ptr (C:color->bytes color) threshold))
 
 (define (image-alpha-mask image-ptr mask-image)
-  ((get-ffi-obj "ImageAlphaMask" T:lib (_fun _pointer _pointer -> _void)) image-ptr mask-image))
+  ;; C: void ImageAlphaMask(Image *image, Image mask)
+  ;; mask-image is Image passed by value, image-ptr is a pointer to the Image struct to modify
+  ((get-ffi-obj "ImageAlphaMask" T:lib
+    (_fun _pointer (mask : C:_image-bytes) -> _void))
+   image-ptr mask-image))
 
 (define (image-alpha-premultiply image-ptr)
   ((get-ffi-obj "ImageAlphaPremultiply" T:lib (_fun _pointer -> _void)) image-ptr))
