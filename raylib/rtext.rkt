@@ -2,7 +2,8 @@
 
 (require ffi/unsafe
          (prefix-in T: "types.rkt")
-         (prefix-in C: "rcore.rkt"))
+         (prefix-in C: "rcore.rkt")
+         (prefix-in RL: "rlgl.rkt"))
 
 (define lib T:lib)
 
@@ -133,6 +134,156 @@
              (_fun (font : _font-bytes) _int -> (r : C:_rect-bytes)))])
     (lambda (font codepoint)
       (C:rect-bytes->rect (f font codepoint)))))
+
+;; ============================================================
+;; 3D 文字绘制 (基于 rlgl 即时模式)
+;; ============================================================
+
+;; GlyphInfo / Rectangle 结构体大小 (用于指针偏移)
+(define _glyph-info-size (ctype-sizeof T:_GlyphInfo))
+(define _rect-size (ctype-sizeof T:_Rectangle))
+
+;; DrawTextCodepoint3D — 在 3D 空间绘制单个字符
+(define (draw-text-codepoint-3d font codepoint position font-size backface? tint)
+  (let* ([base-size   (list-ref font 0)]
+         [glyph-count (list-ref font 1)]
+         [glyph-pad   (list-ref font 2)]
+         [tex-id      (list-ref font 3)]
+         [tex-width   (list-ref font 4)]
+         [tex-height  (list-ref font 5)]
+         [recs-ptr    (list-ref font 8)]
+         [glyphs-ptr  (list-ref font 9)]
+         [index       (get-glyph-index font codepoint)]
+         [scale       (/ font-size (exact->inexact base-size))]
+         [glyph-ptr   (ptr-add glyphs-ptr (* index _glyph-info-size))]
+         [offset-x    (ptr-ref glyph-ptr _int 1)]
+         [offset-y    (ptr-ref glyph-ptr _int 2)]
+         [rec-ptr     (ptr-add recs-ptr (* index _rect-size))]
+         [rec-x       (ptr-ref rec-ptr _float 0)]
+         [rec-y       (ptr-ref rec-ptr _float 1)]
+         [rec-w       (ptr-ref rec-ptr _float 2)]
+         [rec-h       (ptr-ref rec-ptr _float 3)]
+         [px (+ (ptr-ref position _float 0) (* (- offset-x glyph-pad) scale))]
+         [py (ptr-ref position _float 1)]
+         [pz (+ (ptr-ref position _float 2) (* (- offset-y glyph-pad) scale))]
+         [src-x  (- rec-x glyph-pad)]
+         [src-y  (- rec-y glyph-pad)]
+         [src-w  (+ rec-w (* 2.0 glyph-pad))]
+         [src-h  (+ rec-h (* 2.0 glyph-pad))]
+         [width  (* src-w scale)]
+         [height (* src-h scale)]
+         [tx  (/ src-x tex-width)]
+         [ty  (/ src-y tex-height)]
+         [tw  (/ (+ src-x src-w) tex-width)]
+         [th  (/ (+ src-y src-h) tex-height)])
+    (when (> tex-id 0)
+      (RL:rl-check-render-batch-limit (+ 4 (if backface? 4 0)))
+      (RL:rl-set-texture tex-id)
+      (RL:rl-push-matrix)
+      (RL:rl-translate-f px py pz)
+      (RL:rl-begin RL:RL-QUADS)
+      (let ([r (ptr-ref tint _ubyte 0)]
+            [g (ptr-ref tint _ubyte 1)]
+            [b (ptr-ref tint _ubyte 2)]
+            [a (ptr-ref tint _ubyte 3)])
+        (RL:rl-color-4ub r g b a)
+        (RL:rl-normal-3f 0.0 1.0 0.0)
+        (RL:rl-tex-coord-2f tx ty) (RL:rl-vertex-3f 0.0 0.0 0.0)
+        (RL:rl-tex-coord-2f tx th) (RL:rl-vertex-3f 0.0 0.0 height)
+        (RL:rl-tex-coord-2f tw th) (RL:rl-vertex-3f width 0.0 height)
+        (RL:rl-tex-coord-2f tw ty) (RL:rl-vertex-3f width 0.0 0.0)
+        (when backface?
+          (RL:rl-normal-3f 0.0 -1.0 0.0)
+          (RL:rl-tex-coord-2f tx ty) (RL:rl-vertex-3f 0.0 0.0 0.0)
+          (RL:rl-tex-coord-2f tw ty) (RL:rl-vertex-3f width 0.0 0.0)
+          (RL:rl-tex-coord-2f tw th) (RL:rl-vertex-3f width 0.0 height)
+          (RL:rl-tex-coord-2f tx th) (RL:rl-vertex-3f 0.0 0.0 height)))
+      (RL:rl-end)
+      (RL:rl-pop-matrix)
+      (RL:rl-set-texture 0))))
+
+;; DrawText3D — 在 3D 空间中绘制完整字符串
+(define (draw-text-3d font text position font-size font-spacing line-spacing backface? tint)
+  (let* ([len        (string-length text)]
+         [base-size  (list-ref font 0)]
+         [scale      (/ font-size (exact->inexact base-size))]
+         [glyphs-ptr (list-ref font 9)]
+         [recs-ptr   (list-ref font 8)])
+    (let loop ([i 0] [off-x 0.0] [off-y 0.0])
+      (when (< i len)
+        (let*-values ([(cp cp-bytes) (get-codepoint (substring text i))])
+          (let ([next-i (+ i cp-bytes)])
+            (if (char=? (integer->char cp) #\newline)
+                (loop next-i 0.0 (+ off-y font-size line-spacing))
+                (begin
+                  (when (and (not (= cp 32)) (not (= cp 9)))
+                    (let ([pos (malloc T:_Vector3 'atomic)])
+                      (ptr-set! pos _float 0 (+ (ptr-ref position _float 0) off-x))
+                      (ptr-set! pos _float 1 (ptr-ref position _float 1))
+                      (ptr-set! pos _float 2 (+ (ptr-ref position _float 2) off-y))
+                      (draw-text-codepoint-3d font cp pos font-size backface? tint)))
+                  (let* ([index     (get-glyph-index font cp)]
+                         [glyph-ptr (ptr-add glyphs-ptr (* index _glyph-info-size))]
+                         [adv-x     (ptr-ref glyph-ptr _int 3)]
+                         [rec-w     (ptr-ref (ptr-add recs-ptr (* index _rect-size)) _float 2)]
+                         [step      (if (zero? adv-x)
+                                        (+ (* rec-w scale) font-spacing)
+                                        (+ (* adv-x scale) font-spacing))])
+                    (loop next-i (+ off-x step) off-y))))))))))
+
+;; DrawTextWave3D — 3D 波浪文字
+;; 检测 ~~...~~ 标记，标记之间的字符应用 sin 波浪动画
+(define (draw-text-wave-3d font text position font-size font-spacing
+                           line-spacing backface? wave-speed wave-offset
+                           wave-range time tint)
+  (let* ([len        (string-length text)]
+         [base-size  (list-ref font 0)]
+         [scale      (/ font-size (exact->inexact base-size))]
+         [glyphs-ptr (list-ref font 9)]
+         [recs-ptr   (list-ref font 8)])
+    (let loop ([i 0] [k 0] [off-x 0.0] [off-y 0.0] [wave? #f])
+      (when (< i len)
+        (if (and (< (+ i 1) len)
+                 (char=? (string-ref text i) #\~)
+                 (char=? (string-ref text (+ i 1)) #\~))
+            ;; 遇到 ~~ 标记，切换 wave 状态
+            (loop (+ i 2) k off-x off-y (not wave?))
+            (let*-values ([(cp cp-bytes) (get-codepoint (substring text i))])
+              (let ([next-i (+ i cp-bytes)])
+                (if (char=? (integer->char cp) #\newline)
+                    (loop next-i 0 0.0 (+ off-y font-size line-spacing) wave?)
+                    (begin
+                      (when (and (not (= cp 32)) (not (= cp 9)))
+                        (define pos (malloc T:_Vector3 'atomic))
+                        (if wave?
+                            (let ([wx (+ (ptr-ref position _float 0)
+                                         (* (sin (- (* time (ptr-ref wave-speed _float 0))
+                                                    (* k (ptr-ref wave-offset _float 0))))
+                                            (ptr-ref wave-range _float 0)))]
+                                  [wy (+ (ptr-ref position _float 1)
+                                         (* (sin (- (* time (ptr-ref wave-speed _float 1))
+                                                    (* k (ptr-ref wave-offset _float 1))))
+                                            (ptr-ref wave-range _float 1)))]
+                                  [wz (+ (ptr-ref position _float 2)
+                                         (* (sin (- (* time (ptr-ref wave-speed _float 2))
+                                                    (* k (ptr-ref wave-offset _float 2))))
+                                            (ptr-ref wave-range _float 2)))])
+                              (ptr-set! pos _float 0 (+ wx off-x))
+                              (ptr-set! pos _float 1 wy)
+                              (ptr-set! pos _float 2 (+ wz off-y)))
+                            (begin
+                              (ptr-set! pos _float 0 (+ (ptr-ref position _float 0) off-x))
+                              (ptr-set! pos _float 1 (ptr-ref position _float 1))
+                              (ptr-set! pos _float 2 (+ (ptr-ref position _float 2) off-y))))
+                        (draw-text-codepoint-3d font cp pos font-size backface? tint))
+                      (let* ([index     (get-glyph-index font cp)]
+                             [glyph-ptr (ptr-add glyphs-ptr (* index _glyph-info-size))]
+                             [adv-x     (ptr-ref glyph-ptr _int 3)]
+                             [rec-w     (ptr-ref (ptr-add recs-ptr (* index _rect-size)) _float 2)]
+                             [step      (if (zero? adv-x)
+                                            (+ (* rec-w scale) font-spacing)
+                                            (+ (* adv-x scale) font-spacing))])
+                        (loop next-i (+ k 1) (+ off-x step) off-y wave?)))))))))))
 
 ;; ============================================================
 ;; UTF8 / Codepoints
@@ -288,6 +439,7 @@
  unload-font-data unload-font export-font-as-code
  draw-text-ex draw-text-pro draw-text-codepoint draw-text-codepoints
  set-text-line-spacing measure-text-codepoints
+ draw-text-codepoint-3d draw-text-3d draw-text-wave-3d
  get-glyph-index get-glyph-info get-glyph-atlas-rec
  load-utf8 unload-utf8 load-codepoints unload-codepoints
  get-codepoint-count get-codepoint get-codepoint-next get-codepoint-previous
