@@ -161,15 +161,18 @@
     (define delta (get-frame-time))
     (define mouse (get-mouse-position))
 
-    ;; 鼠标左键 — 抓取粒子
+    ;; 鼠标左键 — 抓取粒子 (从后往前找，匹配首个即停止)
     (when (is-mouse-button-pressed MOUSE-BUTTON-LEFT)
-      (for ([i (in-range (- (unbox particle-count) 1) -1 -1)])
-        (define t (vector-ref particles i))
-        (set-vector2-x! press-offset (- (vector2-x mouse) (rectangle-x (tp-rect t))))
-        (set-vector2-y! press-offset (- (vector2-y mouse) (rectangle-y (tp-rect t))))
-        (when (check-collision-point-rec mouse (tp-rect t))
-          (set-tp-grabbed! t #t)
-          (set-box! grabbed-particle t))))
+      (let grab-loop ([i (- (unbox particle-count) 1)])
+        (when (>= i 0)
+          (define t (vector-ref particles i))
+          (when (check-collision-point-rec mouse (tp-rect t))
+            (set-vector2-x! press-offset (- (vector2-x mouse) (rectangle-x (tp-rect t))))
+            (set-vector2-y! press-offset (- (vector2-y mouse) (rectangle-y (tp-rect t))))
+            (set-tp-grabbed! t #t)
+            (set-box! grabbed-particle t))
+          (unless (unbox grabbed-particle)
+            (grab-loop (- i 1))))))
 
     ;; 鼠标左键释放 — 释放粒子
     (when (is-mouse-button-released MOUSE-BUTTON-LEFT)
@@ -177,15 +180,18 @@
         (set-tp-grabbed! (unbox grabbed-particle) #f)
         (set-box! grabbed-particle #f)))
 
-    ;; 鼠标右键 — 切片或粉碎
+    ;; 鼠标右键 — 切片或粉碎 (从后往前找，匹配首个即停止)
     (when (is-mouse-button-pressed MOUSE-BUTTON-RIGHT)
-      (for ([i (in-range (- (unbox particle-count) 1) -1 -1)])
-        (define t (vector-ref particles i))
-        (when (check-collision-point-rec mouse (tp-rect t))
-          (if (is-key-down KEY-LEFT-SHIFT)
-              (shatter-particle! t particles particle-count)
-              (slice-text-particle! t particles particle-count
-                                    (quotient (string-length (tp-text t)) 2))))))
+      (let slice-loop ([i (- (unbox particle-count) 1)])
+        (when (>= i 0)
+          (define t (vector-ref particles i))
+          (if (check-collision-point-rec mouse (tp-rect t))
+              (begin
+                (if (is-key-down KEY-LEFT-SHIFT)
+                    (shatter-particle! t particles particle-count)
+                    (slice-text-particle! t particles particle-count
+                                          (quotient (string-length (tp-text t)) 2))))
+              (slice-loop (- i 1))))))
 
     ;; 鼠标中键 — 摇动所有粒子
     (when (is-mouse-button-pressed MOUSE-BUTTON-MIDDLE)
