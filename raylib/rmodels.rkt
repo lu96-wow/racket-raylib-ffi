@@ -125,6 +125,18 @@
     _int _pointer _pointer
     _pointer _pointer))
 
+;; Mesh (raylib.h:346) — ~112 字节，用于 GenMesh* / LoadModelFromMesh 的传值 ABI
+(define _mesh-bytes
+  (_list-struct
+    _int _int           ; vertexCount, triangleCount
+    _pointer _pointer _pointer       ; vertices, texcoords, texcoords2
+    _pointer _pointer _pointer _pointer  ; normals, tangents, colors, indices
+    _int                ; boneCount
+    _pointer _pointer   ; boneIndices, boneWeights
+    _pointer _pointer   ; animVertices, animNormals
+    _uint               ; vaoId
+    _pointer))          ; vboId
+
 ;; ============================================================
 ;; LoadModel(const char *fileName) -> Model
 ;; ============================================================
@@ -319,8 +331,8 @@
 
 (define load-model-from-mesh
   (let ([f (get-ffi-obj "LoadModelFromMesh" T:lib
-             (_fun _pointer -> (m : _model-bytes)))])
-    (lambda (mesh-ptr) (f mesh-ptr))))
+             (_fun (m : _mesh-bytes) -> (ret : _model-bytes)))])
+    (lambda (mesh) (f mesh))))
 
 (define is-model-valid
   (let ([f (get-ffi-obj "IsModelValid" T:lib
@@ -432,47 +444,47 @@
 ;; ============================================================
 
 (define gen-mesh-poly
-  (let ([f (get-ffi-obj "GenMeshPoly" T:lib (_fun _int _float -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshPoly" T:lib (_fun _int _float -> (m : _mesh-bytes)))])
     (lambda (sides radius) (f sides radius))))
 
 (define gen-mesh-plane
-  (let ([f (get-ffi-obj "GenMeshPlane" T:lib (_fun _float _float _int _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshPlane" T:lib (_fun _float _float _int _int -> (m : _mesh-bytes)))])
     (lambda (width length res-x res-z) (f width length res-x res-z))))
 
 (define gen-mesh-cube
-  (let ([f (get-ffi-obj "GenMeshCube" T:lib (_fun _float _float _float -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshCube" T:lib (_fun _float _float _float -> (m : _mesh-bytes)))])
     (lambda (width height length) (f width height length))))
 
 (define gen-mesh-sphere
-  (let ([f (get-ffi-obj "GenMeshSphere" T:lib (_fun _float _int _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshSphere" T:lib (_fun _float _int _int -> (m : _mesh-bytes)))])
     (lambda (radius rings slices) (f radius rings slices))))
 
 (define gen-mesh-hemi-sphere
-  (let ([f (get-ffi-obj "GenMeshHemiSphere" T:lib (_fun _float _int _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshHemiSphere" T:lib (_fun _float _int _int -> (m : _mesh-bytes)))])
     (lambda (radius rings slices) (f radius rings slices))))
 
 (define gen-mesh-cylinder
-  (let ([f (get-ffi-obj "GenMeshCylinder" T:lib (_fun _float _float _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshCylinder" T:lib (_fun _float _float _int -> (m : _mesh-bytes)))])
     (lambda (radius height slices) (f radius height slices))))
 
 (define gen-mesh-cone
-  (let ([f (get-ffi-obj "GenMeshCone" T:lib (_fun _float _float _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshCone" T:lib (_fun _float _float _int -> (m : _mesh-bytes)))])
     (lambda (radius height slices) (f radius height slices))))
 
 (define gen-mesh-torus
-  (let ([f (get-ffi-obj "GenMeshTorus" T:lib (_fun _float _float _int _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshTorus" T:lib (_fun _float _float _int _int -> (m : _mesh-bytes)))])
     (lambda (radius size rad-seg sides) (f radius size rad-seg sides))))
 
 (define gen-mesh-knot
-  (let ([f (get-ffi-obj "GenMeshKnot" T:lib (_fun _float _float _int _int -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshKnot" T:lib (_fun _float _float _int _int -> (m : _mesh-bytes)))])
     (lambda (radius size rad-seg sides) (f radius size rad-seg sides))))
 
 (define gen-mesh-heightmap
-  (let ([f (get-ffi-obj "GenMeshHeightmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshHeightmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> (m : _mesh-bytes)))])
     (lambda (image size) (f image (C:vec3->bytes size)))))
 
 (define gen-mesh-cubicmap
-  (let ([f (get-ffi-obj "GenMeshCubicmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> _pointer))])
+  (let ([f (get-ffi-obj "GenMeshCubicmap" T:lib (_fun (img : C:_image-bytes) (size : C:_vec3-bytes) -> (m : _mesh-bytes)))])
     (lambda (image size) (f image (C:vec3->bytes size)))))
 
 ;; ============================================================
@@ -558,6 +570,7 @@
  draw-ray
  get-ray-collision-box
  _model-bytes
+ _mesh-bytes
  load-model
  unload-model
  draw-model-ex
