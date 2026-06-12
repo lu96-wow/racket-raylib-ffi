@@ -115,6 +115,7 @@
 
 (def-ffi rl-set-blend-mode             "rlSetBlendMode"             (_fun _int -> _void))
 (def-ffi rl-set-blend-factors          "rlSetBlendFactors"          (_fun _int _int _int -> _void))
+(def-ffi rl-set-blend-factors-separate "rlSetBlendFactorsSeparate" (_fun _int _int _int _int _int _int -> _void))
 (def-ffi rl-enable-color-blend         "rlEnableColorBlend"         (_fun -> _void))
 (def-ffi rl-disable-color-blend        "rlDisableColorBlend"        (_fun -> _void))
 (def-ffi rl-enable-depth-test          "rlEnableDepthTest"          (_fun -> _void))
@@ -213,7 +214,7 @@
  rl-viewport rl-frustum rl-ortho
  rl-set-clip-planes rl-get-cull-distance-near rl-get-cull-distance-far
  ;; 状态
- rl-set-blend-mode rl-set-blend-factors
+ rl-set-blend-mode rl-set-blend-factors rl-set-blend-factors-separate
  rl-enable-color-blend rl-disable-color-blend
  rl-enable-depth-test rl-disable-depth-test
  rl-enable-depth-mask rl-disable-depth-mask

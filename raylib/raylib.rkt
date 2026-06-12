@@ -10,7 +10,7 @@
          "rcamera.rkt"
          "raymath.rkt"
          "rlgl.rkt"
-         "../raylib-var/var.rkt"
+         (except-in "../raylib-var/var.rkt" RL-ZERO RL-ONE RL-SRC-ALPHA RL-FUNC-ADD)
          (only-in ffi/unsafe ptr-ref ptr-set!
                   _ubyte _float _int _uint _pointer _bool))
 
