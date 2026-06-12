@@ -140,10 +140,7 @@
       (rl-pop-matrix)
       (set! show-letter-boundry save-lb))
 
-    ;; ==== 3D 操作说明 ====
-    (rl-push-matrix)
-    (rl-rotate-f 180.0 0.0 1.0 0.0)
-
+    ;; ==== 3D 操作说明 (默认相机方向，不旋转) ====
     (define info-pos (malloc T:_Vector3 'atomic))
     (ptr-set! info-pos _float 1 0.01)
     (ptr-set! info-pos _float 2 2.0)
@@ -161,8 +158,6 @@
     (draw-info "press [PgUp]/[PgDown] to change the line spacing" 0.6 0.05)
     (draw-info "press [F1] to toggle the letter boundry" 0.6 0.05)
     (draw-info "press [F2] to toggle the text boundry" 0.6 0.05)
-
-    (rl-pop-matrix)
 
     (when alpha-discard-shader (end-shader-mode))
     (end-mode-3d)
