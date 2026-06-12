@@ -5,14 +5,15 @@
 ;; 对应 C: examples/text/text_font_sdf.c
 
 (require ffi/unsafe
-         "../../raylib/raylib.rkt")
+         "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
 ;; ============================================================
-;; 资源路径
+;; 资源路径 — 使用 define-runtime-path 确保路径相对于本文件
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
+(define-runtime-path resource-dir
+  "../../../examples/text/resources")
 
 ;; ============================================================
 ;; GLSL 版本
@@ -34,7 +35,7 @@
 
 ;; Loading file to memory
 (define-values (file-data file-size)
-  (load-file-data (string-append resource-dir "anonymous_pro_bold.ttf")))
+  (load-file-data (path->string (build-path resource-dir "anonymous_pro_bold.ttf"))))
 
 ;; Default font generation from TTF font
 (define font-default (get-font-default))
@@ -67,8 +68,8 @@
 (unload-file-data file-data)
 
 ;; Load SDF required shader (we use default vertex shader, so pass #f = NULL for vs)
-(define shader (load-shader #f (string-append resource-dir
-                                              "shaders/glsl" (number->string GLSL-VERSION) "/sdf.fs")))
+(define shader (load-shader #f
+  (path->string (build-path resource-dir "shaders" (string-append "glsl" (number->string GLSL-VERSION)) "sdf.fs"))))
 (set-texture-filter sdf-texture TEXTURE-FILTER-BILINEAR)  ; Required for SDF font
 
 ;; Build font structures manually

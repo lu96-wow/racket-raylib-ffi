@@ -4,14 +4,15 @@
 ;;
 ;; 对应 C: examples/text/text_sprite_fonts.c
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
 ;; ============================================================
-;; 资源路径
+;; 资源路径 — 使用 define-runtime-path 确保路径相对于本文件
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
+(define-runtime-path resource-dir
+  "../../../examples/text/resources")
 
 ;; ============================================================
 ;; 初始化
@@ -26,14 +27,14 @@
 
 ;; NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 (define fonts
-  (vector (load-font (string-append resource-dir "sprite_fonts/alagard.png"))
-          (load-font (string-append resource-dir "sprite_fonts/pixelplay.png"))
-          (load-font (string-append resource-dir "sprite_fonts/mecha.png"))
-          (load-font (string-append resource-dir "sprite_fonts/setback.png"))
-          (load-font (string-append resource-dir "sprite_fonts/romulus.png"))
-          (load-font (string-append resource-dir "sprite_fonts/pixantiqua.png"))
-          (load-font (string-append resource-dir "sprite_fonts/alpha_beta.png"))
-          (load-font (string-append resource-dir "sprite_fonts/jupiter_crash.png"))))
+  (vector (load-font (path->string (build-path resource-dir "sprite_fonts/alagard.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/pixelplay.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/mecha.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/setback.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/romulus.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/pixantiqua.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/alpha_beta.png")))
+          (load-font (path->string (build-path resource-dir "sprite_fonts/jupiter_crash.png")))))
 
 (define messages
   (vector "ALAGARD FONT designed by Hewett Tsoi"

@@ -6,15 +6,16 @@
 ;; 按键 0-4 切换 Unicode 区块，右侧显示字体图集纹理
 
 (require ffi/unsafe
-         "../../raylib/raylib.rkt")
+         "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
 ;; ============================================================
-;; 资源路径
+;; 资源路径 — 使用 define-runtime-path 确保路径相对于本文件
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
-(define font-path (string-append resource-dir "NotoSansTC-Regular.ttf"))
+(define-runtime-path resource-dir
+  "../../../examples/text/resources")
+(define font-path (path->string (build-path resource-dir "NotoSansTC-Regular.ttf")))
 
 ;; ============================================================
 ;; build-codepoints — 构建码点数组（malloc _int 缓冲区）

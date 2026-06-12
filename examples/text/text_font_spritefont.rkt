@@ -4,14 +4,15 @@
 ;;
 ;; 对应 C: examples/text/text_font_spritefont.c
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
 ;; ============================================================
-;; 资源路径
+;; 资源路径 — 使用 define-runtime-path 确保路径相对于本文件
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/text/resources/")))
+(define-runtime-path resource-dir
+  "../../../examples/text/resources")
 
 ;; ============================================================
 ;; 初始化
@@ -28,9 +29,9 @@
 (define msg3 "...and a THIRD one! GREAT! :D")
 
 ;; NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-(define font1 (load-font (string-append resource-dir "custom_mecha.png")))          ; Font loading
-(define font2 (load-font (string-append resource-dir "custom_alagard.png")))        ; Font loading
-(define font3 (load-font (string-append resource-dir "custom_jupiter_crash.png")))  ; Font loading
+(define font1 (load-font (path->string (build-path resource-dir "custom_mecha.png"))))          ; Font loading
+(define font2 (load-font (path->string (build-path resource-dir "custom_alagard.png"))))        ; Font loading
+(define font3 (load-font (path->string (build-path resource-dir "custom_jupiter_crash.png"))))  ; Font loading
 
 (define font-base1 (exact->inexact (car font1)))
 (define font-base2 (exact->inexact (car font2)))
