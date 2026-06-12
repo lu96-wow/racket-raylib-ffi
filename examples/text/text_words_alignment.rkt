@@ -66,7 +66,9 @@
     (if str-ptr
         (let ([tmp (malloc _pointer 'atomic)])
           (ptr-set! tmp _pointer 0 str-ptr)
-          (ptr-ref tmp _string))
+          (let ([result (ptr-ref tmp _string)])
+            (free tmp)
+            result))
         "")))
 
 ;; ============================================================
@@ -136,5 +138,6 @@
 ;; 清理
 ;; ============================================================
 
-(unload-codepoints words)
+;; NOTE: TextSplit uses static memory, no manual unload needed
+
 (close-window)
