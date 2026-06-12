@@ -26,74 +26,74 @@
   (define tex-id (list-ref texture 0))
   (define src-x (rectangle-x source)) (define src-y (rectangle-y source))
   (define src-w (rectangle-w source)) (define src-h (rectangle-h source))
-  (define dst-x (rectangle-x dest))   (define dst-y (rectangle-y dest))
-  (define dst-w (rectangle-w dest))   (define dst-h (rectangle-h dest))
+  (define dst-x (rectangle-x dest)) (define dst-y (rectangle-y dest))
+  (define dst-w (rectangle-w dest)) (define dst-h (rectangle-h dest))
   (when (and (> tex-id 0) (> scale 0.0) (> src-w 0) (> src-h 0))
     (define tile-w (* src-w scale))
     (define tile-h (* src-h scale))
     (cond
       [(and (< dst-w tile-w) (< dst-h tile-h))
        (draw-texture-pro texture
-         (rectangle src-x src-y (* (/ dst-w tile-w) src-w) (* (/ dst-h tile-h) src-h))
-         dest origin rotation tint)]
+                         (rectangle src-x src-y (* (/ dst-w tile-w) src-w) (* (/ dst-h tile-h) src-h))
+                         dest origin rotation tint)]
       [(<= dst-w tile-w)
        (let vloop ([dy 0.0])
          (when (< (+ dy tile-h) dst-h)
            (draw-texture-pro texture
-             (rectangle src-x src-y (* (/ dst-w tile-w) src-w) src-h)
-             (rectangle dst-x (+ dst-y dy) dst-w tile-h) origin rotation tint)
+                             (rectangle src-x src-y (* (/ dst-w tile-w) src-w) src-h)
+                             (rectangle dst-x (+ dst-y dy) dst-w tile-h) origin rotation tint)
            (vloop (+ dy tile-h))))
        (let ([dy (* (floor (/ dst-h tile-h)) tile-h)])
          (when (< dy dst-h)
            (draw-texture-pro texture
-             (rectangle src-x src-y (* (/ dst-w tile-w) src-w)
-                        (* (/ (- dst-h dy) tile-h) src-h))
-             (rectangle dst-x (+ dst-y dy) dst-w (- dst-h dy)) origin rotation tint)))]
+                             (rectangle src-x src-y (* (/ dst-w tile-w) src-w)
+                                        (* (/ (- dst-h dy) tile-h) src-h))
+                             (rectangle dst-x (+ dst-y dy) dst-w (- dst-h dy)) origin rotation tint)))]
       [(<= dst-h tile-h)
        (let hloop ([dx 0.0])
          (when (< (+ dx tile-w) dst-w)
            (draw-texture-pro texture
-             (rectangle src-x src-y src-w (* (/ dst-h tile-h) src-h))
-             (rectangle (+ dst-x dx) dst-y tile-w dst-h) origin rotation tint)
+                             (rectangle src-x src-y src-w (* (/ dst-h tile-h) src-h))
+                             (rectangle (+ dst-x dx) dst-y tile-w dst-h) origin rotation tint)
            (hloop (+ dx tile-w))))
        (let ([dx (* (floor (/ dst-w tile-w)) tile-w)])
          (when (< dx dst-w)
            (draw-texture-pro texture
-             (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w)
-                        (* (/ dst-h tile-h) src-h))
-             (rectangle (+ dst-x dx) dst-y (- dst-w dx) dst-h) origin rotation tint)))]
+                             (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w)
+                                        (* (/ dst-h tile-h) src-h))
+                             (rectangle (+ dst-x dx) dst-y (- dst-w dx) dst-h) origin rotation tint)))]
       [else
        (let hloop ([dx 0.0])
          (when (< (+ dx tile-w) dst-w)
            (let vloop ([dy 0.0])
              (when (< (+ dy tile-h) dst-h)
                (draw-texture-pro texture source
-                 (rectangle (+ dst-x dx) (+ dst-y dy) tile-w tile-h)
-                 origin rotation tint)
+                                 (rectangle (+ dst-x dx) (+ dst-y dy) tile-w tile-h)
+                                 origin rotation tint)
                (vloop (+ dy tile-h))))
            (let ([dy (* (floor (/ dst-h tile-h)) tile-h)])
              (when (< dy dst-h)
                (draw-texture-pro texture
-                 (rectangle src-x src-y src-w (* (/ (- dst-h dy) tile-h) src-h))
-                 (rectangle (+ dst-x dx) (+ dst-y dy) tile-w (- dst-h dy))
-                 origin rotation tint)))
+                                 (rectangle src-x src-y src-w (* (/ (- dst-h dy) tile-h) src-h))
+                                 (rectangle (+ dst-x dx) (+ dst-y dy) tile-w (- dst-h dy))
+                                 origin rotation tint)))
            (hloop (+ dx tile-w))))
        (let ([dx (* (floor (/ dst-w tile-w)) tile-w)])
          (when (< dx dst-w)
            (let vloop ([dy 0.0])
              (when (< (+ dy tile-h) dst-h)
                (draw-texture-pro texture
-                 (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w) src-h)
-                 (rectangle (+ dst-x dx) (+ dst-y dy) (- dst-w dx) tile-h)
-                 origin rotation tint)
+                                 (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w) src-h)
+                                 (rectangle (+ dst-x dx) (+ dst-y dy) (- dst-w dx) tile-h)
+                                 origin rotation tint)
                (vloop (+ dy tile-h))))
            (let ([dy (* (floor (/ dst-h tile-h)) tile-h)])
              (when (< dy dst-h)
                (draw-texture-pro texture
-                 (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w)
-                            (* (/ (- dst-h dy) tile-h) src-h))
-                 (rectangle (+ dst-x dx) (+ dst-y dy) (- dst-w dx) (- dst-h dy))
-                 origin rotation tint)))))])))
+                                 (rectangle src-x src-y (* (/ (- dst-w dx) tile-w) src-w)
+                                            (* (/ (- dst-h dy) tile-h) src-h))
+                                 (rectangle (+ dst-x dx) (+ dst-y dy) (- dst-w dx) (- dst-h dy))
+                                 origin rotation tint)))))])))
 
 ;; ============================================================
 ;; 初始化
@@ -107,12 +107,12 @@
 (set-texture-filter tex-pattern TEXTURE-FILTER-BILINEAR)
 
 (define rec-patterns
-  (vector (rectangle  3.0   3.0  66.0  66.0)
-          (rectangle 75.0   3.0 100.0 100.0)
-          (rectangle  3.0  75.0  66.0  66.0)
-          (rectangle  7.0 156.0  50.0  50.0)
-          (rectangle 85.0 106.0  90.0  45.0)
-          (rectangle 75.0 154.0 100.0  60.0)))
+  (vector (rectangle 3.0 3.0 66.0 66.0)
+          (rectangle 75.0 3.0 100.0 100.0)
+          (rectangle 3.0 75.0 66.0 66.0)
+          (rectangle 7.0 156.0 50.0 50.0)
+          (rectangle 85.0 106.0 90.0 45.0)
+          (rectangle 75.0 154.0 100.0 60.0)))
 
 (define colors-list
   (list BLACK MAROON ORANGE BLUE PURPLE BEIGE LIME RED DARKGRAY SKYBLUE))
@@ -153,25 +153,25 @@
             (if (check-collision-point-rec mouse (vector-ref color-recs i))
                 (set! active-col i)
                 (cloop (+ i 1)))))))
-    (let* ([new-scale (cond [(is-key-pressed KEY-UP)   (+ scale 0.25)]
+    (let* ([new-scale (cond [(is-key-pressed KEY-UP) (+ scale 0.25)]
                             [(is-key-pressed KEY-DOWN) (- scale 0.25)]
                             [else scale])]
            [new-scale (cond [(> new-scale 10.0) 10.0]
                             [(<= new-scale 0.0) 0.25]
                             [else new-scale])]
-           [new-rot   (cond [(is-key-pressed KEY-LEFT)  (- rotation 25.0)]
-                            [(is-key-pressed KEY-RIGHT) (+ rotation 25.0)]
-                            [else rotation])]
+           [new-rot (cond [(is-key-pressed KEY-LEFT) (- rotation 25.0)]
+                          [(is-key-pressed KEY-RIGHT) (+ rotation 25.0)]
+                          [else rotation])]
            [new-scale (if (is-key-pressed KEY-SPACE) 1.0 new-scale)]
-           [new-rot   (if (is-key-pressed KEY-SPACE) 0.0 new-rot)])
+           [new-rot (if (is-key-pressed KEY-SPACE) 0.0 new-rot)])
       (begin-drawing)
       (clear-background RAYWHITE)
       (draw-texture-tiled tex-pattern
-        (vector-ref rec-patterns active-pattern)
-        (rectangle (+ OPT-WIDTH MARGIN-SIZE) MARGIN-SIZE
-                   (- (get-screen-width) OPT-WIDTH (* 2.0 MARGIN-SIZE))
-                   (- (get-screen-height) (* 2.0 MARGIN-SIZE)))
-        (vector2 0.0 0.0) new-rot new-scale (list-ref colors-list active-col))
+                          (vector-ref rec-patterns active-pattern)
+                          (rectangle (+ OPT-WIDTH MARGIN-SIZE) MARGIN-SIZE
+                                     (- (get-screen-width) OPT-WIDTH (* 2.0 MARGIN-SIZE))
+                                     (- (get-screen-height) (* 2.0 MARGIN-SIZE)))
+                          (vector2 0.0 0.0) new-rot new-scale (list-ref colors-list active-col))
       (draw-rectangle MARGIN-SIZE MARGIN-SIZE (- OPT-WIDTH MARGIN-SIZE)
                       (- (get-screen-height) (* 2 MARGIN-SIZE))
                       (color-alpha LIGHTGRAY 0.5))

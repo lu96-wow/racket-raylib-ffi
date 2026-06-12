@@ -12,14 +12,17 @@
 ;;
 ;; 导出: _Color, _Vector2 等类型 + make-Xxx / Xxx? / 字段访问器
 
-(require ffi/unsafe)
+(require ffi/unsafe
+         racket/runtime-path)
+
+(define-runtime-path local-raylib-lib-path "local-raylib-lib.rkt")
 
 ;; ============================================================
-;; 共享库
+;; 共享库 — 由 local-raylib-lib.rkt 统一管理路径查找
 ;; ============================================================
 
 (define lib
-  (ffi-lib "/home/debian/raylib/build/raylib/libraylib.so"))
+  (dynamic-require local-raylib-lib-path 'raylib-lib))
 
 ;; ============================================================
 ;; 基础类型
