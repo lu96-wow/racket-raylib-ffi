@@ -3,11 +3,6 @@
 ;; 对应 C: examples/models/models_point_rendering.c
 (require "../../raylib/raylib.rkt" ffi/unsafe racket/math)
 
-;; GenMeshPoints — 完全复刻 C 版:
-;; 1. mem-alloc 构造 Mesh struct (指针)
-;; 2. 填充顶点/颜色数据
-;; 3. upload-mesh (指针版, 创建 VAO/VBO)
-;; 4. 将 Mesh 转为 _mesh-bytes list (供 load-model-from-mesh)
 (define (gen-mesh-points num-points)
   (define verts  (mem-alloc (* num-points 3 4)))
   (define colors (mem-alloc (* num-points 4)))
@@ -24,33 +19,28 @@
       (ptr-set! colors _ubyte (+ (* i 4) 1) (ptr-ref col _ubyte 1))
       (ptr-set! colors _ubyte (+ (* i 4) 2) (ptr-ref col _ubyte 2))
       (ptr-set! colors _ubyte (+ (* i 4) 3) (ptr-ref col _ubyte 3))))
-  ;; 构造 Mesh 指针 (mem-alloc 零初始化)
+  ;; 构造 Mesh 指针 + upload-mesh → vaoId 变非零
   (define m (mem-alloc (ctype-sizeof _Mesh)))
-  (ptr-set! m _int 0 num-points)     ;; vertexCount
-  (ptr-set! m _int 1 1)              ;; triangleCount
-  (ptr-set! m _pointer 1 verts)      ;; vertices @ byte 8
-  (ptr-set! m _pointer 6 colors)     ;; colors   @ byte 48
-  ;; upload-mesh → 创建 VAO/VBO (vaoId 变非零)
+  (ptr-set! m _int 0 num-points)
+  (ptr-set! m _int 1 1)
+  (ptr-set! m _pointer 1 verts)
+  (ptr-set! m _pointer 6 colors)
   (upload-mesh m #f)
-  ;; 转为 _mesh-bytes list (读回所有字段)
-  (define lst
-    (list (ptr-ref m _int 0)         ;; 0: vertexCount
-          (ptr-ref m _int 1)         ;; 1: triangleCount
-          (ptr-ref m _pointer 1)     ;; 2: vertices
-          (ptr-ref m _pointer 2)     ;; 3: texcoords
-          (ptr-ref m _pointer 3)     ;; 4: texcoords2
-          (ptr-ref m _pointer 4)     ;; 5: normals
-          (ptr-ref m _pointer 5)     ;; 6: tangents
-          (ptr-ref m _pointer 6)     ;; 7: colors
-          (ptr-ref m _pointer 7)     ;; 8: indices
-          (ptr-ref m _int 16)        ;; 9: boneCount
-          (ptr-ref m _pointer 9)     ;; 10: boneIndices
-          (ptr-ref m _pointer 10)    ;; 11: boneWeights
-          (ptr-ref m _pointer 11)    ;; 12: animVertices
-          (ptr-ref m _pointer 12)    ;; 13: animNormals
-          (ptr-ref m _uint 26)       ;; 14: vaoId
-          (ptr-ref m _pointer 14)))  ;; 15: vboId
-  (values lst verts colors))
+  ;; 读回字段构造 _mesh-bytes list
+  (values
+   (list (ptr-ref m _int 0) (ptr-ref m _int 1)
+         (ptr-ref m _pointer 1) (ptr-ref m _pointer 2)
+         (ptr-ref m _pointer 3) (ptr-ref m _pointer 4)
+         (ptr-ref m _pointer 5) (ptr-ref m _pointer 6)
+         (ptr-ref m _pointer 7)
+         (ptr-ref m _int 16)
+         (ptr-ref m _pointer 9) (ptr-ref m _pointer 10)
+         (ptr-ref m _pointer 11) (ptr-ref m _pointer 12)
+         (ptr-ref m _uint 26)
+         (ptr-ref m _pointer 14))
+   ;; 注意: load-model-from-mesh 接管 verts/colors 的所有权
+   ;; UnloadModel → UnloadMesh 会 RL_FREE 它们
+   verts colors))
 
 (define (draw-model-points model position scale tint)
   (rl-enable-point-mode) (rl-disable-backface-culling)
@@ -60,13 +50,10 @@
 (init-window 800 450 "raylib [models] example - point rendering")
 (define cam (camera3d 3.0 3.0 3.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 CAMERA-PERSPECTIVE))
 (define origin (vector3 0.0 0.0 0.0))
-(define use-model? (box #t))
-(define changed? (box #f))
-(define npts (box 1000))
+(define use-model? (box #t)) (define changed? (box #f)) (define npts (box 1000))
 (define-values (mesh-list v c) (gen-mesh-points (unbox npts)))
 (define model (load-model-from-mesh mesh-list))
-(define tp (malloc _Vector3 'atomic))
-(define tc (malloc _Color 'atomic))
+(define tp (malloc _Vector3 'atomic)) (define tc (malloc _Color 'atomic))
 (set-target-fps 60)
 
 (let loop ()
@@ -78,9 +65,9 @@
     (when (is-key-pressed KEY-DOWN)
       (set-box! npts (max (quotient (unbox npts) 10) 1000)) (set-box! changed? #t))
     (when (unbox changed?)
-      (unload-model model) (mem-free v) (mem-free c)
-      (let-values ([(ml v2 c2) (gen-mesh-points (unbox npts))])
-        (set! mesh-list ml) (set! v v2) (set! c c2)
+      (unload-model model)  ;; UnloadMesh 会 RL_FREE(verts) RL_FREE(colors)
+      (let-values ([(ml new-v new-c) (gen-mesh-points (unbox npts))])
+        (set! mesh-list ml) (set! v new-v) (set! c new-c)
         (set! model (load-model-from-mesh ml)))
       (set-box! changed? #f))
     (begin-drawing) (clear-background BLACK) (begin-mode-3d cam)
@@ -102,4 +89,5 @@
         (draw-text "Using: DrawModelPoints()" 10 70 20 GREEN)
         (draw-text "Using: DrawPoint3D()" 10 70 20 RED))
     (draw-fps 10 10) (end-drawing) (loop)))
-(unload-model model) (mem-free v) (mem-free c) (close-window)
+;; cleanup: unload-model 已释放 verts/colors, 不需再 mem-free
+(unload-model model) (close-window)
