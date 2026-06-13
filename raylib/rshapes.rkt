@@ -205,6 +205,13 @@
     (λ (rec1 rec2)
       (f (C:rect->bytes rec1) (C:rect->bytes rec2)))))
 
+;; CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec) -> bool
+(define check-collision-circle-rec
+  (let ([f (get-ffi-obj "CheckCollisionCircleRec" T:lib
+             (_fun (c : C:_vec2-bytes) _float (r : C:_rect-bytes) -> _stdbool))])
+    (λ (center radius rec)
+      (f (C:vec2->bytes center) radius (C:rect->bytes rec)))))
+
 ;; ============================================================
 ;; 获取碰撞矩形 (shapes_collision_area.c)
 ;; GetCollisionRec(Rectangle rec1, Rectangle rec2) -> Rectangle
@@ -793,6 +800,7 @@
  draw-line-3d
  check-collision-point-circle
  check-collision-recs
+ check-collision-circle-rec
  get-collision-rec
  draw-ring
  draw-ring-lines
