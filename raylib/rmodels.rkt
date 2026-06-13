@@ -123,7 +123,7 @@
     _int _int
     _pointer _pointer _pointer
     _int _pointer _pointer
-    _pointer _pointer))
+    _pointer _pointer)) ; currentPose, boneMatrices
 
 ;; Mesh (raylib.h:346) — ~112 字节，用于 GenMesh* / LoadModelFromMesh 的传值 ABI
 (define _mesh-bytes
@@ -140,6 +140,16 @@
 ;; ============================================================
 ;; LoadModel(const char *fileName) -> Model
 ;; ============================================================
+
+
+;; Material (raylib.h:388) — 40B: Shader(16B) + MaterialMap* + float[4]
+(define _material-bytes
+  (_list-struct
+    _uint               ; shader.id
+    _int                ; PADDING (4B, align shader.locs to 8B)
+    _pointer            ; shader.locs
+    _pointer            ; maps
+    _float _float _float _float)) ; params[4]
 
 (define load-model
   (let ([f (get-ffi-obj "LoadModel" T:lib
@@ -200,6 +210,7 @@
 ;; LoadModelAnimations(const char *fileName, int *animCount)
 ;; -> ModelAnimation* (pointer to array)
 ;; ============================================================
+
 
 (define load-model-animations
   (let ([f (get-ffi-obj "LoadModelAnimations" T:lib
@@ -329,6 +340,7 @@
 ;; 模型加载/操作
 ;; ============================================================
 
+
 (define load-model-from-mesh
   (let ([f (get-ffi-obj "LoadModelFromMesh" T:lib
              (_fun (m : _mesh-bytes) -> (ret : _model-bytes)))])
@@ -415,13 +427,17 @@
 (define (unload-mesh mesh-ptr)
   ((get-ffi-obj "UnloadMesh" T:lib (_fun _pointer -> _void)) mesh-ptr))
 
-(define (draw-mesh mesh-ptr material-ptr transform-matrix-ptr)
-  ((get-ffi-obj "DrawMesh" T:lib (_fun _pointer _pointer _pointer -> _void))
-   mesh-ptr material-ptr transform-matrix-ptr))
+(define draw-mesh
+  (let ([f (get-ffi-obj "DrawMesh" T:lib
+             (_fun (m : _mesh-bytes) (mat : _material-bytes) (tr : C:_matrix-bytes) -> _void))])
+    (lambda (mesh material matrix)
+      (f mesh material matrix))))
 
-(define (draw-mesh-instanced mesh-ptr material-ptr transforms-ptr instances)
-  ((get-ffi-obj "DrawMeshInstanced" T:lib (_fun _pointer _pointer _pointer _int -> _void))
-   mesh-ptr material-ptr transforms-ptr instances))
+(define draw-mesh-instanced
+  (let ([f (get-ffi-obj "DrawMeshInstanced" T:lib
+             (_fun (m : _mesh-bytes) (mat : _material-bytes) _pointer _int -> _void))])
+    (lambda (mesh material transforms instances)
+      (f mesh material transforms instances))))
 
 (define (export-mesh mesh-ptr file-name)
   ((get-ffi-obj "ExportMesh" T:lib (_fun _pointer _string -> _stdbool))
