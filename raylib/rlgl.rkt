@@ -128,6 +128,8 @@
 (def-ffi rl-enable-scissor-test        "rlEnableScissorTest"        (_fun -> _void))
 (def-ffi rl-disable-scissor-test       "rlDisableScissorTest"       (_fun -> _void))
 (def-ffi rl-scissor                    "rlScissor"                  (_fun _int _int _int _int -> _void))
+(def-ffi rl-enable-point-mode          "rlEnablePointMode"          (_fun -> _void))
+(def-ffi rl-disable-point-mode         "rlDisablePointMode"         (_fun -> _void))
 (def-ffi rl-enable-wire-mode           "rlEnableWireMode"           (_fun -> _void))
 (def-ffi rl-disable-wire-mode          "rlDisableWireMode"          (_fun -> _void))
 (def-ffi rl-set-line-width             "rlSetLineWidth"             (_fun _float -> _void))
@@ -220,6 +222,7 @@
  rl-enable-depth-mask rl-disable-depth-mask
  rl-enable-backface-culling rl-disable-backface-culling rl-set-cull-face
  rl-enable-scissor-test rl-disable-scissor-test rl-scissor
+ rl-enable-point-mode rl-disable-point-mode
  rl-enable-wire-mode rl-disable-wire-mode
  rl-set-line-width rl-get-line-width
  rl-set-point-size rl-get-point-size
