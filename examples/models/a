@@ -1,3 +1,0 @@
-继续完成 racket-raylib-ffi 的 models 示例从 C 到 Racket 的逐个翻译。
-做到models
-现在逐个来，每次只做一个示例的翻译让我确认。

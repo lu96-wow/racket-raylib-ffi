@@ -436,8 +436,8 @@
 
 (define get-mesh-bounding-box
   (let ([f (get-ffi-obj "GetMeshBoundingBox" T:lib
-             (_fun _pointer -> (bb : C:_bounding-box-bytes)))])
-    (lambda (mesh-ptr) (f mesh-ptr))))
+             (_fun (m : _mesh-bytes) -> (bb : C:_bounding-box-bytes)))])
+    (lambda (mesh-lst) (f mesh-lst))))
 
 ;; ============================================================
 ;; GenMesh* — 生成网格

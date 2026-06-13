@@ -5,7 +5,8 @@
 ;; 对应 C: examples/models/models_loading_m3d.c
 
 (require "../../raylib/raylib.rkt"
-         racket/runtime-path)
+         racket/runtime-path
+         "../../raylib/raw-types.rkt")
 
 ;; ============================================================
 ;; 初始化
@@ -41,33 +42,35 @@
   ;; 辅助函数: 从动画列表中提取名称
   (define (anim-name-from-list anim-lst)
     (list->string
-     (for/list ([i (in-range 32)]
+     (for/list ([i (in-range anim-name-length)]
                 #:break (zero? (list-ref anim-lst i)))
        (integer->char (list-ref anim-lst i)))))
 
   ;; 绘制骨骼 (对应 C: DrawModelSkeleton)
-  ;; Transform: Vector3(3f) + Quaternion(4f) + Vector3(3f) = 10 _float
-  ;; BoneInfo:  char name[32] + int parent = 36 bytes = 9 _int slots
+  ;; 使用 raw-types.rkt 的安全访问器 + ptr-add 字节偏移
   (define (draw-skeleton anim)
     (define frame-int (inexact->exact (floor anim-current-frame)))
-    (define kf-poses-ptr (list-ref anim 34))     ;; Transform**
-    (define frame-poses (ptr-ref kf-poses-ptr _pointer frame-int)) ;; Transform*
+    (define kf-poses-ptr (list-ref anim anim-keyframe-poses-index))  ;; Transform**
+    (define frame-poses (ptr-ref kf-poses-ptr _pointer frame-int))   ;; Transform*
 
     (for ([i (in-range (sub1 bone-count))])
-      ;; pose[i].translation
-      (define tx (ptr-ref frame-poses _float (+ (* i 10) 0)))
-      (define ty (ptr-ref frame-poses _float (+ (* i 10) 1)))
-      (define tz (ptr-ref frame-poses _float (+ (* i 10) 2)))
-      (define pos (vector3 tx ty tz))
+      ;; &pose[i] — ptr-add 前进 i × sizeof(Transform) 字节
+      (define bone-ptr (ptr-add frame-poses (* i sizeof-transform)))
+      (define pos (vector3 (transform-trans-x bone-ptr)
+                           (transform-trans-y bone-ptr)
+                           (transform-trans-z bone-ptr)))
       (draw-cube pos 0.05 0.05 0.05 RED)
 
-      ;; skeleton.bones[i].parent (BoneInfo: parent 在字节偏移 32 = _int 索引 8)
-      (define parent (ptr-ref bones-ptr _int (+ (* i 9) 8)))
+      ;; &bones[i] — ptr-add 前进 i × sizeof(BoneInfo) 字节
+      (define bi-ptr (ptr-add bones-ptr (* i sizeof-boneinfo)))
+      (define parent (bone-info-parent bi-ptr))
       (when (>= parent 0)
-        (define px (ptr-ref frame-poses _float (+ (* parent 10) 0)))
-        (define py (ptr-ref frame-poses _float (+ (* parent 10) 1)))
-        (define pz (ptr-ref frame-poses _float (+ (* parent 10) 2)))
-        (draw-line-3d pos (vector3 px py pz) RED))))
+        ;; &pose[parent]
+        (define parent-ptr (ptr-add frame-poses (* parent sizeof-transform)))
+        (define p-pos (vector3 (transform-trans-x parent-ptr)
+                               (transform-trans-y parent-ptr)
+                               (transform-trans-z parent-ptr)))
+        (draw-line-3d pos p-pos RED))))
 
   ;; 动画播放变量
   (define anim-index 0)
@@ -92,7 +95,7 @@
 
       ;; 获取当前动画数据
       (let* ([anim (ptr-ref anims-ptr _model-animation-bytes anim-index)]
-             [kf-count (list-ref anim 33)]       ;; keyframeCount
+             [kf-count (list-ref anim anim-keyframe-count-index)]       ;; keyframeCount
              [anim-name (anim-name-from-list anim)])
 
         ;; 更新动画帧 (插值帧，使用 float)
