@@ -19,6 +19,16 @@
     (ptr-set! c _ubyte 3 a)
     c))
 
+(define (color-r c) (ptr-ref c _ubyte 0))
+(define (color-g c) (ptr-ref c _ubyte 1))
+(define (color-b c) (ptr-ref c _ubyte 2))
+(define (color-a c) (ptr-ref c _ubyte 3))
+
+(define (set-color-r! c v) (ptr-set! c _ubyte 0 v))
+(define (set-color-g! c v) (ptr-set! c _ubyte 1 v))
+(define (set-color-b! c v) (ptr-set! c _ubyte 2 v))
+(define (set-color-a! c v) (ptr-set! c _ubyte 3 v))
+
 (define (vector2 x y)
   (let ([v (malloc T:_Vector2 'atomic)])
     (ptr-set! v _float 0 (exact->inexact x))  ;; offset 0 = first float
@@ -623,7 +633,9 @@
 ;; ============================================================
 
 (provide
- color vector2 vector2-x vector2-y set-vector2-x! set-vector2-y!
+ color color-r color-g color-b color-a
+ set-color-r! set-color-g! set-color-b! set-color-a!
+ vector2 vector2-x vector2-y set-vector2-x! set-vector2-y!
  vector3 vector3-x vector3-y vector3-z
  set-vector3-x! set-vector3-y! set-vector3-z!
  rectangle rectangle-x rectangle-y rectangle-w rectangle-h
