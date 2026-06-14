@@ -55,8 +55,8 @@
     (ptr-set! p _int 5 (list-ref f 5))
     (ptr-set! p _int 6 (list-ref f 6))
     (ptr-set! p _int 7 (list-ref f 7))
-    (ptr-set! p _pointer 8 (list-ref f 8))
-    (ptr-set! p _pointer 9 (list-ref f 9))
+    (ptr-set! p _pointer 4 (list-ref f 8))
+    (ptr-set! p _pointer 5 (list-ref f 9))
     p))
 
 ;; ============================================================

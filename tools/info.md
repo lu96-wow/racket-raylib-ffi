@@ -70,20 +70,35 @@ bash build-all.sh > ../raylib/layout.rkt
 
 ## gen-layout.c 当前覆盖的结构体
 
-| 结构体 | 文件 | sizeof |
-|--------|------|--------|
-| Shader | `Shader-layout.c` | 16 |
-| MaterialMap | `MaterialMap-layout.c` | 28 |
-| Material | `Material-layout.c` | 40 |
-| Mesh | `Mesh-layout.c` | 120 |
-| Transform | `Transform-layout.c` | 40 |
-| BoneInfo | `BoneInfo-layout.c` | 36 |
-| ModelSkeleton | `ModelSkeleton-layout.c` | 24 |
-| Model | `Model-layout.c` | 136 |
-| ModelAnimation | `ModelAnimation-layout.c` | 48 |
-| RayCollision | `RayCollision-layout.c` | 32 |
+| 结构体 | 文件 | sizeof | 验证 |
+|--------|------|--------|:--:|
+| Shader | `Shader-layout.c` | 16 | ✅ |
+| MaterialMap | `MaterialMap-layout.c` | 28 | ✅ |
+| Material | `Material-layout.c` | 40 | ✅ |
+| Mesh | `Mesh-layout.c` | 120 | ✅ |
+| Transform | `Transform-layout.c` | 40 | ✅ |
+| BoneInfo | `BoneInfo-layout.c` | 36 | ✅ |
+| ModelSkeleton | `ModelSkeleton-layout.c` | 24 | ✅ |
+| Model | `Model-layout.c` | 136 | ✅ |
+| ModelAnimation | `ModelAnimation-layout.c` | 48 | ✅ |
+| RayCollision | `RayCollision-layout.c` | 32 | ✅ |
+| Font | `Font-layout.c` | 48 | ✅ |
+| Camera3D | `Camera3D-layout.c` | 44 | ✅ |
+| RenderTexture | `RenderTexture-layout.c` | 44 | ✅ |
+| Image | `Image-layout.c` | 24 | ✅ |
+| Texture | `Texture-layout.c` | 20 | ✅ |
+| NPatchInfo | `NPatchInfo-layout.c` | 36 | ✅ |
+| GlyphInfo | `GlyphInfo-layout.c` | 40 | ✅ |
+| Wave | `Wave-layout.c` | 24 | ✅ |
+| AudioStream | `AudioStream-layout.c` | 32 | ✅ |
+| Sound | `Sound-layout.c` | 40 | ✅ |
+| Music | `Music-layout.c` | 56 | ✅ |
+| VrDeviceInfo | `VrDeviceInfo-layout.c` | 60 | ✅ |
+| FilePathList | `FilePathList-layout.c` | 16 | ✅ |
+| AutomationEvent | `AutomationEvent-layout.c` | 24 | ✅ |
+| AutomationEventList | `AutomationEventList-layout.c` | 16 | ✅ |
 
-**如果审查发现需要但未覆盖的结构体**（如 Light[rlights], Texture2D, NPatchInfo, AudioStream, Sound, Music 等），创建对应的 `Xxx-layout.c` 并加入 `build-all.sh`。
+以下纯同类型结构体无需 layout 文件：Color, Vector2/3/4, Rectangle, Camera2D, Ray, BoundingBox, Matrix, VrStereoConfig(76×float)。
 
 ## 已知不一致（已修复）
 
@@ -92,9 +107,11 @@ bash build-all.sh > ../raylib/layout.rkt
 | `_mesh-bytes` | 112 字节 | 120 字节 | 缺 boneCount 后和 vaoId 后的 padding |
 | `models_mesh_picking.rkt` ptr-add | `(* m 112)` | `(* m 120)` | 同上 |
 | `_ray-collision-bytes` | `_stdbool`+9×`_float` (40B) | `_stdbool`+7×`_float` (32B) | 多了 2 个末尾 float，C 返回 32B 但 Racket 读 40B |
+| `font-list->ptr` (2 文件) | `_pointer 8/9` | `_pointer 4/5` | Font.recs@32 写成 byte64, glyphs@40 写成 byte72 |
+| `set-material-color` | `_pointer 16` | `_pointer 2` | `_pointer` 索引×8, maps@byte16 需 idx=2 非 16 |
 
 ## 已知问题（未修复）
 
 | 位置 | 问题 | 状态 |
 |------|------|------|
-| `set-material-color` 中 `ptr-ref mat-ptr _pointer 16` | 读到无效指针，但同偏移 C 函数正常 | 待查（可能 Racket FFI ABI 边界问题） |
+| — | (当前无) | — |

@@ -505,16 +505,18 @@
 
 ;; ============================================================
 ;; SetMaterialColor — 手动写 MaterialMap.color (C 侧无直接 API)
-;; 布局由 gen-layout.c + offsetof 确认: Material-maps-off=16, MaterialMap-color-off=20
+;; 布局由 gen-layout.c + offsetof 确认:
+;;   Material-maps-off=16 (_pointer 2), MaterialMap-color-off=20 (_ubyte 20)
+;;   MaterialMap-size=28
 ;; ============================================================
 
 (define (set-material-color material-ptr map-type color-ptr)
-  (let ([maps-ptr (ptr-ref material-ptr _pointer 16)])   ; offsetof(Material,maps)=16
+  (let ([maps-ptr (ptr-ref material-ptr _pointer 2)])    ; offsetof(Material,maps)=16 → _pointer idx=2
     (let ([map-ptr (ptr-add maps-ptr (* map-type 28))])  ; sizeof(MaterialMap)=28
-      (ptr-set! map-ptr _ubyte 20 (ptr-ref color-ptr _ubyte 0))  ; color.r
-      (ptr-set! map-ptr _ubyte 21 (ptr-ref color-ptr _ubyte 1))  ; color.g
-      (ptr-set! map-ptr _ubyte 22 (ptr-ref color-ptr _ubyte 2))  ; color.b
-      (ptr-set! map-ptr _ubyte 23 (ptr-ref color-ptr _ubyte 3))))) ; color.a
+      (ptr-set! map-ptr _ubyte 20 (ptr-ref color-ptr _ubyte 0))  ; color.r @20
+      (ptr-set! map-ptr _ubyte 21 (ptr-ref color-ptr _ubyte 1))  ; color.g @21
+      (ptr-set! map-ptr _ubyte 22 (ptr-ref color-ptr _ubyte 2))  ; color.b @22
+      (ptr-set! map-ptr _ubyte 23 (ptr-ref color-ptr _ubyte 3))))) ; color.a @23
 
 ;; ============================================================
 ;; Image 绘制函数

@@ -60,8 +60,8 @@
     (ptr-set! p _int 5 (list-ref f 5))      ;; tex-height
     (ptr-set! p _int 6 (list-ref f 6))      ;; tex-mipmaps
     (ptr-set! p _int 7 (list-ref f 7))      ;; tex-format
-    (ptr-set! p _pointer 8 (list-ref f 8))  ;; recs
-    (ptr-set! p _pointer 9 (list-ref f 9))  ;; glyphs
+    (ptr-set! p _pointer 4 (list-ref f 8))  ;; recs  @ offsetof(Font,recs)=32
+    (ptr-set! p _pointer 5 (list-ref f 9))  ;; glyphs @ offsetof(Font,glyphs)=40
     p))
 
 ;; ============================================================
