@@ -27,7 +27,7 @@
                           0.0 1.0  0.0
                           45.0 CAMERA-PERSPECTIVE))
 
-;; 创建立方体模型，用 BEIGE 作底色
+;; 创建立方体模型 + 底色 (通过 tint 参数实现，等价 C 侧设 material color)
 (define cube-model (load-model-from-mesh (gen-mesh-cube 1.0 1.0 1.0)))
 
 ;; 初始化体素世界 (3D bool array: 8×8×8, 全部填满)

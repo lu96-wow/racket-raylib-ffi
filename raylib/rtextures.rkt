@@ -502,6 +502,20 @@
              (_fun _pointer _int (t : _texture-bytes) -> _void))])
     (lambda (material-ptr map-type texture)
       (f material-ptr map-type texture))))
+
+;; ============================================================
+;; SetMaterialColor — 手动写 MaterialMap.color (C 侧无直接 API)
+;; 布局由 gen-layout.c + offsetof 确认: Material-maps-off=16, MaterialMap-color-off=20
+;; ============================================================
+
+(define (set-material-color material-ptr map-type color-ptr)
+  (let ([maps-ptr (ptr-ref material-ptr _pointer 16)])   ; offsetof(Material,maps)=16
+    (let ([map-ptr (ptr-add maps-ptr (* map-type 28))])  ; sizeof(MaterialMap)=28
+      (ptr-set! map-ptr _ubyte 20 (ptr-ref color-ptr _ubyte 0))  ; color.r
+      (ptr-set! map-ptr _ubyte 21 (ptr-ref color-ptr _ubyte 1))  ; color.g
+      (ptr-set! map-ptr _ubyte 22 (ptr-ref color-ptr _ubyte 2))  ; color.b
+      (ptr-set! map-ptr _ubyte 23 (ptr-ref color-ptr _ubyte 3))))) ; color.a
+
 ;; ============================================================
 ;; Image 绘制函数
 ;; ============================================================
@@ -686,7 +700,7 @@
  load-image-from-memory load-image-colors load-image-palette
  unload-image-colors unload-image-palette
  get-image-alpha-border get-image-color
- set-material-texture
+ set-material-texture set-material-color
  gen-texture-mipmaps set-texture-wrap
  load-texture-cubemap
  ;; image-draw-line / image-draw-circle / image-draw-rectangle-lines 等绘制函数

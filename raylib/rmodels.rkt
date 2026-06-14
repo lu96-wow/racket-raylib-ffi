@@ -125,17 +125,19 @@
     _int _pointer _pointer
     _pointer _pointer)) ; currentPose, boneMatrices
 
-;; Mesh (raylib.h:346) — ~112 字节，用于 GenMesh* / LoadModelFromMesh 的传值 ABI
+;; Mesh (raylib.h:346) — 120 字节 (gen-layout.c 确认, 含 padding)
 (define _mesh-bytes
   (_list-struct
-    _int _int           ; vertexCount, triangleCount
-    _pointer _pointer _pointer       ; vertices, texcoords, texcoords2
+    _int _int           ; vertexCount(4), triangleCount(4)
+    _pointer _pointer _pointer       ; vertices(8), texcoords(8), texcoords2(8)
     _pointer _pointer _pointer _pointer  ; normals, tangents, colors, indices
-    _int                ; boneCount
-    _pointer _pointer   ; boneIndices, boneWeights
-    _pointer _pointer   ; animVertices, animNormals
-    _uint               ; vaoId
-    _pointer))          ; vboId
+    _int                ; boneCount(4)
+    _int                ; PADDING (align boneIndices to 8)
+    _pointer _pointer   ; boneIndices(8), boneWeights(8)
+    _pointer _pointer   ; animVertices(8), animNormals(8)
+    _uint               ; vaoId(4)
+    _int                ; PADDING (align vboId to 8)
+    _pointer))          ; vboId(8)
 
 ;; ============================================================
 ;; LoadModel(const char *fileName) -> Model

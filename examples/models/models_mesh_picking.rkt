@@ -93,7 +93,7 @@
         (set! cursor-color ORANGE) (set! hit-object-name "Box")
         (set! box-hit? #t)
         (for ([m (in-range (list-ref tower 16))])
-          (let* ([mesh-ptr (ptr-add meshes-ptr (* m 112))]
+          (let* ([mesh-ptr (ptr-add meshes-ptr (* m 120))]  ; Mesh-size = 120
                  [mhit (get-ray-collision-mesh ray mesh-ptr (model-transform tower))])
             (when (and (list-ref mhit 0) (< (list-ref mhit 1) collision-dist))
               (set! collision-hit? #t) (set! collision-dist (list-ref mhit 1))
