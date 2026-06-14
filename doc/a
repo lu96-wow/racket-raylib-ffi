@@ -1,2 +1,0 @@
-for f in *.rkt; do echo "=== $f ===" && racket "$f"; done | grep -v "^INFO:"
-运行所有文件并屏蔽ifo开头行

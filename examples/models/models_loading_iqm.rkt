@@ -3,10 +3,10 @@
 ;; raylib [models] example - loading iqm (Racket FFI 翻译)
 ;; 带动画
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../examples/models/resources/")))
+(define-runtime-path resource-dir "../../../examples/models/resources/")
 
 (define screen-width 800)
 (define screen-height 450)
@@ -20,10 +20,10 @@
                               45.0 CAMERA-PERSPECTIVE))
 
 (define guy-model
-  (load-model (string-append resource-dir "models/iqm/guy.iqm")))
+  (load-model (string-append (path->string resource-dir) "models/iqm/guy.iqm")))
 
 (define guy-texture
-  (load-texture (string-append resource-dir "models/iqm/guytex.png")))
+  (load-texture (string-append (path->string resource-dir) "models/iqm/guytex.png")))
 
 ;; materials is index 19 in model list
 (set-material-texture (list-ref guy-model 19) MATERIAL-MAP-DIFFUSE guy-texture)
@@ -31,15 +31,18 @@
 (define position (vector3 0.0 0.0 0.0))
 
 ;; Load animation
+(define anim-ok? #f)
+(define anim-name "N/A")
+(define keyframe-count 0)
+(define first-anim #f)
 (let-values ([(anims-ptr anim-count)
               (load-model-animations
-                (string-append resource-dir "models/iqm/guyanim.iqm"))])
-  
-  (define anim-name (model-animation-name anims-ptr))
-  (define keyframe-count (model-animation-keyframe-count anims-ptr))
-  
-  ;; Read first animation as value list for update-model-animation
-  (define first-anim (ptr-ref anims-ptr _model-animation-bytes 0))
+                (string-append (path->string resource-dir) "models/iqm/guyanim.iqm"))])
+  (when (and anims-ptr (> anim-count 0))
+    (set! anim-ok? #t)
+    (set! anim-name (model-animation-name anims-ptr))
+    (set! keyframe-count (model-animation-keyframe-count anims-ptr))
+    (set! first-anim (ptr-ref anims-ptr _model-animation-bytes 0)))
   
   (define current-frame 0.0)
   
@@ -50,10 +53,11 @@
       (update-camera camera CAMERA-ORBITAL)
       
       ;; Update animation (always playing)
-      (set! current-frame (+ current-frame 1.0))
-      (update-model-animation guy-model first-anim current-frame)
-      (when (>= current-frame keyframe-count)
-        (set! current-frame 0.0))
+      (when anim-ok?
+        (set! current-frame (+ current-frame 1.0))
+        (update-model-animation guy-model first-anim current-frame)
+        (when (>= current-frame keyframe-count)
+          (set! current-frame 0.0)))
       
       (begin-drawing)
       (clear-background RAYWHITE)

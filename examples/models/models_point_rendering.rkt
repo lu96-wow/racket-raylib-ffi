@@ -34,9 +34,11 @@
          (ptr-ref m _pointer 5) (ptr-ref m _pointer 6)
          (ptr-ref m _pointer 7)
          (ptr-ref m _int 16)
+         0  ; padding after boneCount (align boneIndices to 8)
          (ptr-ref m _pointer 9) (ptr-ref m _pointer 10)
          (ptr-ref m _pointer 11) (ptr-ref m _pointer 12)
          (ptr-ref m _uint 26)
+         0  ; padding after vaoId (align vboId to 8)
          (ptr-ref m _pointer 14))
    ;; 注意: load-model-from-mesh 接管 verts/colors 的所有权
    ;; UnloadModel → UnloadMesh 会 RL_FREE 它们
