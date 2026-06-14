@@ -1,0 +1,3 @@
+# Ignore compiled layout probe binaries
+*-layout
+!*-layout.c

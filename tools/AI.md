@@ -9,9 +9,14 @@
 
 2. **查偏移**：
    ```bash
-   cd tools && gcc -I../../src gen-layout.c -o gen-layout && ./gen-layout | grep Material
+   cd tools
+   # 单个结构体:
+   gcc -I../../src Material-layout.c -o Material-layout && ./Material-layout
    # → (define Material-maps-off 16)
    # → (define Material-size 40)
+
+   # 全部结构体生成 layout.rkt:
+   bash build-all.sh > ../raylib/layout.rkt
    ```
 
 3. **硬编码到代码**，加注释：
@@ -20,7 +25,7 @@
    (ptr-add p (* i 120))           ; sizeof(Mesh)
    ```
 
-4. **如果 `gen-layout.c` 没有目标结构体** → 先加对应的 `printf("(define Xxx-foo-off %zu)\n", offsetof(Xxx, foo));` 再编译运行。
+4. **如果 tools/ 没有目标结构体的 layout 文件** → 参考已有文件创建 `Xxx-layout.c`，在 `build-all.sh` 的 `STRUCTS` 数组中添加，运行 `bash build-all.sh > ../raylib/layout.rkt`。
 
 ## 记住
 

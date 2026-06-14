@@ -596,8 +596,11 @@
   (list (ptr-ref bb _float 0) (ptr-ref bb _float 1) (ptr-ref bb _float 2)
         (ptr-ref bb _float 3) (ptr-ref bb _float 4) (ptr-ref bb _float 5)))
 
+;; RayCollision: 32 bytes (gen-layout.c 确认)
+;;   hit(1B+3pad) distance(4B) point(Vector3=12B) normal(Vector3=12B)
+;;   扁平: hit + distance + point.xyz + normal.xyz = 8 个 list 元素
 (define _ray-collision-bytes
-  (_list-struct _stdbool _float _float _float _float _float _float _float _float _float))
+  (_list-struct _stdbool _float _float _float _float _float _float _float))
 
 ;; ============================================================
 ;; 拖放文件 (core_drop_files.c)
