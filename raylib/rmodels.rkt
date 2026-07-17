@@ -154,12 +154,6 @@
         0.0 0.0 1.0 0.0
         0.0 0.0 0.0 1.0))
 
-(define (matrix-translate x y z)
-  (list 1.0 0.0 0.0 x
-        0.0 1.0 0.0 y
-        0.0 0.0 1.0 z
-        0.0 0.0 0.0 1.0))
-
 ;; Mesh (raylib.h:346) — 120 字节 (gen-layout.c 确认, 含 padding)
 (define _mesh-bytes
   (_list-struct
@@ -476,6 +470,46 @@
     (lambda (mesh material transforms instances)
       (f mesh material transforms instances))))
 
+;; ============================================================
+;; 辅助: cpointer → _mesh-bytes / _material-bytes list
+;; ============================================================
+
+(define (mesh-ptr->list ptr)
+  ;; Mesh 120B: vertexCount@0(4), triangleCount@4(4),
+  ;;   vertices@8, texcoords@16, texcoords2@24,
+  ;;   normals@32, tangents@40, colors@48, indices@56,
+  ;;   boneCount@64(4), pad, boneIndices@72, boneWeights@80,
+  ;;   animVertices@88, animNormals@96, vaoId@104(4), pad, vboId@112
+  (list (ptr-ref ptr _int 0)      ;; vertexCount
+        (ptr-ref ptr _int 1)      ;; triangleCount
+        (ptr-ref ptr _pointer 1)  ;; vertices @8
+        (ptr-ref ptr _pointer 2)  ;; texcoords @16
+        (ptr-ref ptr _pointer 3)  ;; texcoords2 @24
+        (ptr-ref ptr _pointer 4)  ;; normals @32
+        (ptr-ref ptr _pointer 5)  ;; tangents @40
+        (ptr-ref ptr _pointer 6)  ;; colors @48
+        (ptr-ref ptr _pointer 7)  ;; indices @56
+        (ptr-ref ptr _int 16)     ;; boneCount @64
+        0                         ;; padding
+        (ptr-ref ptr _pointer 9)  ;; boneIndices @72
+        (ptr-ref ptr _pointer 10) ;; boneWeights @80
+        (ptr-ref ptr _pointer 11) ;; animVertices @88
+        (ptr-ref ptr _pointer 12) ;; animNormals @96
+        (ptr-ref ptr _uint 26)    ;; vaoId @104
+        0                         ;; padding
+        (ptr-ref ptr _pointer 14))) ;; vboId @112
+
+(define (material-ptr->list ptr)
+  ;; Material 40B: shader.id@0(4), pad, shader.locs@8, maps@16, params@24(16)
+  (list (ptr-ref ptr _uint 0)     ;; shader.id
+        0                          ;; padding
+        (ptr-ref ptr _pointer 1)  ;; shader.locs @8
+        (ptr-ref ptr _pointer 2)  ;; maps @16
+        (ptr-ref ptr _float 6)    ;; params[0] @24
+        (ptr-ref ptr _float 7)    ;; params[1]
+        (ptr-ref ptr _float 8)    ;; params[2]
+        (ptr-ref ptr _float 9)))  ;; params[3]
+
 (define (export-mesh mesh-ptr file-name)
   ((get-ffi-obj "ExportMesh" T:lib (_fun _pointer _string -> _stdbool))
    mesh-ptr file-name))
@@ -616,7 +650,6 @@
 (provide
  ;; ══ 矩阵辅助 (C Matrix 字段顺序: m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15) ══
  matrix-identity
- matrix-translate
  ;; ══ 模型绑定 ══
  draw-cube
  draw-cube-wires
@@ -665,6 +698,8 @@
  unload-mesh
  draw-mesh
  draw-mesh-instanced
+ mesh-ptr->list
+ material-ptr->list
  export-mesh
  export-mesh-as-code
  gen-mesh-tangents

@@ -169,6 +169,85 @@
              (_fun (m : C:_matrix-bytes) -> (result : C:_matrix-bytes)))])
     (lambda (mat) (f mat))))
 
+(define matrix-translate
+  (let ([f (get-ffi-obj "MatrixTranslate" T:lib
+             (_fun _float _float _float -> (m : C:_matrix-bytes)))])
+    (lambda (x y z) (f x y z))))
+
+;; ============================================================
+;; Quaternion (纯 Racket 实现, Quaternion = Vector4 = malloc'd ptr)
+;; ============================================================
+
+(define (quaternion-from-axis-angle axis-ptr angle)
+  (let* ([ax (ptr-ref axis-ptr _float 0)]
+         [ay (ptr-ref axis-ptr _float 1)]
+         [az (ptr-ref axis-ptr _float 2)]
+         [len (sqrt (+ (* ax ax) (* ay ay) (* az az)))]
+         [half-angle (/ angle 2.0)]
+         [s (sin half-angle)]
+         [c (cos half-angle)]
+         [nx (if (= len 0.0) ax (/ ax len))]
+         [ny (if (= len 0.0) ay (/ ay len))]
+         [nz (if (= len 0.0) az (/ az len))]
+         [q (malloc T:_Vector4 'atomic)])
+    (ptr-set! q _float 0 (exact->inexact (* nx s)))
+    (ptr-set! q _float 1 (exact->inexact (* ny s)))
+    (ptr-set! q _float 2 (exact->inexact (* nz s)))
+    (ptr-set! q _float 3 (exact->inexact c))
+    q))
+
+(define (quaternion-multiply q1 q2)
+  (let* ([x1 (ptr-ref q1 _float 0)] [y1 (ptr-ref q1 _float 1)]
+         [z1 (ptr-ref q1 _float 2)] [w1 (ptr-ref q1 _float 3)]
+         [x2 (ptr-ref q2 _float 0)] [y2 (ptr-ref q2 _float 1)]
+         [z2 (ptr-ref q2 _float 2)] [w2 (ptr-ref q2 _float 3)]
+         [q (malloc T:_Vector4 'atomic)])
+    (ptr-set! q _float 0 (exact->inexact (+ (* w1 x2) (* x1 w2) (* y1 z2) (- (* z1 y2)))))
+    (ptr-set! q _float 1 (exact->inexact (+ (* w1 y2) (- (* x1 z2)) (* y1 w2) (* z1 x2))))
+    (ptr-set! q _float 2 (exact->inexact (+ (* w1 z2) (* x1 y2) (- (* y1 x2)) (* z1 w2))))
+    (ptr-set! q _float 3 (exact->inexact (- (* w1 w2) (* x1 x2) (* y1 y2) (* z1 z2))))
+    q))
+
+(define (quaternion-invert q)
+  (let* ([x (ptr-ref q _float 0)] [y (ptr-ref q _float 1)]
+         [z (ptr-ref q _float 2)] [w (ptr-ref q _float 3)]
+         [len-sq (+ (* x x) (* y y) (* z z) (* w w))]
+         [inv (malloc T:_Vector4 'atomic)])
+    (if (= len-sq 0.0)
+      (begin
+        (ptr-set! inv _float 0 0.0)
+        (ptr-set! inv _float 1 0.0)
+        (ptr-set! inv _float 2 0.0)
+        (ptr-set! inv _float 3 1.0))
+      (let ([f (/ 1.0 len-sq)])
+        (ptr-set! inv _float 0 (exact->inexact (* (- x) f)))
+        (ptr-set! inv _float 1 (exact->inexact (* (- y) f)))
+        (ptr-set! inv _float 2 (exact->inexact (* (- z) f)))
+        (ptr-set! inv _float 3 (exact->inexact (* w f)))))
+    inv))
+
+;; quaternion->matrix: 返回 C Matrix 字段顺序的 list
+(define (quaternion-to-matrix q)
+  (let* ([x (ptr-ref q _float 0)] [y (ptr-ref q _float 1)]
+         [z (ptr-ref q _float 2)] [w (ptr-ref q _float 3)]
+         [x2 (* x x)] [y2 (* y y)] [z2 (* z z)]
+         [xy (* x y)] [xz (* x z)] [yz (* y z)]
+         [wx (* w x)] [wy (* w y)] [wz (* w z)])
+    ;; C Matrix 字段顺序: m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15
+    (list (- 1.0 (* 2.0 (+ y2 z2)))   ;; m0
+          (* 2.0 (- xy wz))            ;; m4
+          (* 2.0 (+ xz wy))            ;; m8
+          0.0                          ;; m12
+          (* 2.0 (+ xy wz))            ;; m1
+          (- 1.0 (* 2.0 (+ x2 z2)))   ;; m5
+          (* 2.0 (- yz wx))            ;; m9
+          0.0                          ;; m13
+          (* 2.0 (- xz wy))            ;; m2
+          (* 2.0 (+ yz wx))            ;; m6
+          (- 1.0 (* 2.0 (+ x2 y2)))   ;; m10
+          0.0                          ;; m14
+          0.0 0.0 0.0 1.0)))            ;; m3,m7,m11,m15
+
 (provide
  clamp lerp remap
  vec2-add vec2-subtract vec2-scale vec2-multiply
@@ -176,4 +255,7 @@
  vec3-add vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize
  vec3-rotate-by-axis-angle vec3-lerp
- vector3-distance matrix-perspective matrix-multiply matrix-invert)
+ vector3-distance matrix-perspective matrix-multiply matrix-invert
+ matrix-translate
+ quaternion-from-axis-angle quaternion-multiply quaternion-invert
+ quaternion-to-matrix)
