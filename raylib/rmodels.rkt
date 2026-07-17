@@ -103,15 +103,21 @@
 
 
 ;; ============================================================
-;; Model 传值类型
-;; Model struct (26 字段):
-;;   Matrix transform      → 16 floats
-;;   int meshCount, materialCount
-;;   Mesh *meshes, Material *materials, int *meshMaterial
-;;   int boneCount
-;;   BoneInfo *bones, Transform *bindPose
-;;   Transform *currentPose
-;;   Matrix *boneMatrices
+;; Model 传值类型 (27 要素 / 136 字节 = gen-layout.c 确认)
+;;
+;; 布局 (offsetof):
+;;   transform      float[16]  @0    64B
+;;   meshCount      int        @64    4B
+;;   materialCount  int        @68    4B
+;;   meshes         *Mesh      @72    8B
+;;   materials      *Material  @80    8B
+;;   meshMaterial   *int       @88    8B
+;;   skeleton ┬ boneCount  int       @96    4B
+;;            ├ PADDING            @100    4B   ← 必须有!
+;;            ├ bones      *Bone   @104    8B
+;;            └ bindPose   *Trans  @112    8B
+;;   currentPose    *Trans     @120    8B
+;;   boneMatrices   *Matrix    @128    8B
 ;; ============================================================
 
 (define _model-bytes
@@ -122,7 +128,8 @@
     _float _float _float _float
     _int _int
     _pointer _pointer _pointer
-    _int _pointer _pointer
+    _int _int           ; boneCount(4) + padding(4)
+    _pointer _pointer   ; bones, bindPose
     _pointer _pointer)) ; currentPose, boneMatrices
 
 ;; Mesh (raylib.h:346) — 120 字节 (gen-layout.c 确认, 含 padding)

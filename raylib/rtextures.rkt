@@ -504,6 +504,16 @@
       (f material-ptr map-type texture))))
 
 ;; ============================================================
+;; SetMaterialShader — 赋值 Shader 到 Material (C 侧无直接 API)
+;; C: material->shader = shader;  (结构体赋值)
+;; Shader 布局: { uint id(4B) + 4B padding + pointer locs(8B) } = 16B
+;; 必须用 _shader-bytes 整体写入，分字段写会遗漏 padding 导致着色器无效
+;; ============================================================
+
+(define (set-material-shader material-ptr shader)
+  (ptr-set! material-ptr C:_shader-bytes shader))
+
+;; ============================================================
 ;; SetMaterialColor — 手动写 MaterialMap.color (C 侧无直接 API)
 ;; 布局由 gen-layout.c + offsetof 确认:
 ;;   Material-maps-off=16 (_pointer 2), MaterialMap-color-off=20 (_ubyte 20)
@@ -702,7 +712,7 @@
  load-image-from-memory load-image-colors load-image-palette
  unload-image-colors unload-image-palette
  get-image-alpha-border get-image-color
- set-material-texture set-material-color
+ set-material-texture set-material-shader set-material-color
  gen-texture-mipmaps set-texture-wrap
  load-texture-cubemap
  ;; image-draw-line / image-draw-circle / image-draw-rectangle-lines 等绘制函数

@@ -703,9 +703,9 @@
 ;;   Shader = { unsigned int id; int *locs; }
 ;; ============================================================
 
-;; Shader 传值类型: id (_uint) + locs (_pointer)
+;; Shader 传值类型: id (_uint 4B) + padding (_int 4B, align locs to 8) + locs (_pointer 8B) = 16B
 (define _shader-bytes
-  (_list-struct _uint _pointer))
+  (_list-struct _uint _int _pointer))
 
 (define load-shader
   (let ([f (get-ffi-obj "LoadShader" T:lib
