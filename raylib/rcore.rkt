@@ -709,8 +709,13 @@
 
 (define load-shader
   (let ([f (get-ffi-obj "LoadShader" T:lib
-                        (_fun _string _string -> (s : _shader-bytes)))])
-    (lambda (vs-filename fs-filename) (f vs-filename fs-filename))))
+                        (_fun _string _string -> (s : _shader-bytes)))]
+        [f-null (get-ffi-obj "LoadShader" T:lib
+                           (_fun _pointer _string -> (s : _shader-bytes)))])
+    (lambda (vs-filename fs-filename)
+      (if vs-filename
+          (f vs-filename fs-filename)
+          (f-null #f fs-filename)))))
 
 (define unload-shader
   (let ([f (get-ffi-obj "UnloadShader" T:lib
