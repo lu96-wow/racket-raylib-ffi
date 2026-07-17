@@ -188,6 +188,17 @@
 (def-ffi rl-draw-render-batch-active   "rlDrawRenderBatchActive"     (_fun -> _void))
 
 ;; ============================================================
+;; Framebuffer / Texture 扩展
+;; ============================================================
+
+(def-ffi rl-get-framebuffer-width   "rlGetFramebufferWidth"   (_fun -> _int))
+(def-ffi rl-get-framebuffer-height  "rlGetFramebufferHeight"  (_fun -> _int))
+(def-ffi rl-load-texture-depth      "rlLoadTextureDepth"      (_fun _int _int _stdbool -> _uint))
+(def-ffi rl-load-texture-cubemap    "rlLoadTextureCubemap"    (_fun _pointer _int _int _int -> _uint))
+(def-ffi rl-load-draw-cube          "rlLoadDrawCube"          (_fun -> _void))
+(def-ffi rl-set-uniform-matrix      "rlSetUniformMatrix"      (_fun _int _pointer -> _void))
+
+;; ============================================================
 ;; 导出
 ;; ============================================================
 
@@ -242,4 +253,8 @@
  ;; 杂项
  rl-get-version rl-get-texture-id-default rl-get-shader-id-default
  rl-check-render-batch-limit rl-draw-render-batch-active
+ ;; 帧缓冲/纹理扩展
+ rl-get-framebuffer-width rl-get-framebuffer-height
+ rl-load-texture-depth rl-load-texture-cubemap
+ rl-load-draw-cube rl-set-uniform-matrix
 )
