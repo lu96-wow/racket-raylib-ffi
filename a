@@ -1,0 +1,1 @@
+for f in *.rkt; do echo "=== $f ===" && racket "$f"; done | grep -v "^INFO:"

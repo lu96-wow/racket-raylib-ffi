@@ -103,6 +103,18 @@
 
 
 ;; ============================================================
+;; ============================================================
+;; ⚠️ 关键: C Matrix 字段内存顺序
+;;
+;; C struct Matrix { float m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15; };
+;; _list-struct 平坦序列化按此顺序读写: [m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15]
+;;
+;; 正确示例 (平移矩阵):
+;;   (list 1.0 0.0 0.0 x   0.0 1.0 0.0 y   0.0 0.0 1.0 z   0.0 0.0 0.0 1.0)
+;;   (list m0  m4  m8  m12 m1  m5  m9  m13 m2  m6  m10 m14 m3  m7  m11 m15)
+;;
+;; Identity 是唯一巧合: 因为全 0/全 1 在任何排列下都相同
+;;
 ;; Model 传值类型 (27 要素 / 136 字节 = gen-layout.c 确认)
 ;;
 ;; 布局 (offsetof):
@@ -131,6 +143,22 @@
     _int _int           ; boneCount(4) + padding(4)
     _pointer _pointer   ; bones, bindPose
     _pointer _pointer)) ; currentPose, boneMatrices
+
+;; ============================================================
+;; 共享矩阵辅助 (C Matrix 字段顺序)
+;; ============================================================
+
+(define (matrix-identity)
+  (list 1.0 0.0 0.0 0.0
+        0.0 1.0 0.0 0.0
+        0.0 0.0 1.0 0.0
+        0.0 0.0 0.0 1.0))
+
+(define (matrix-translate x y z)
+  (list 1.0 0.0 0.0 x
+        0.0 1.0 0.0 y
+        0.0 0.0 1.0 z
+        0.0 0.0 0.0 1.0))
 
 ;; Mesh (raylib.h:346) — 120 字节 (gen-layout.c 确认, 含 padding)
 (define _mesh-bytes
@@ -586,6 +614,10 @@
       (f (C:ray->bytes ray) (C:vec3->bytes v1) (C:vec3->bytes v2) (C:vec3->bytes v3) (C:vec3->bytes v4)))))
 
 (provide
+ ;; ══ 矩阵辅助 (C Matrix 字段顺序: m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15) ══
+ matrix-identity
+ matrix-translate
+ ;; ══ 模型绑定 ══
  draw-cube
  draw-cube-wires
  draw-plane

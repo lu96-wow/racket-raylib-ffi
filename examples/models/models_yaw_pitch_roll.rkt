@@ -13,23 +13,25 @@
 ;; 辅助: Euler 旋转矩阵 (Rx*Ry*Rz, 列主序, 16 floats)
 ;; ============================================================
 
+;; C Matrix 字段顺序: m0,m4,m8,m12, m1,m5,m9,m13, m2,m6,m10,m14, m3,m7,m11,m15
+;; _list-struct 按此顺序序列化, 因此矩阵 list 必须按此顺序!
 (define (euler-xyz-matrix pitch yaw roll)
   (define sp (sin pitch)) (define cp (cos pitch))
   (define sy (sin yaw))   (define cy (cos yaw))
   (define sr (sin roll))  (define cr (cos roll))
   (list (* cy cr)                              ;; m0
-        (* cy sr)                              ;; m1
-        (- sy)                                 ;; m2
-        0.0                                    ;; m3
         (- (* sp sy cr) (* cp sr))             ;; m4
-        (+ (* sp sy sr) (* cp cr))             ;; m5
-        (* sp cy)                              ;; m6
-        0.0                                    ;; m7
         (+ (* cp sy cr) (* sp sr))             ;; m8
+        0.0                                    ;; m12
+        (* cy sr)                              ;; m1
+        (+ (* sp sy sr) (* cp cr))             ;; m5
         (- (* cp sy sr) (* sp cr))             ;; m9
+        0.0                                    ;; m13
+        (- sy)                                 ;; m2
+        (* sp cy)                              ;; m6
         (* cp cy)                              ;; m10
-        0.0                                    ;; m11
-        0.0 0.0 0.0 1.0))                      ;; m12-m15
+        0.0                                    ;; m14
+        0.0 0.0 0.0 1.0))                      ;; m3,m7,m11,m15
 
 ;; ============================================================
 ;; 初始化

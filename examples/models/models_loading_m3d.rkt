@@ -33,9 +33,9 @@
 (define position (vector3 0.0 0.0 0.0))
 
 ;; 提取 model 骨骼数据
-;; _model-bytes: index 21 = boneCount, index 22 = bones (BoneInfo*)
+;; _model-bytes (136B): index 21=boneCount, 22=padding, 23=bones (BoneInfo*)
 (define bone-count (list-ref model 21))
-(define bones-ptr (list-ref model 22))
+(define bones-ptr (list-ref model 23))
 
 ;; 加载动画
 (let-values ([(anims-ptr anim-count) (load-model-animations m3d-path)])
