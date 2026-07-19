@@ -189,6 +189,16 @@
              (_fun _float -> (m : C:_matrix-bytes)))])
     (lambda (angle) (f angle))))
 
+(define matrix-rotate-x
+  (let ([f (get-ffi-obj "MatrixRotateX" T:lib
+             (_fun _float -> (m : C:_matrix-bytes)))])
+    (lambda (angle) (f angle))))
+
+(define matrix-rotate-z
+  (let ([f (get-ffi-obj "MatrixRotateZ" T:lib
+             (_fun _float -> (m : C:_matrix-bytes)))])
+    (lambda (angle) (f angle))))
+
 ;; ============================================================
 ;; Quaternion (纯 Racket 实现, Quaternion = Vector4 = malloc'd ptr)
 ;; ============================================================
@@ -272,6 +282,6 @@
  vec3-rotate-by-axis-angle vec3-lerp
  vector3-distance matrix-perspective matrix-multiply matrix-invert
  matrix-translate
- matrix-look-at matrix-rotate-xyz matrix-rotate-y
+ matrix-look-at matrix-rotate-xyz matrix-rotate-y matrix-rotate-x matrix-rotate-z
  quaternion-from-axis-angle quaternion-multiply quaternion-invert
  quaternion-to-matrix)
