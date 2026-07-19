@@ -40,6 +40,8 @@
   (vector-set! light 14 (get-shader-location shader (string-append prefix "position")))
   (vector-set! light 15 (get-shader-location shader (string-append prefix "target")))
   (vector-set! light 16 (get-shader-location shader (string-append prefix "color")))
+  ;; C CreateLight calls UpdateLightValues internally to upload values
+  (update-light-values shader light)
   light)
 
 (define (update-light-values shader light)

@@ -38,7 +38,7 @@
   (define rx (* (exact->inexact (get-random-value 0 360)) (/ pi 180.0)))
   (define ry (* (exact->inexact (get-random-value 0 360)) (/ pi 180.0)))
   (define rz (* (exact->inexact (get-random-value 0 360)) (/ pi 180.0)))
-  (define rotation (matrix-rotate-xyz rx ry rz))
+  (define rotation (matrix-rotate-xyz (vector3 rx ry rz)))
   (define m (matrix-multiply rotation translation))
   (for ([j (in-range 16)])
     (ptr-set! transforms _float (+ (* i 16) j) (list-ref m j))))
