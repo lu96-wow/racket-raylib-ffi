@@ -1,0 +1,48 @@
+#lang racket/base
+(require "../../raylib/raylib.rkt" ffi/unsafe
+         (only-in ffi/unsafe ptr-set! _uint _int _float malloc)
+         racket/runtime-path)
+(define-syntax-rule (log fmt . args)
+  (begin (fprintf (current-error-port) fmt . args) (flush-output)))
+(define GLSL-VERSION 330)
+(define-runtime-path rd "../../../examples/shaders/resources/")
+(define (res . p) (path->string (simplify-path (apply build-path rd p))))
+(init-window 800 450 "debug")
+(log "LOADING...~n")
+
+(define shader (load-shader (res (format "shaders/glsl~a/lightmap.vs" GLSL-VERSION))
+                            (res (format "shaders/glsl~a/lightmap.fs" GLSL-VERSION))))
+(log "shader id=~a~n" (car shader))
+
+(define texture (load-texture (res "cubicmap_atlas.png")))
+(log "tex loaded id=~a~n" (car texture))
+(define light (load-texture (res "spark_flame.png")))
+(log "light loaded~n")
+
+(define lm-rt (load-render-texture 16 16))
+;; draw lightmap content
+(begin-texture-mode lm-rt)(clear-background BLACK)
+(begin-blend-mode BLEND-ADDITIVE)
+(draw-texture-pro light (rectangle 0.0 0.0 128.0 128.0) (rectangle 0.0 0.0 32.0 32.0) (vector2 16.0 16.0) 0.0 RED)
+(begin-blend-mode BLEND-ALPHA)(end-texture-mode)
+(define lm-tex (list (list-ref lm-rt 1)(list-ref lm-rt 2)(list-ref lm-rt 3)(list-ref lm-rt 4)(list-ref lm-rt 5)))
+(log "lightmap ready~n")
+
+;; MATERIAL TEST
+(log "A: load-material-default...~n")
+(define mat-ptr (load-material-default))
+(log "  ptr=~s~n" mat-ptr)
+(log "B: set-material-shader...~n")
+(set-material-shader mat-ptr shader)
+(log "  OK~n")
+(log "C: set-material-texture ALBEDO...~n")
+(set-material-texture mat-ptr MATERIAL-MAP-ALBEDO texture)
+(log "  OK~n")
+(log "D: set-material-texture METALNESS...~n")
+(set-material-texture mat-ptr MATERIAL-MAP-METALNESS lm-tex)
+(log "  OK~n")
+(log "E: material-ptr->list...~n")
+(define mat-list (material-ptr->list mat-ptr))
+(log "  shader-id=~a, maps-ptr=~s~n" (list-ref mat-list 0) (list-ref mat-list 3))
+(log "DONE!~n")
+(close-window)

@@ -57,6 +57,14 @@
 (define RL-COMPUTE-SHADER  #x91B9)
 
 ;; ============================================================
+;; Cull face / 数据类型
+;; ============================================================
+
+(define RL-CULL-FACE-FRONT 0)
+(define RL-CULL-FACE-BACK  1)
+(define RL-FLOAT #x1406)
+
+;; ============================================================
 ;; 即时模式绘制
 ;; ============================================================
 
@@ -148,6 +156,7 @@
 (def-ffi rl-unload-vertex-array        "rlUnloadVertexArray"        (_fun _uint -> _void))
 (def-ffi rl-enable-vertex-array        "rlEnableVertexArray"        (_fun _uint -> _stdbool))
 (def-ffi rl-disable-vertex-array       "rlDisableVertexArray"       (_fun -> _void))
+(def-ffi rl-enable-vertex-attribute     "rlEnableVertexAttribute"   (_fun _uint -> _void))
 (def-ffi rl-load-vertex-buffer         "rlLoadVertexBuffer"         (_fun _pointer _int _stdbool -> _uint))
 (def-ffi rl-update-vertex-buffer       "rlUpdateVertexBuffer"       (_fun _uint _pointer _int _int -> _void))
 (def-ffi rl-unload-vertex-buffer       "rlUnloadVertexBuffer"       (_fun _uint -> _void))
@@ -197,6 +206,7 @@
 (def-ffi rl-load-texture-cubemap    "rlLoadTextureCubemap"    (_fun _pointer _int _int _int -> _uint))
 (def-ffi rl-load-draw-cube          "rlLoadDrawCube"          (_fun -> _void))
 (def-ffi rl-set-uniform-matrix      "rlSetUniformMatrix"      (_fun _int _pointer -> _void))
+(def-ffi rl-set-uniform-sampler      "rlSetUniformSampler"      (_fun _int _uint -> _void))
 
 ;; ============================================================
 ;; 导出
@@ -211,6 +221,7 @@
  RL-ZERO RL-ONE RL-SRC-ALPHA RL-ONE-MINUS-SRC-ALPHA
  RL-DST-COLOR RL-ONE-MINUS-DST-COLOR RL-FUNC-ADD RL-MIN RL-MAX
  RL-VERTEX-SHADER RL-FRAGMENT-SHADER RL-COMPUTE-SHADER
+ RL-CULL-FACE-FRONT RL-CULL-FACE-BACK RL-FLOAT
  ;; 即时模式绘制
  rl-begin rl-end
  rl-vertex-2i rl-vertex-2f rl-vertex-3f
@@ -240,7 +251,7 @@
  rl-clear-color rl-clear-screen-buffers rl-check-errors
  ;; 顶点缓冲
  rl-load-vertex-array rl-unload-vertex-array
- rl-enable-vertex-array rl-disable-vertex-array
+ rl-enable-vertex-array rl-disable-vertex-array rl-enable-vertex-attribute
  rl-load-vertex-buffer rl-update-vertex-buffer rl-unload-vertex-buffer
  rl-set-vertex-attribute
  rl-draw-vertex-array rl-draw-vertex-array-elements rl-draw-vertex-array-instanced
@@ -256,5 +267,5 @@
  ;; 帧缓冲/纹理扩展
  rl-get-framebuffer-width rl-get-framebuffer-height
  rl-load-texture-depth rl-load-texture-cubemap
- rl-load-draw-cube rl-set-uniform-matrix
+ rl-load-draw-cube rl-set-uniform-matrix rl-set-uniform-sampler
 )

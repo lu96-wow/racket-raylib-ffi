@@ -586,7 +586,24 @@
           (values result (ptr-ref count-buf _int 0)))))))
 
 (define load-material-default
-  (get-ffi-obj "LoadMaterialDefault" T:lib (_fun -> _pointer)))
+  ;; C returns Material by value (40 bytes). >16-byte struct return requires hidden
+  ;; pointer ABI that _fun->pointer doesn't handle. Use _material-bytes to get proper
+  ;; ABI handling, then convert the returned list back to a malloc'd pointer.
+  (let ([f (get-ffi-obj "LoadMaterialDefault" T:lib (_fun -> _material-bytes))])
+    (lambda ()
+      (define lst (f))
+      (define ptr (malloc 40 'atomic))
+      ;; _material-bytes: _uint _int _pointer _pointer _float×4
+      ;; C offsets: id@0(4) pad@4(4) locs@8(8) maps@16(8) p0@24(4) p1@28(4) p2@32(4) p3@36(4)
+      (ptr-set! ptr _uint 0 (list-ref lst 0))       ;; shader.id @0
+      (ptr-set! ptr _int 1 (list-ref lst 1))         ;; padding @4
+      (ptr-set! ptr _pointer 1 (list-ref lst 2))     ;; shader.locs @8
+      (ptr-set! ptr _pointer 2 (list-ref lst 3))     ;; maps @16
+      (ptr-set! ptr _float 6 (list-ref lst 4))       ;; params[0] @24
+      (ptr-set! ptr _float 7 (list-ref lst 5))       ;; params[1] @28
+      (ptr-set! ptr _float 8 (list-ref lst 6))       ;; params[2] @32
+      (ptr-set! ptr _float 9 (list-ref lst 7))       ;; params[3] @36
+      ptr)))
 
 (define (is-material-valid material-ptr)
   ((get-ffi-obj "IsMaterialValid" T:lib (_fun _pointer -> _stdbool)) material-ptr))
