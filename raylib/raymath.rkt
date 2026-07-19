@@ -70,6 +70,12 @@
     (ptr-set! r _float 1 (+ (ptr-ref v1 _float 1) (ptr-ref v2 _float 1)))
     (ptr-set! r _float 2 (+ (ptr-ref v1 _float 2) (ptr-ref v2 _float 2))) r))
 
+(define (vec3-subtract v1 v2)
+  (let ([r (malloc T:_Vector3 'atomic)])
+    (ptr-set! r _float 0 (- (ptr-ref v1 _float 0) (ptr-ref v2 _float 0)))
+    (ptr-set! r _float 1 (- (ptr-ref v1 _float 1) (ptr-ref v2 _float 1)))
+    (ptr-set! r _float 2 (- (ptr-ref v1 _float 2) (ptr-ref v2 _float 2))) r))
+
 (define (vec3-scale v s)
   (let ([r (malloc T:_Vector3 'atomic)])
     (ptr-set! r _float 0 (* (ptr-ref v _float 0) s))
@@ -277,7 +283,7 @@
  clamp lerp remap
  vec2-add vec2-subtract vec2-scale vec2-multiply
  vec2-length vec2-normalize vec2-rotate vec2-clamp
- vec3-add vec3-scale vec3-cross-product vec3-length
+ vec3-add vec3-subtract vec3-scale vec3-cross-product vec3-length
  vec3-dot-product vec3-angle vec3-negate vec3-normalize
  vec3-rotate-by-axis-angle vec3-lerp
  vector3-distance matrix-perspective matrix-multiply matrix-invert

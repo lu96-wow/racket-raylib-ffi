@@ -12,9 +12,17 @@
 (define _audio-stream-bytes
   (_list-struct _pointer _pointer _uint _uint _uint))
 
-;; Sound: AudioStream stream; unsigned int frameCount
+;; Sound: AudioStream stream (32 bytes, incl padding) + unsigned int frameCount + tail padding = 40 bytes
 (define _sound-bytes
-  (_list-struct _pointer _pointer _uint _uint _uint _uint))
+  (_list-struct _pointer _pointer _uint _uint _uint _uint _uint _uint))
+
+;; Music: AudioStream stream (32) + uint frameCount + bool looping(+pad) + int ctxType + void* ctxData = 56 bytes
+(define _music-bytes
+  (_list-struct _pointer _pointer _uint _uint _uint _uint _uint _uint _int _pointer))
+
+;; Audio callback type: void (*)(void *bufferData, unsigned int frames)
+(define _audio-callback
+  (_cprocedure (list _pointer _uint) _void #:atomic? #t))
 
 ;; ============================================================
 ;; 设备管理
@@ -122,52 +130,58 @@
 ;; ============================================================
 
 (define load-music-stream
-  (get-ffi-obj "LoadMusicStream" lib (_fun _string -> _pointer)))
+  (let ([f (get-ffi-obj "LoadMusicStream" lib (_fun _string -> (m : _music-bytes)))])
+    (lambda (file-name) (f file-name))))
 
 (define load-music-stream-from-memory
-  (get-ffi-obj "LoadMusicStreamFromMemory" lib (_fun _string _pointer _int -> _pointer)))
+  (let ([f (get-ffi-obj "LoadMusicStreamFromMemory" lib (_fun _string _pointer _int -> (m : _music-bytes)))])
+    (lambda (file-type data-ptr data-size) (f file-type data-ptr data-size))))
 
 (define is-music-valid
-  (get-ffi-obj "IsMusicValid" lib (_fun _pointer -> _stdbool)))
+  (let ([f (get-ffi-obj "IsMusicValid" lib (_fun (m : _music-bytes) -> _stdbool))])
+    (lambda (music) (f music))))
 
 (define unload-music-stream
-  (get-ffi-obj "UnloadMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "UnloadMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define play-music-stream
-  (get-ffi-obj "PlayMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "PlayMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define is-music-stream-playing?
-  (get-ffi-obj "IsMusicStreamPlaying" lib (_fun _pointer -> _stdbool)))
+  (let ([f (get-ffi-obj "IsMusicStreamPlaying" lib (_fun (m : _music-bytes) -> _stdbool))])
+    (lambda (music) (f music))))
 
 (define update-music-stream
-  (get-ffi-obj "UpdateMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "UpdateMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define stop-music-stream
-  (get-ffi-obj "StopMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "StopMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define pause-music-stream
-  (get-ffi-obj "PauseMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "PauseMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define resume-music-stream
-  (get-ffi-obj "ResumeMusicStream" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "ResumeMusicStream" lib (_fun (m : _music-bytes) -> _void)))
 
 (define seek-music-stream
-  (get-ffi-obj "SeekMusicStream" lib (_fun _pointer _float -> _void)))
+  (get-ffi-obj "SeekMusicStream" lib (_fun (m : _music-bytes) _float -> _void)))
 
 (define set-music-volume
-  (get-ffi-obj "SetMusicVolume" lib (_fun _pointer _float -> _void)))
+  (get-ffi-obj "SetMusicVolume" lib (_fun (m : _music-bytes) _float -> _void)))
 
 (define set-music-pitch
-  (get-ffi-obj "SetMusicPitch" lib (_fun _pointer _float -> _void)))
+  (get-ffi-obj "SetMusicPitch" lib (_fun (m : _music-bytes) _float -> _void)))
 
 (define set-music-pan
-  (get-ffi-obj "SetMusicPan" lib (_fun _pointer _float -> _void)))
+  (get-ffi-obj "SetMusicPan" lib (_fun (m : _music-bytes) _float -> _void)))
 
 (define get-music-time-length
-  (get-ffi-obj "GetMusicTimeLength" lib (_fun _pointer -> _float)))
+  (let ([f (get-ffi-obj "GetMusicTimeLength" lib (_fun (m : _music-bytes) -> _float))])
+    (lambda (music) (f music))))
 
 (define get-music-time-played
-  (get-ffi-obj "GetMusicTimePlayed" lib (_fun _pointer -> _float)))
+  (let ([f (get-ffi-obj "GetMusicTimePlayed" lib (_fun (m : _music-bytes) -> _float))])
+    (lambda (music) (f music))))
 
 ;; ============================================================
 ;; AudioStream
@@ -216,19 +230,19 @@
   (get-ffi-obj "SetAudioStreamBufferSizeDefault" lib (_fun _int -> _void)))
 
 (define set-audio-stream-callback
-  (get-ffi-obj "SetAudioStreamCallback" lib (_fun _pointer _pointer -> _void)))
+  (get-ffi-obj "SetAudioStreamCallback" lib (_fun (s : _audio-stream-bytes) _audio-callback -> _void)))
 
 (define attach-audio-stream-processor
-  (get-ffi-obj "AttachAudioStreamProcessor" lib (_fun _pointer _pointer -> _void)))
+  (get-ffi-obj "AttachAudioStreamProcessor" lib (_fun (s : _audio-stream-bytes) _audio-callback -> _void)))
 
 (define detach-audio-stream-processor
-  (get-ffi-obj "DetachAudioStreamProcessor" lib (_fun _pointer _pointer -> _void)))
+  (get-ffi-obj "DetachAudioStreamProcessor" lib (_fun (s : _audio-stream-bytes) _audio-callback -> _void)))
 
 (define attach-audio-mixed-processor
-  (get-ffi-obj "AttachAudioMixedProcessor" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "AttachAudioMixedProcessor" lib (_fun _audio-callback -> _void)))
 
 (define detach-audio-mixed-processor
-  (get-ffi-obj "DetachAudioMixedProcessor" lib (_fun _pointer -> _void)))
+  (get-ffi-obj "DetachAudioMixedProcessor" lib (_fun _audio-callback -> _void)))
 
 ;; ============================================================
 ;; 导出
