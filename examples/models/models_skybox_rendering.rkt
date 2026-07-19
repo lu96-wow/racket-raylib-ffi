@@ -38,7 +38,7 @@
   (define mat-proj (matrix-perspective (* 90.0 DEG2RAD) 1.0
                                        (rl-get-cull-distance-near)
                                        (rl-get-cull-distance-far)))
-  (rl-set-uniform-matrix (ptr-ref (caddr shader) _int (* SHADER-LOC-MATRIX-PROJECTION 4))
+  (rl-set-uniform-matrix (ptr-ref (caddr shader) _int SHADER-LOC-MATRIX-PROJECTION)
                          (cpointer->buffer mat-proj))
 
   (define fbo-views
@@ -54,7 +54,7 @@
   (rl-enable-texture (list-ref panorama 0))  ;; texture id is first element
 
   (for ([i 6])
-    (rl-set-uniform-matrix (ptr-ref (caddr shader) _int (* SHADER-LOC-MATRIX-VIEW 4))
+    (rl-set-uniform-matrix (ptr-ref (caddr shader) _int SHADER-LOC-MATRIX-VIEW)
                            (cpointer->buffer (vector-ref fbo-views i)))
     (rl-framebuffer-attach fbo cubemap-id RL-ATTACHMENT-COLOR-CHANNEL0
                            (+ RL-ATTACHMENT-CUBEMAP-POSITIVE-X i) 0)

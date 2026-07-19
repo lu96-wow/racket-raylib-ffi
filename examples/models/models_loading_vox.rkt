@@ -14,7 +14,6 @@
 
 (define MAX-VOX-FILES 4)
 (define GLSL-VERSION 330)
-(define SHADER-LOC-VECTOR-VIEW 11)
 (define LIGHT-POINT 1)
 (define MAX-LIGHTS 4)
 
@@ -103,7 +102,7 @@
 
 ;; shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos")
 ;; 修复: caddr (shader 是 3 元素 list: id padding locs), * 4 (字节偏移)
-(ptr-set! (caddr shader) _int (* SHADER-LOC-VECTOR-VIEW 4)
+(ptr-set! (caddr shader) _int SHADER-LOC-VECTOR-VIEW
           (get-shader-location shader "viewPos"))
 
 ;; Ambient light
@@ -166,7 +165,7 @@
     (ptr-set! _fbuf3 _float 0 (ptr-ref camera _float 0))
     (ptr-set! _fbuf3 _float 1 (ptr-ref camera _float 1))
     (ptr-set! _fbuf3 _float 2 (ptr-ref camera _float 2))
-    (set-shader-value shader (ptr-ref (caddr shader) _int (* SHADER-LOC-VECTOR-VIEW 4))
+    (set-shader-value shader (ptr-ref (caddr shader) _int SHADER-LOC-VECTOR-VIEW)
                       _fbuf3 SHADER-UNIFORM-VEC3)
 
     (update-lights!)
