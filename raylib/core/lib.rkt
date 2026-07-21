@@ -1,41 +1,24 @@
 #lang racket/base
 
-;; raylib/core/lib.rkt — 共享库发现与加载
+;; raylib/core/lib.rkt — 共享库加载
+;;
+;; 加载优先级:
+;;   1. RAYLIB_SO_PATH 环境变量 (开发阶段)
+;;   2. ffi-lib "libraylib" 系统搜索 (生产阶段)
+;;      → LD_LIBRARY_PATH → ldconfig 缓存 → /usr/lib 等标准路径
 
-(require ffi/unsafe
-         racket/string)
+(require ffi/unsafe)
 
-(define candidate-paths
-  (list
-   (λ () (getenv "RAYLIB_SO_PATH"))
-   (λ () "/home/debian/raylib/build/raylib/libraylib.so")
-   (λ ()
-     (let-values ([(dir _1 _2)
-                   (split-path (or (current-load-relative-directory)
-                                   (current-directory)))])
-       (build-path dir ".." ".." "build" "raylib" "libraylib.so")))
-   (λ () "/usr/local/lib/libraylib.so")
-   (λ () "/usr/lib/libraylib.so")
-   (λ () "/usr/lib/x86_64-linux-gnu/libraylib.so")
-   (λ () "libraylib.so")))
+(define lib
+  (with-handlers ([exn:fail?
+                   (λ (e)
+                     (error 'raylib-lib
+                            (string-append
+                             "Cannot load libraylib.\n"
+                             "  Development: set RAYLIB_SO_PATH=/path/to/libraylib.so\n"
+                             "  Production:  install libraylib.so to /usr/local/lib/ and run ldconfig\n"
+                             "  Error: " (exn-message e))))])
+    (ffi-lib (or (getenv "RAYLIB_SO_PATH")
+                 "libraylib"))))
 
-(define (find-raylib-lib)
-  (let loop ([remaining candidate-paths] [tried '()])
-    (if (null? remaining)
-        (error 'find-raylib-lib
-               "Cannot find libraylib.so. Tried:\n  ~a\nSet RAYLIB_SO_PATH."
-               (string-join (reverse tried) "\n  "))
-        (let* ([thunk (car remaining)]
-               [path  (thunk)])
-          (if (not path)
-              (loop (cdr remaining) (cons "(null)" tried))
-              (with-handlers ([exn:fail:filesystem?
-                               (λ (e)
-                                 (loop (cdr remaining)
-                                       (cons (format "~a (FAILED)" path)
-                                             tried)))])
-                (ffi-lib path)))))))
-
-(define lib (find-raylib-lib))
-
-(provide lib find-raylib-lib candidate-paths)
+(provide lib)
