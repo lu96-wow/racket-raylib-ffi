@@ -1,4 +1,0 @@
-文件: core_directory_files.c
-使用结构体:
-  FilePathList — src/raylib.h:530
-  Rectangle    — src/raylib.h:256 (通过 raygui 调用)

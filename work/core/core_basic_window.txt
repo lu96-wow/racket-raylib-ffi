@@ -1,3 +1,0 @@
-文件: core_basic_window.c
-使用结构体:
-  (无) — 仅使用基本类型和预定义颜色宏(RAYWHITE, LIGHTGRAY)，未使用任何 raylib 结构体变量

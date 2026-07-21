@@ -7,7 +7,7 @@
 ;; 功能: 使用 GPU 实例化渲染 10000 个随机位置/旋转的立方体
 
 (require "../../raylib/raylib.rkt"
-         "../../raylib/rlights.rkt"
+         "../../raylib/core/rlights.rkt"
          racket/runtime-path
          racket/math
          ffi/unsafe

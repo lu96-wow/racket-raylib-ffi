@@ -1,6 +1,0 @@
-文件: core_3d_camera_first_person.c
-使用结构体:
-  Camera3D/Camera — src/raylib.h:327 (Camera3D) ; Camera 是 typedef Camera3D Camera (raylib.h:335)
-  Vector3         — src/raylib.h:222
-  Color           — src/raylib.h:248
-  Vector2         — src/raylib.h:216 (通过 rcamera.h 内部使用)

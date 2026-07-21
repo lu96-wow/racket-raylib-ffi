@@ -1,3 +1,0 @@
-文件: core_keyboard_testbed.c
-使用结构体:
-  Rectangle — src/raylib.h:256

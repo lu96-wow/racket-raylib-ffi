@@ -1,4 +1,0 @@
-文件: core_drop_files.c
-使用结构体:
-  FilePathList — src/raylib.h:530
-  Color        — src/raylib.h:248 (通过 Fade() 返回值)

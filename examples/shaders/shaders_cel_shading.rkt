@@ -8,7 +8,7 @@
 ;; 按 Z 切换卡通渲染, C 切换轮廓, Q/E 调整色带数
 
 (require "../../raylib/raylib.rkt"
-         "../../raylib/rlights.rkt"
+         "../../raylib/core/rlights.rkt"
          racket/runtime-path
          ffi/unsafe
          (only-in ffi/unsafe ptr-set! ptr-ref _float _int malloc))

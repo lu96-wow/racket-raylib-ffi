@@ -13,7 +13,8 @@
          racket/file
          racket/string
          ffi/unsafe
-         (prefix-in T: "../raylib/types.rkt"))
+         "../raylib/core/lib.rkt"
+         "../raylib/core/types/automation-event.rkt")
 
 ;; ============================================================
 ;; AutomationEvent 传值类型 + 原始 FFI
@@ -21,11 +22,8 @@
 ;;   传值调用，24 字节压栈，无指针问题
 ;; ============================================================
 
-(define _automation-event-bytes
-  (_list-struct _uint _uint _int _int _int _int))
-
 (define _play-ae-ffi
-  (get-ffi-obj "PlayAutomationEvent" T:lib
+  (get-ffi-obj "PlayAutomationEvent" lib
     (_fun (evt : _automation-event-bytes) -> _void)))
 
 ;; ============================================================

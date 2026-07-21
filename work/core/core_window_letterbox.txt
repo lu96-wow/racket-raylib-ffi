@@ -1,8 +1,0 @@
-文件: core_window_letterbox.c
-使用结构体:
-  RenderTexture2D  — src/raylib.h:294 (typedef RenderTexture)
-  RenderTexture    — src/raylib.h:288
-  Texture          — src/raylib.h:273 (通过 target.texture)
-  Rectangle        — src/raylib.h:256
-  Vector2          — src/raylib.h:216
-  Color            — src/raylib.h:248

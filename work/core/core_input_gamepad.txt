@@ -1,7 +1,0 @@
-文件: core_input_gamepad.c
-使用结构体:
-  Rectangle    — src/raylib.h:256
-  Vector2      — src/raylib.h:216
-  Texture2D    — src/raylib.h:281 (typedef Texture)
-  Texture      — src/raylib.h:273 (通过 LoadTexture 返回值)
-  Color        — src/raylib.h:248

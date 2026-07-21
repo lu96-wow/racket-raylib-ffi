@@ -1,3 +1,0 @@
-文件: core_compute_hash.c
-使用结构体:
-  Rectangle — src/raylib.h:256 (通过 raygui 调用)

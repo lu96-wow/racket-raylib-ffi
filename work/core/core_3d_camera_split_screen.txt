@@ -1,8 +1,0 @@
-文件: core_3d_camera_split_screen.c
-使用结构体:
-  Camera3D/Camera — src/raylib.h:327
-  RenderTexture   — src/raylib.h:288
-  Rectangle       — src/raylib.h:256
-  Texture         — src/raylib.h:273 (通过 RenderTexture.texture)
-  Vector3         — src/raylib.h:222
-  Vector2         — src/raylib.h:216

@@ -1,5 +1,0 @@
-文件: core_world_screen.c
-使用结构体:
-  Camera3D/Camera — src/raylib.h:327
-  Vector3         — src/raylib.h:222
-  Vector2         — src/raylib.h:216

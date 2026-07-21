@@ -1,4 +1,0 @@
-文件: core_input_mouse.c
-使用结构体:
-  Vector2 — src/raylib.h:216
-  Color   — src/raylib.h:248

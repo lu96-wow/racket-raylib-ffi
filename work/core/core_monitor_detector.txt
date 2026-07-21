@@ -1,7 +1,0 @@
-文件: core_monitor_detector.c
-使用结构体:
-  Vector2    — src/raylib.h:216
-  Rectangle  — src/raylib.h:256
-
-自定义结构体:
-  MonitorInfo — 文件中自定义 { Vector2 position; const char *name; int width; int height; int physicalWidth; int physicalHeight; int refreshRate; }

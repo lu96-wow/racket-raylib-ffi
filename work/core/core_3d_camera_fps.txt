@@ -1,9 +1,0 @@
-文件: core_3d_camera_fps.c
-使用结构体:
-  Camera3D/Camera — src/raylib.h:327
-  Vector3         — src/raylib.h:222
-  Vector2         — src/raylib.h:216
-  Color           — src/raylib.h:248 (通过局部变量如 tileColor1, towerColor)
-
-自定义结构体:
-  Body            — 文件中自定义 { Vector3 position; Vector3 velocity; Vector3 dir; bool isGrounded; }

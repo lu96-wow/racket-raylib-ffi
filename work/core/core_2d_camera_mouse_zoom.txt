@@ -1,4 +1,0 @@
-文件: core_2d_camera_mouse_zoom.c
-使用结构体:
-  Camera2D     — src/raylib.h:338
-  Vector2      — src/raylib.h:216

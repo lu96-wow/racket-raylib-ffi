@@ -1,6 +1,0 @@
-文件: core_input_actions.c
-使用结构体:
-  Vector2 — src/raylib.h:216
-
-自定义结构体:
-  ActionInput — 文件中自定义 { int key; int button; }

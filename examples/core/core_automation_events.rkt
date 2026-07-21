@@ -12,7 +12,7 @@
 ;;       回放用唯一 FFI: PlayAutomationEvent
 
 (require racket/string
-         "../../raylib/raylib.rkt"
+         (except-in "../../raylib/raylib.rkt" play-automation-event)
          "../../raylib-racket/automation.rkt")
 
 ;; ============================================================

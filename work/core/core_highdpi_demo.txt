@@ -1,5 +1,0 @@
-文件: core_highdpi_demo.c
-使用结构体:
-  Vector2  — src/raylib.h:216
-  Color    — src/raylib.h:248
-  Font     — src/raylib.h:317 (通过 GetFontDefault())

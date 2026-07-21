@@ -1,3 +1,0 @@
-文件: core_input_mouse_wheel.c
-使用结构体:
-  (无) — 仅使用基本类型和颜色宏
