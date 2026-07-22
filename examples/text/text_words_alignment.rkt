@@ -67,7 +67,6 @@
         (let ([tmp (malloc _pointer 'atomic)])
           (ptr-set! tmp _pointer 0 str-ptr)
           (let ([result (ptr-ref tmp _string)])
-            (free tmp)
             result))
         "")))
 

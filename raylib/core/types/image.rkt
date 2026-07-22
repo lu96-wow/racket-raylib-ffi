@@ -18,10 +18,10 @@
 (define (image-list->ptr lst)
   (let ([p (malloc _Image 'atomic)])
     (ptr-set! p _pointer 0 (list-ref lst 0))
-    (ptr-set! p _int 1 (list-ref lst 1))
-    (ptr-set! p _int 2 (list-ref lst 2))
-    (ptr-set! p _int 3 (list-ref lst 3))
-    (ptr-set! p _int 4 (list-ref lst 4))
+    (ptr-set! p _int 2 (list-ref lst 1))
+    (ptr-set! p _int 3 (list-ref lst 2))
+    (ptr-set! p _int 4 (list-ref lst 3))
+    (ptr-set! p _int 5 (list-ref lst 4))
     p))
 
 (provide _Image _image-bytes image
