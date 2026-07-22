@@ -396,18 +396,18 @@
 
 (define load-directory-files
   (let ([lf (get-ffi-obj "LoadDirectoryFiles" lib
-                         (_fun _string -> (lst : _filepathlist-bytes)))]
+                         (_fun _string -> (lst : _file-path-list-bytes)))]
         [uf (get-ffi-obj "UnloadDirectoryFiles" lib
-                         (_fun (lst : _filepathlist-bytes) -> _void))])
+                         (_fun (lst : _file-path-list-bytes) -> _void))])
     (lambda (dir-path)
       (let* ([raw (lf dir-path)] [paths (filepathlist->string-list raw)])
         (uf raw) paths))))
 
 (define load-directory-files-ex
   (let ([lf (get-ffi-obj "LoadDirectoryFilesEx" lib
-                         (_fun _string _string _stdbool -> (lst : _filepathlist-bytes)))]
+                         (_fun _string _string _stdbool -> (lst : _file-path-list-bytes)))]
         [uf (get-ffi-obj "UnloadDirectoryFiles" lib
-                         (_fun (lst : _filepathlist-bytes) -> _void))])
+                         (_fun (lst : _file-path-list-bytes) -> _void))])
     (lambda (base-path filter scan-subdirs?)
       (let* ([raw (lf base-path filter scan-subdirs?)]
              [paths (filepathlist->string-list raw)])
@@ -415,9 +415,9 @@
 
 (define load-dropped-files
   (let ([lf (get-ffi-obj "LoadDroppedFiles" lib
-                         (_fun -> (lst : _filepathlist-bytes)))]
+                         (_fun -> (lst : _file-path-list-bytes)))]
         [uf (get-ffi-obj "UnloadDroppedFiles" lib
-                         (_fun (lst : _filepathlist-bytes) -> _void))])
+                         (_fun (lst : _file-path-list-bytes) -> _void))])
     (lambda ()
       (let* ([raw (lf)] [paths (filepathlist->string-list raw)])
         (uf raw) paths))))
@@ -564,16 +564,16 @@
 
 (define load-vr-stereo-config
   (let ([f (get-ffi-obj "LoadVrStereoConfig" lib
-                        (_fun (dev : _vrdeviceinfo-bytes)
-                              -> (cfg : _vrstereoconfig-bytes)))])
+                        (_fun (dev : _vr-device-info-bytes)
+                              -> (cfg : _vr-stereo-config-bytes)))])
     (lambda (device) (f device))))
 (define unload-vr-stereo-config
   (let ([f (get-ffi-obj "UnloadVrStereoConfig" lib
-                        (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+                        (_fun (cfg : _vr-stereo-config-bytes) -> _void))])
     (lambda (config) (f config))))
 (define begin-vr-stereo-mode
   (let ([f (get-ffi-obj "BeginVrStereoMode" lib
-                        (_fun (cfg : _vrstereoconfig-bytes) -> _void))])
+                        (_fun (cfg : _vr-stereo-config-bytes) -> _void))])
     (lambda (config) (f config))))
 (define end-vr-stereo-mode (get-ffi-obj "EndVrStereoMode" lib (_fun -> _void)))
 (define play-automation-event

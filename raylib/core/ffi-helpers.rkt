@@ -94,15 +94,16 @@
  _shader-bytes
  _mesh-bytes _material-bytes _model-bytes _model-animation-bytes
  _wave-bytes _audio-stream-bytes _sound-bytes _music-bytes
- _vrdeviceinfo-bytes _vrstereoconfig-bytes
- _filepathlist-bytes _automation-event-bytes
+ _vr-device-info-bytes _vr-stereo-config-bytes
+ _file-path-list-bytes _automation-event-bytes
 
  ;; 转换器
  color->bytes vec2->bytes vec3->bytes vec4->bytes
  rect->bytes camera2d->bytes camera3d->bytes
- ray->bytes bounding-box->bytes
+ ray->bytes bounding-box->bytes image->bytes
  bytes->vec2 bytes->vec3 bytes->vec4 bytes->rect bytes->color bytes->bounding-box
  bytes->ray bytes->ray-collision bytes->npatch-info bytes->glyph-info bytes->font
+ bytes->camera2d bytes->camera3d bytes->image
  malloc-float-vec2 malloc-float-vec3 malloc-float-vec4
 
  ;; 辅助

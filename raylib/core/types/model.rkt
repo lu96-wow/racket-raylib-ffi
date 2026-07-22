@@ -1,6 +1,12 @@
 #lang racket/base
 
+;; types/model.rkt — Model (104 bytes)
+
 (require ffi/unsafe)
+
+;; ═══════════════════════════════════════════════════════════
+;; C struct
+;; ═══════════════════════════════════════════════════════════
 
 (define-cstruct _Model
   ([tr-m0 _float] [tr-m1 _float] [tr-m2 _float] [tr-m3 _float]
@@ -12,6 +18,10 @@
    [skeleton-boneCount _int]
    [skeleton-bones _pointer] [skeleton-bindPose _pointer]
    [currentPose _pointer] [boneMatrices _pointer]))
+
+;; ═══════════════════════════════════════════════════════════
+;; pass-by-value 转换
+;; ═══════════════════════════════════════════════════════════
 
 (define _model-bytes
   (_list-struct
@@ -25,17 +35,25 @@
    _pointer _pointer
    _pointer _pointer))
 
-(define (model-transform lst)     (for/list ([i (in-range 16)]) (list-ref lst i)))
-(define (model-mesh-count lst)    (list-ref lst 16))
-(define (model-material-count lst)(list-ref lst 17))
-(define (model-meshes lst)        (list-ref lst 18))
-(define (model-materials lst)     (list-ref lst 19))
-(define (model-mesh-material lst) (list-ref lst 20))
-(define (model-bone-count lst)    (list-ref lst 21))
-(define (model-bones lst)         (list-ref lst 22))
-(define (model-bind-pose lst)     (list-ref lst 23))
-(define (model-current-pose lst)  (list-ref lst 24))
-(define (model-bone-matrices lst) (list-ref lst 25))
+;; ═══════════════════════════════════════════════════════════
+;; 列表访问器 (用于 FFI 返回值)
+;; ═══════════════════════════════════════════════════════════
+
+(define (model-transform lst)      (for/list ([i (in-range 16)]) (list-ref lst i)))
+(define (model-mesh-count lst)     (list-ref lst 16))
+(define (model-material-count lst) (list-ref lst 17))
+(define (model-meshes lst)         (list-ref lst 18))
+(define (model-materials lst)      (list-ref lst 19))
+(define (model-mesh-material lst)  (list-ref lst 20))
+(define (model-bone-count lst)     (list-ref lst 21))
+(define (model-bones lst)          (list-ref lst 22))
+(define (model-bind-pose lst)      (list-ref lst 23))
+(define (model-current-pose lst)   (list-ref lst 24))
+(define (model-bone-matrices lst)  (list-ref lst 25))
+
+;; ═══════════════════════════════════════════════════════════
+;; 导出
+;; ═══════════════════════════════════════════════════════════
 
 (provide _Model _model-bytes
          model-transform model-mesh-count model-material-count

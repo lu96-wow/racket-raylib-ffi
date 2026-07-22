@@ -1,20 +1,47 @@
 #lang racket/base
+
+;; types/vector4.rkt — Vector4 (16 bytes, pass-by-value)
+
 (require ffi/unsafe)
-(define-cstruct _Vector4 ([x _float] [y _float] [z _float] [w _float]))
+
+;; ═══════════════════════════════════════════════════════════
+;; C struct
+;; ═══════════════════════════════════════════════════════════
+
+(define-cstruct _Vector4
+  ([x _float] [y _float] [z _float] [w _float]))
+
+;; ═══════════════════════════════════════════════════════════
+;; 构造器
+;; ═══════════════════════════════════════════════════════════
+
 (define (vector4 x y z w)
   (let ([v (malloc _Vector4 'atomic)])
-    (ptr-set! v _float 0 (exact->inexact x)) (ptr-set! v _float 1 (exact->inexact y))
-    (ptr-set! v _float 2 (exact->inexact z)) (ptr-set! v _float 3 (exact->inexact w)) v))
+    (ptr-set! v _float 0 (exact->inexact x))
+    (ptr-set! v _float 1 (exact->inexact y))
+    (ptr-set! v _float 2 (exact->inexact z))
+    (ptr-set! v _float 3 (exact->inexact w))
+    v))
+
+;; ═══════════════════════════════════════════════════════════
+;; 访问器
+;; ═══════════════════════════════════════════════════════════
+
 (define (vector4-x v) (ptr-ref v _float 0))
 (define (vector4-y v) (ptr-ref v _float 1))
 (define (vector4-z v) (ptr-ref v _float 2))
 (define (vector4-w v) (ptr-ref v _float 3))
 
-;; pass-by-value
+;; ═══════════════════════════════════════════════════════════
+;; pass-by-value 转换
+;; ═══════════════════════════════════════════════════════════
+
 (define _vec4-bytes (_list-struct _float _float _float _float))
+
 (define (vec4->bytes v)
   (list (ptr-ref v _float 0) (ptr-ref v _float 1)
         (ptr-ref v _float 2) (ptr-ref v _float 3)))
+
 (define (bytes->vec4 lst)
   (let ([v (malloc _Vector4 'atomic)])
     (ptr-set! v _float 0 (car lst))
@@ -22,6 +49,11 @@
     (ptr-set! v _float 2 (caddr lst))
     (ptr-set! v _float 3 (cadddr lst))
     v))
+
+;; ═══════════════════════════════════════════════════════════
+;; malloc 辅助 (供数组/批量传输)
+;; ═══════════════════════════════════════════════════════════
+
 (define (malloc-float-vec4 a b c d)
   (let ([p (malloc _float 4 'atomic)])
     (ptr-set! p _float 0 a)
@@ -30,5 +62,11 @@
     (ptr-set! p _float 3 d)
     p))
 
-(provide _Vector4 _vec4-bytes vector4 vector4-x vector4-y vector4-z vector4-w
-         vec4->bytes bytes->vec4 malloc-float-vec4)
+;; ═══════════════════════════════════════════════════════════
+;; 导出
+;; ═══════════════════════════════════════════════════════════
+
+(provide _Vector4 _vec4-bytes
+         vector4 vector4-x vector4-y vector4-z vector4-w
+         vec4->bytes bytes->vec4
+         malloc-float-vec4)

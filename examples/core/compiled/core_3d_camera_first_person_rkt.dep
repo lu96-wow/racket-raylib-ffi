@@ -1,1 +1,1 @@
-("9.2" ta6le ("0a86c07f67b54ff2a99063cc3c81ab2fce6e0f89" . "62de91f5983c7e556c812d0e5a748940858e0f38") #"/home/debian/raylib/racket-raylib-ffi-rebuild/examples/core/../../raylib/raylib.rkt" (collects #"racket" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))
+("9.2" ta6le ("0a86c07f67b54ff2a99063cc3c81ab2fce6e0f89" . "2c66f2848ef4c43051788983da574b6a3a2f8170") #"/home/debian/raylib/racket-raylib-ffi-rebuild/examples/core/../../raylib/raylib.rkt" (collects #"racket" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))

@@ -1,8 +1,15 @@
 #lang racket/base
+
 ;; raylib [shapes] example - easings testbed (Racket FFI 翻译)
+;;
+;; 对应 C: examples/shapes/shapes_easings_testbed.c
+
 (require "../../raylib/raylib.rkt" racket/math)
 
-;; Easing functions from reasings.h
+;; ============================================================
+;; Easing 函数 (译自 reasings.h)
+;; ============================================================
+
 (define (no-ease t b c d) b)
 (define (ease-linear-none t b c d) (+ (* c (/ t d)) b))
 (define ease-linear-in ease-linear-none)
@@ -29,8 +36,6 @@
   (set! t (/ t (/ d 2.0)))
   (if (< t 1.0) (+ (* c 0.5 t t) b)
       (begin (set! t (- t 1.0)) (+ (* (- c) 0.5 (- (* t (- t 2.0)) 1.0)) b))))
-
-
 (define (ease-expo-in t b c d)
   (if (= t 0.0) b (+ (* c (expt 2.0 (* 10.0 (- (/ t d) 1.0)))) b)))
 (define (ease-expo-out t b c d)
@@ -94,9 +99,8 @@
           (list "None" no-ease)))
 (define EASING-NONE 28)
 
-
 ;; ============================================================
-;; 初始化 & 主循环
+;; 初始化
 ;; ============================================================
 
 (define screen-width 800)
@@ -104,70 +108,89 @@
 (define FONT-SIZE 20)
 (init-window screen-width screen-height "raylib [shapes] example - easings testbed")
 
-(define ball-pos (vector2 100.0 100.0))
-(define t (box 0.0))
-(define d (box 300.0))
-(define paused (box #t))
-(define bounded-t? (box #t))
-(define easing-x (box EASING-NONE))
-(define easing-y (box EASING-NONE))
 (set-target-fps 60)
 
-(let main-loop ()
+(define ball-pos (vector2 100.0 100.0))
+
+;; 可变状态: 用 let-passing 在线程中传递
+(let loop ([t 0.0] [d 300.0] [paused #t] [bounded-t? #t]
+            [easing-x EASING-NONE] [easing-y EASING-NONE])
   (unless (window-should-close?)
-    (when (is-key-pressed KEY-T) (set-box! bounded-t? (not (unbox bounded-t?))))
-    (when (is-key-pressed KEY-RIGHT)
-      (set-box! easing-x (add1 (unbox easing-x)))
-      (when (> (unbox easing-x) EASING-NONE) (set-box! easing-x 0)))
-    (when (is-key-pressed KEY-LEFT)
-      (if (= (unbox easing-x) 0) (set-box! easing-x EASING-NONE)
-          (set-box! easing-x (sub1 (unbox easing-x)))))
-    (when (is-key-pressed KEY-DOWN)
-      (set-box! easing-y (add1 (unbox easing-y)))
-      (when (> (unbox easing-y) EASING-NONE) (set-box! easing-y 0)))
-    (when (is-key-pressed KEY-UP)
-      (if (= (unbox easing-y) 0) (set-box! easing-y EASING-NONE)
-          (set-box! easing-y (sub1 (unbox easing-y)))))
-    (let ([dv (unbox d)])
-      (when (and (is-key-pressed KEY-W) (< dv (- 10000.0 20.0))) (set-box! d (+ dv 20.0)))
-      (when (and (is-key-pressed KEY-Q) (> dv (+ 1.0 20.0))) (set-box! d (- dv 20.0)))
-      (when (and (is-key-down KEY-S) (< dv (- 10000.0 2.0))) (set-box! d (+ dv 2.0)))
-      (when (and (is-key-down KEY-A) (> dv (+ 1.0 2.0))) (set-box! d (- dv 2.0))))
-    (when (or (is-key-pressed KEY-SPACE) (is-key-pressed KEY-T)
-              (is-key-pressed KEY-RIGHT) (is-key-pressed KEY-LEFT)
-              (is-key-pressed KEY-DOWN) (is-key-pressed KEY-UP)
-              (is-key-pressed KEY-W) (is-key-pressed KEY-Q)
-              (is-key-down KEY-S) (is-key-down KEY-A)
-              (and (is-key-pressed KEY-ENTER) (unbox bounded-t?) (>= (unbox t) (unbox d))))
-      (set-box! t 0.0) (ptr-set! ball-pos _float 0 100.0) (ptr-set! ball-pos _float 1 100.0)
-      (set-box! paused #t))
-    (when (is-key-pressed KEY-ENTER) (set-box! paused (not (unbox paused))))
-    (when (and (not (unbox paused))
-               (or (and (unbox bounded-t?) (< (unbox t) (unbox d))) (not (unbox bounded-t?))))
-      (let ([efn-x (cadr (vector-ref easings (unbox easing-x)))]
-            [efn-y (cadr (vector-ref easings (unbox easing-y)))])
-        (ptr-set! ball-pos _float 0 (efn-x (unbox t) 100.0 530.0 (unbox d)))
-        (ptr-set! ball-pos _float 1 (efn-y (unbox t) 100.0 230.0 (unbox d))))
-      (set-box! t (+ (unbox t) 1.0)))
-    (begin-drawing)
-    (clear-background RAYWHITE)
-    (draw-text (format "Easing x: ~a" (car (vector-ref easings (unbox easing-x))))
-               20 FONT-SIZE FONT-SIZE LIGHTGRAY)
-    (draw-text (format "Easing y: ~a" (car (vector-ref easings (unbox easing-y))))
-               20 (* FONT-SIZE 2) FONT-SIZE LIGHTGRAY)
-    (draw-text (format "t (~a) = ~a d = ~a" (if (unbox bounded-t?) "b" "u")
-                       (real->decimal-string (unbox t) 2) (real->decimal-string (unbox d) 2))
-               20 (* FONT-SIZE 3) FONT-SIZE LIGHTGRAY)
-    (draw-text "Use ENTER to play or pause movement, use SPACE to restart"
-               20 (- (get-screen-height) (* FONT-SIZE 2)) FONT-SIZE LIGHTGRAY)
-    (draw-text "Use Q and W or A and S keys to change duration"
-               20 (- (get-screen-height) (* FONT-SIZE 3)) FONT-SIZE LIGHTGRAY)
-    (draw-text "Use LEFT or RIGHT keys to choose easing for the x axis"
-               20 (- (get-screen-height) (* FONT-SIZE 4)) FONT-SIZE LIGHTGRAY)
-    (draw-text "Use UP or DOWN keys to choose easing for the y axis"
-               20 (- (get-screen-height) (* FONT-SIZE 5)) FONT-SIZE LIGHTGRAY)
-    (draw-circle-v ball-pos 16.0 MAROON)
-    (end-drawing)
-    (main-loop)))
+
+    ;; — 输入处理 —
+    (let* ([bounded-t? (if (is-key-pressed KEY-T) (not bounded-t?) bounded-t?)]
+
+           [easing-x (cond [(is-key-pressed KEY-RIGHT)
+                            (let ([v (add1 easing-x)])
+                              (if (> v EASING-NONE) 0 v))]
+                           [(is-key-pressed KEY-LEFT)
+                            (if (= easing-x 0) EASING-NONE (sub1 easing-x))]
+                           [else easing-x])]
+
+           [easing-y (cond [(is-key-pressed KEY-DOWN)
+                            (let ([v (add1 easing-y)])
+                              (if (> v EASING-NONE) 0 v))]
+                           [(is-key-pressed KEY-UP)
+                            (if (= easing-y 0) EASING-NONE (sub1 easing-y))]
+                           [else easing-y])]
+
+           [d (cond [(and (is-key-pressed KEY-W) (< d (- 10000.0 20.0))) (+ d 20.0)]
+                    [(and (is-key-pressed KEY-Q) (> d (+ 1.0 20.0))) (- d 20.0)]
+                    [(and (is-key-down KEY-S) (< d (- 10000.0 2.0))) (+ d 2.0)]
+                    [(and (is-key-down KEY-A) (> d (+ 1.0 2.0))) (- d 2.0)]
+                    [else d])]
+
+           ;; 重置条件: SPACE / 方向键 / 边界到达
+           [reset? (or (is-key-pressed KEY-SPACE) (is-key-pressed KEY-T)
+                       (is-key-pressed KEY-RIGHT) (is-key-pressed KEY-LEFT)
+                       (is-key-pressed KEY-DOWN) (is-key-pressed KEY-UP)
+                       (is-key-pressed KEY-W) (is-key-pressed KEY-Q)
+                       (is-key-down KEY-S) (is-key-down KEY-A)
+                       (and (is-key-pressed KEY-ENTER) bounded-t? (>= t d)))]
+
+           [paused (if (is-key-pressed KEY-ENTER) (not paused) paused)])
+
+      ;; 重置
+      (when reset?
+        (set! t 0.0)
+        (set-vector2-x! ball-pos 100.0)
+        (set-vector2-y! ball-pos 100.0)
+        (set! paused #t))
+
+      ;; 动画更新
+      (let ([t (if (and (not paused)
+                        (or (and bounded-t? (< t d))
+                            (not bounded-t?)))
+                   (let ([efn-x (cadr (vector-ref easings easing-x))]
+                         [efn-y (cadr (vector-ref easings easing-y))])
+                     (set-vector2-x! ball-pos (efn-x t 100.0 530.0 d))
+                     (set-vector2-y! ball-pos (efn-y t 100.0 230.0 d))
+                     (+ t 1.0))
+                   t)])
+
+        ;; — 绘制 —
+        (begin-drawing)
+        (clear-background RAYWHITE)
+        (draw-text (format "Easing x: ~a" (car (vector-ref easings easing-x)))
+                   20 FONT-SIZE FONT-SIZE LIGHTGRAY)
+        (draw-text (format "Easing y: ~a" (car (vector-ref easings easing-y)))
+                   20 (* FONT-SIZE 2) FONT-SIZE LIGHTGRAY)
+        (draw-text (format "t (~a) = ~a d = ~a"
+                           (if bounded-t? "b" "u")
+                           (real->decimal-string t 2)
+                           (real->decimal-string d 2))
+                   20 (* FONT-SIZE 3) FONT-SIZE LIGHTGRAY)
+        (draw-text "Use ENTER to play or pause movement, use SPACE to restart"
+                   20 (- (get-screen-height) (* FONT-SIZE 2)) FONT-SIZE LIGHTGRAY)
+        (draw-text "Use Q and W or A and S keys to change duration"
+                   20 (- (get-screen-height) (* FONT-SIZE 3)) FONT-SIZE LIGHTGRAY)
+        (draw-text "Use LEFT or RIGHT keys to choose easing for the x axis"
+                   20 (- (get-screen-height) (* FONT-SIZE 4)) FONT-SIZE LIGHTGRAY)
+        (draw-text "Use UP or DOWN keys to choose easing for the y axis"
+                   20 (- (get-screen-height) (* FONT-SIZE 5)) FONT-SIZE LIGHTGRAY)
+        (draw-circle-v ball-pos 16.0 MAROON)
+        (end-drawing)
+
+        (loop t d paused bounded-t? easing-x easing-y)))))
 
 (close-window)

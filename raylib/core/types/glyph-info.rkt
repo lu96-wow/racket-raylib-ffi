@@ -1,12 +1,29 @@
 #lang racket/base
+
+;; types/glyph-info.rkt — GlyphInfo (36 bytes)
+
 (require ffi/unsafe)
+
+;; ═══════════════════════════════════════════════════════════
+;; C struct
+;; ═══════════════════════════════════════════════════════════
 
 (define-cstruct _GlyphInfo
   ([value _int] [offsetX _int] [offsetY _int] [advanceX _int]
-   [image-data _pointer] [image-width _int] [image-height _int]
+   [image-data _pointer]
+   [image-width _int] [image-height _int]
    [image-mipmaps _int] [image-format _int]))
+
+;; ═══════════════════════════════════════════════════════════
+;; pass-by-value 转换
+;; ═══════════════════════════════════════════════════════════
+
 (define _glyph-info-bytes
   (_list-struct _int _int _int _int _pointer _int _int _int _int))
+
+;; ═══════════════════════════════════════════════════════════
+;; 列表访问器 (用于 FFI 返回值)
+;; ═══════════════════════════════════════════════════════════
 
 (define (glyph-info-value lst)          (list-ref lst 0))
 (define (glyph-info-offset-x lst)       (list-ref lst 1))
@@ -17,6 +34,10 @@
 (define (glyph-info-image-height lst)   (list-ref lst 6))
 (define (glyph-info-image-mipmaps lst)  (list-ref lst 7))
 (define (glyph-info-image-format lst)   (list-ref lst 8))
+
+;; ═══════════════════════════════════════════════════════════
+;; bytes → cpointer 转换
+;; ═══════════════════════════════════════════════════════════
 
 (define (bytes->glyph-info lst)
   (let ([g (malloc _GlyphInfo 'atomic)])
@@ -31,8 +52,13 @@
     (ptr-set! g _int 9 (list-ref lst 8))
     g))
 
+;; ═══════════════════════════════════════════════════════════
+;; 导出
+;; ═══════════════════════════════════════════════════════════
+
 (provide _GlyphInfo _glyph-info-bytes
-         glyph-info-value glyph-info-offset-x glyph-info-offset-y glyph-info-advance-x
+         glyph-info-value glyph-info-offset-x glyph-info-offset-y
+         glyph-info-advance-x
          glyph-info-image-data glyph-info-image-width glyph-info-image-height
          glyph-info-image-mipmaps glyph-info-image-format
          bytes->glyph-info)
