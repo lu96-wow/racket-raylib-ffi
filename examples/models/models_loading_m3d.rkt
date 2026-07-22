@@ -34,8 +34,8 @@
 
 ;; 提取 model 骨骼数据
 ;; _model-bytes (136B): index 21=boneCount, 22=padding, 23=bones (BoneInfo*)
-(define bone-count (list-ref model 21))
-(define bones-ptr (list-ref model 23))
+(define bone-count (model-bone-count model))
+(define bones-ptr (model-bones model))
 
 ;; 加载动画
 (let-values ([(anims-ptr anim-count) (load-model-animations m3d-path)])
@@ -50,7 +50,7 @@
   ;; 使用 raw-types.rkt 的安全访问器 + ptr-add 字节偏移
   (define (draw-skeleton anim)
     (define frame-int (inexact->exact (floor anim-current-frame)))
-    (define kf-poses-ptr (list-ref anim anim-keyframe-poses-index))  ;; Transform**
+    (define kf-poses-ptr (model-animation-frame-poses anim))  ;; Transform**
     (define frame-poses (ptr-ref kf-poses-ptr _pointer frame-int))   ;; Transform*
 
     (for ([i (in-range (sub1 bone-count))])
@@ -95,7 +95,7 @@
 
       ;; 获取当前动画数据
       (let* ([anim (ptr-ref anims-ptr _model-animation-bytes anim-index)]
-             [kf-count (list-ref anim anim-keyframe-count-index)]       ;; keyframeCount
+             [kf-count (model-animation-frame-count anim)]       ;; keyframeCount
              [anim-name (anim-name-from-list anim)])
 
         ;; 更新动画帧 (插值帧，使用 float)

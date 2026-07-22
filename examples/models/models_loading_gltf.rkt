@@ -63,7 +63,7 @@
 
       ;; 获取当前动画数据
       (let* ([anim (ptr-ref anims-ptr _model-animation-bytes anim-index)]
-             [kf-count (list-ref anim anim-keyframe-count-index)]       ;; keyframeCount
+             [kf-count (model-animation-frame-count anim)]       ;; keyframeCount
              [anim-name (anim-name-from-list anim)])
 
         ;; 更新动画帧

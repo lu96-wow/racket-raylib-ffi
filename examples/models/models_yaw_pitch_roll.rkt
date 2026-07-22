@@ -54,7 +54,7 @@
 ;; 加载模型 & 纹理
 (define model (load-model (path->string (build-path resource-dir "models/obj/plane.obj"))))
 (define texture (load-texture (path->string (build-path resource-dir "models/obj/plane_diffuse.png"))))
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
 
 (define pitch 0.0)
 (define roll 0.0)

@@ -24,7 +24,7 @@
 
 ;; 加载纹理并设置为模型材质
 (define texture (load-texture (res "cubicmap_atlas.png")))
-(let ([mats-ptr (list-ref model 19)])
+(let ([mats-ptr (model-materials model)])
   (set-material-texture mats-ptr MATERIAL-MAP-DIFFUSE texture))
 
 ;; 加载 tiling 着色器
@@ -37,7 +37,7 @@
 (set-shader-value shader (get-shader-location shader "tiling") tiling-val SHADER-UNIFORM-VEC2)
 
 ;; 给模型设置着色器
-(let ([mats-ptr (list-ref model 19)])
+(let ([mats-ptr (model-materials model)])
   (set-material-shader mats-ptr shader))
 
 (disable-cursor)

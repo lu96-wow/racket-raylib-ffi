@@ -38,7 +38,7 @@
 (unload-image crop)
 
 ;; 设置材质纹理
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
 
 (define rotation 0.0)
 

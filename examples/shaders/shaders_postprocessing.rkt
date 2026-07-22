@@ -47,7 +47,7 @@
 ;; 加载模型和纹理
 (define model (load-model (res "models/church.obj")))
 (define texture (load-texture (res "models/church_diffuse.png")))
-(let ([mats-ptr (list-ref model 19)])
+(let ([mats-ptr (model-materials model)])
   (set-material-texture mats-ptr MATERIAL-MAP-DIFFUSE texture))
 
 ;; 加载12个后处理着色器

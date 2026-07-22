@@ -30,7 +30,7 @@
 ;; 加载 billboard 纹理
 (define bill (load-texture (path->string (build-path resource-dir "billboard.png"))))
 (define bill-w (list-ref bill 1))   ;; Texture2D list: (id width height mipmaps format)
-(define bill-h (list-ref bill 2))
+(define bill-h (texture-height bill))
 
 (define bill-position-static (vector3 0.0 2.0 0.0))
 (define bill-position-rotating (vector3 1.0 2.0 1.0))

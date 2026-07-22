@@ -36,7 +36,7 @@
 
 ;; 给模型设置纹理
 (define atlas (load-texture (path->string (build-path resource-dir "cubicmap_atlas.png"))))
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE atlas)  ;; index 19 = materials
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE atlas)  ;; index 19 = materials
 
 (define map-position (vector3 -16.0 0.0 -8.0))
 
@@ -45,8 +45,8 @@
 (define pause #f)
 
 ;; 纹理尺寸 (Texture2D list: id width height mipmaps format)
-(define cmap-w (list-ref cubicmap 1))
-(define cmap-h (list-ref cubicmap 2))
+(define cmap-w (image-width cubicmap))
+(define cmap-h (image-height cubicmap))
 
 (set-target-fps 60)
 

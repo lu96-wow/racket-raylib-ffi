@@ -70,8 +70,8 @@
                                       (+ px 0.5) (+ py 0.5) (+ pz 0.5))]
                    [collision (get-ray-collision-box ray box)])
               (when (and (list-ref collision 0)          ; .hit
-                         (< (list-ref collision 1) closest-distance))
-                (set! closest-distance (list-ref collision 1))
+                         (< (ray-collision-distance collision) closest-distance))
+                (set! closest-distance (ray-collision-distance collision))
                 (set! closest-x x)
                 (set! closest-y y)
                 (set! closest-z z)

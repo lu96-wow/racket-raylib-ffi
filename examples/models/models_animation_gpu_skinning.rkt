@@ -44,7 +44,7 @@
    (res (format "shaders/glsl~a/skinning.fs" GLSL-VERSION))))
 
 ;; 设置 model.materials[1].shader = skinningShader (使用绑定函数)
-(let ([materials-ptr (list-ref model 19)])
+(let ([materials-ptr (model-materials model)])
   (set-material-shader (ptr-add materials-ptr 40) skinning-shader))
 
 ;; 加载动画
@@ -79,7 +79,7 @@
 
       ;; 获取当前动画数据
       (let* ([anim (ptr-ref anims-ptr _model-animation-bytes anim-index)]
-             [kf-count (list-ref anim anim-keyframe-count-index)]
+             [kf-count (model-animation-frame-count anim)]
              [anim-name (anim-name-from-list anim)])
 
         ;; 更新动画帧

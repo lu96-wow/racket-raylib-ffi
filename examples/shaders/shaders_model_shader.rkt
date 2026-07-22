@@ -27,7 +27,7 @@
 (define texture (load-texture (res "models/watermill_diffuse.png")))
 (define shader (load-fs-only-shader (res (format "shaders/glsl~a/grayscale.fs" GLSL-VERSION))))
 
-(let ([mats-ptr (list-ref model 19)])
+(let ([mats-ptr (model-materials model)])
   (set-material-shader mats-ptr shader)
   (set-material-texture mats-ptr MATERIAL-MAP-DIFFUSE texture))
 

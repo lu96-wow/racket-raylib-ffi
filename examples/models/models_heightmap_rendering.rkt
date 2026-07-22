@@ -34,7 +34,7 @@
 (define model (load-model-from-mesh mesh))
 
 ;; 给模型设置纹理
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
 (define map-position (vector3 -8.0 0.0 -8.0))
 
 (unload-image img)

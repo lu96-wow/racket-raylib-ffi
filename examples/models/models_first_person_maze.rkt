@@ -31,15 +31,15 @@
 (define mesh (gen-mesh-cubicmap im-map (vector3 1.0 1.0 1.0)))
 (define model (load-model-from-mesh mesh))
 (define texture (load-texture (path->string (build-path resource-dir "cubicmap_atlas.png"))))
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
 
 ;; 读取像素颜色用于碰撞检测
 (define map-pixels (load-image-colors im-map))  ;; Color* 指针
 (unload-image im-map)
 
 (define map-position (vector3 -16.0 0.0 -8.0))
-(define cmap-w (list-ref cubicmap 1))
-(define cmap-h (list-ref cubicmap 2))
+(define cmap-w (image-width cubicmap))
+(define cmap-h (image-height cubicmap))
 
 (disable-cursor)
 (set-target-fps 60)

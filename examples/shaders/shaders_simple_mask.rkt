@@ -39,8 +39,8 @@
 (define tex-mask (load-texture (res "mask.png")))
 
 ;; 设置材质纹理和着色器
-(let ([mats1 (list-ref model1 19)]
-      [mats2 (list-ref model2 19)])
+(let ([mats1 (model-materials model1)]
+      [mats2 (model-materials model2)])
   ;; 设置 diffuse 纹理
   (set-material-texture mats1 MATERIAL-MAP-DIFFUSE tex-diffuse)
   (set-material-texture mats2 MATERIAL-MAP-DIFFUSE tex-diffuse)

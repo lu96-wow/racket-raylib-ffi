@@ -142,8 +142,8 @@
       (update-model-animation model-list anim-list (exact->inexact anim-current-frame))
 
       ;; 绘制角色 (meshes[0], materials[1])
-      (let ([meshes-ptr (list-ref model-list 18)]
-            [mats-ptr (list-ref model-list 19)])
+      (let ([meshes-ptr (model-meshes model-list)]
+            [mats-ptr (model-materials model-list)])
         (draw-mesh (mesh-ptr->list meshes-ptr)
                    (material-ptr->list (ptr-add mats-ptr 40))
                    char-transform))

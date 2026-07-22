@@ -20,7 +20,7 @@
 
 (define model (load-model (res "models/barracks.obj")))
 (define texture (load-texture (res "models/barracks_diffuse.png")))
-(let ([mats-ptr (list-ref model 19)])
+(let ([mats-ptr (model-materials model)])
   (set-material-texture mats-ptr MATERIAL-MAP-DIFFUSE texture))
 (define position (vector3 0.0 0.0 0.0))
 
