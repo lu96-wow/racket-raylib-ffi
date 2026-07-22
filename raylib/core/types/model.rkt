@@ -1,7 +1,5 @@
 #lang racket/base
 
-;; types/model.rkt — Model (136 bytes)
-
 (require ffi/unsafe)
 
 (define-cstruct _Model
@@ -15,8 +13,6 @@
    [skeleton-bones _pointer] [skeleton-bindPose _pointer]
    [currentPose _pointer] [boneMatrices _pointer]))
 
-
-;; pass-by-value
 (define _model-bytes
   (_list-struct
    _float _float _float _float
@@ -29,4 +25,20 @@
    _pointer _pointer
    _pointer _pointer))
 
-(provide _Model _model-bytes)
+(define (model-transform lst)     (for/list ([i (in-range 16)]) (list-ref lst i)))
+(define (model-mesh-count lst)    (list-ref lst 16))
+(define (model-material-count lst)(list-ref lst 17))
+(define (model-meshes lst)        (list-ref lst 18))
+(define (model-materials lst)     (list-ref lst 19))
+(define (model-mesh-material lst) (list-ref lst 20))
+(define (model-bone-count lst)    (list-ref lst 21))
+(define (model-bones lst)         (list-ref lst 22))
+(define (model-bind-pose lst)     (list-ref lst 23))
+(define (model-current-pose lst)  (list-ref lst 24))
+(define (model-bone-matrices lst) (list-ref lst 25))
+
+(provide _Model _model-bytes
+         model-transform model-mesh-count model-material-count
+         model-meshes model-materials model-mesh-material
+         model-bone-count model-bones model-bind-pose
+         model-current-pose model-bone-matrices)

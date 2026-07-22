@@ -28,7 +28,7 @@
 (define mesh (gen-mesh-plane (exact->inexact MAP-SIZE) (exact->inexact MAP-SIZE) 1 1))
 
 ;; manually set up texcoords2 VBO (GenMeshPlane doesn't generate texcoords2)
-(define vertex-count (list-ref mesh 0))   ;; = 4 vertices
+(define vertex-count (mesh-vertex-count mesh))
 (define tc2 (malloc _float (* vertex-count 2) 'atomic))
 ;; fill texcoords2: [0,0, 1,0, 0,1, 1,1]
 (ptr-set! tc2 _float 0 0.0)  (ptr-set! tc2 _float 1 0.0)
@@ -38,11 +38,11 @@
 
 ;; upload texcoords2 as VBO and store in mesh.vboId[SHADER_LOC_VERTEX_TEXCOORD02]
 (define tc2-vbo (rl-load-vertex-buffer tc2 (* vertex-count 2 4) #f))
-(define vbo-id-ptr (list-ref mesh 17))  ;; vboId pointer (index 17 in _mesh-bytes)
+(define vbo-id-ptr (mesh-vbo-id mesh))
 (ptr-set! vbo-id-ptr _uint SHADER-LOC-VERTEX-TEXCOORD02 tc2-vbo)
 
 ;; configure vertex attribute 5 for texcoords2
-(rl-enable-vertex-array (list-ref mesh 15))  ;; vaoId at index 15
+(rl-enable-vertex-array (mesh-vao-id mesh))
 (rl-set-vertex-attribute 5 2 RL-FLOAT 0 0 0)
 (rl-enable-vertex-attribute 5)
 (rl-disable-vertex-array)

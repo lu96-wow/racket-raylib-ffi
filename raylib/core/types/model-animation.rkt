@@ -1,7 +1,4 @@
 #lang racket/base
-
-;; types/model-animation.rkt — ModelAnimation (56 bytes)
-
 (require ffi/unsafe)
 
 (define-cstruct _ModelAnimation
@@ -15,18 +12,17 @@
    [name28 _ubyte] [name29 _ubyte] [name30 _ubyte] [name31 _ubyte]
    [boneCount _int] [keyframeCount _int] [keyframePoses _pointer]))
 
-
-;; pass-by-value
 (define _model-animation-bytes
   (_list-struct
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
-   _ubyte _ubyte _ubyte _ubyte
+   _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte
+   _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte
+   _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte
+   _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte
    _int _int _pointer))
 
-(provide _ModelAnimation _model-animation-bytes)
+(define (ma-bone-count lst)      (list-ref lst 32))
+(define (ma-keyframe-count lst)  (list-ref lst 33))
+(define (ma-keyframe-poses lst)  (list-ref lst 34))
+
+(provide _ModelAnimation _model-animation-bytes
+         ma-bone-count ma-keyframe-count ma-keyframe-poses)
