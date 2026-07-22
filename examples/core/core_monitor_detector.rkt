@@ -8,7 +8,7 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - monitor detector")
 
-(define current-monitor (box 0))
+(define-var current-monitor 0)
 (set-target-fps 60)
 
 (define (build-monitors count)

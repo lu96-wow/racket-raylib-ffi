@@ -70,9 +70,9 @@
 ;; should not be manually freed with C free)
 #;(free codepoints-no-dups-ptr)
 
-(define show-font-atlas? (box #f))
+(define-var show-font-atlas? #f)
 
-(define ptr (box 0))
+(define-var ptr 0)
 (set-box! ptr (string-length text))
 
 (set-target-fps 60)

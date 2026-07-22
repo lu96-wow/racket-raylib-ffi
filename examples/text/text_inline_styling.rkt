@@ -119,7 +119,7 @@
   "raylib [text] example - inline styling")
 
 (define col-random (color 230 41 55 255))  ; RED
-(define frame-counter (box 0))
+(define-var frame-counter 0)
 
 (set-target-fps 60)
 
@@ -130,7 +130,7 @@
 (let loop ()
   (unless (window-should-close?)
     ;; 更新
-    (set-box! frame-counter (+ (unbox frame-counter) 1))
+    (+= frame-counter 1)
 
     (when (= (modulo (unbox frame-counter) 20) 0)
       (ptr-set! col-random _ubyte 0 (get-random-value 0 255))

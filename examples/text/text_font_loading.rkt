@@ -27,7 +27,7 @@
 
 (set-text-line-spacing 16)
 
-(define use-ttf? (box #f))
+(define-var use-ttf? #f)
 
 (set-target-fps 60)
 

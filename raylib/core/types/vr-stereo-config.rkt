@@ -44,4 +44,24 @@
    _float _float _float _float
    _float _float _float _float))
 
-(provide _VrStereoConfig _vrstereoconfig-bytes)
+;; 命名访问器（常用字段）
+(define (vr-stereo-config-left-lens-center0 cfg)  (list-ref cfg 64))
+(define (vr-stereo-config-left-lens-center1 cfg)  (list-ref cfg 65))
+(define (vr-stereo-config-right-lens-center0 cfg) (list-ref cfg 66))
+(define (vr-stereo-config-right-lens-center1 cfg) (list-ref cfg 67))
+(define (vr-stereo-config-left-screen-center0 cfg)  (list-ref cfg 68))
+(define (vr-stereo-config-left-screen-center1 cfg)  (list-ref cfg 69))
+(define (vr-stereo-config-right-screen-center0 cfg) (list-ref cfg 70))
+(define (vr-stereo-config-right-screen-center1 cfg) (list-ref cfg 71))
+(define (vr-stereo-config-scale0 cfg)    (list-ref cfg 72))
+(define (vr-stereo-config-scale1 cfg)    (list-ref cfg 73))
+(define (vr-stereo-config-scale-in0 cfg) (list-ref cfg 74))
+(define (vr-stereo-config-scale-in1 cfg) (list-ref cfg 75))
+
+(provide _VrStereoConfig _vrstereoconfig-bytes
+         vr-stereo-config-left-lens-center0 vr-stereo-config-left-lens-center1
+         vr-stereo-config-right-lens-center0 vr-stereo-config-right-lens-center1
+         vr-stereo-config-left-screen-center0 vr-stereo-config-left-screen-center1
+         vr-stereo-config-right-screen-center0 vr-stereo-config-right-screen-center1
+         vr-stereo-config-scale0 vr-stereo-config-scale1
+         vr-stereo-config-scale-in0 vr-stereo-config-scale-in1)

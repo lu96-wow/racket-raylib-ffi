@@ -17,7 +17,20 @@
 (define (ray-collision-normal-y lst)  (list-ref lst 6))
 (define (ray-collision-normal-z lst)  (list-ref lst 7))
 
+(define (bytes->ray-collision lst)
+  (let ([r (malloc _RayCollision 'atomic)])
+    (ptr-set! r _stdbool 0 (list-ref lst 0))
+    (ptr-set! r _float 1 (list-ref lst 1))
+    (ptr-set! r _float 2 (list-ref lst 2))
+    (ptr-set! r _float 3 (list-ref lst 3))
+    (ptr-set! r _float 4 (list-ref lst 4))
+    (ptr-set! r _float 5 (list-ref lst 5))
+    (ptr-set! r _float 6 (list-ref lst 6))
+    (ptr-set! r _float 7 (list-ref lst 7))
+    r))
+
 (provide _RayCollision _ray-collision-bytes
          ray-collision-hit ray-collision-distance
          ray-collision-point-x ray-collision-point-y ray-collision-point-z
-         ray-collision-normal-x ray-collision-normal-y ray-collision-normal-z)
+         ray-collision-normal-x ray-collision-normal-y ray-collision-normal-z
+         bytes->ray-collision)

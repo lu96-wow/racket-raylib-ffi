@@ -159,7 +159,7 @@
 (define global-mask (load-render-texture W H))
 (setup-light 0 600.0 400.0 300.0)
 (define next-light 1)
-(define show-lines? (box #f))
+(define-var show-lines? #f)
 (set-target-fps 60)
 
 ;; ============================================================

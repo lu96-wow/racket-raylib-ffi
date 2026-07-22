@@ -27,8 +27,8 @@
 ;; ============================================================
 
 (define (rt->texture rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3)
-        (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt)
+        (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 ;; ============================================================
 ;; 初始化
@@ -53,8 +53,8 @@
 
 ;; 纹理源矩形 (height 取负 = OpenGL 上下翻转)
 (define source-rec (rectangle 0 0
-                    (list-ref target 2)          ;; tex-width
-                    (* -1 (list-ref target 3)))) ;; -tex-height
+                    (render-texture-tex-width target)
+                    (* -1 (render-texture-tex-height target))))
 
 ;; 目标矩形 (居中缩放显示)
 (define dest-rec

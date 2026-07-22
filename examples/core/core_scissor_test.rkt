@@ -19,7 +19,7 @@
 
 ;; 裁剪区域矩形 (Rectangle 指针)
 (define scissor-area (rectangle 0 0 300 300))
-(define scissor-mode (box #t))  ;; 用 box 以便在闭包中修改
+(define-var scissor-mode #t)  ;; 用 box 以便在闭包中修改
 
 (set-target-fps 60)
 

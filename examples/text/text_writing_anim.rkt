@@ -18,7 +18,7 @@
 
 (define message "This sample illustrates a text writing\nanimation effect! Check it out! ;)")
 
-(define frames-counter (box 0))
+(define-var frames-counter 0)
 
 (set-target-fps 60)
 
@@ -30,8 +30,8 @@
   (unless (window-should-close?)
     ;; 更新
     (if (is-key-down KEY-SPACE)
-        (set-box! frames-counter (+ (unbox frames-counter) 8))
-        (set-box! frames-counter (+ (unbox frames-counter) 1)))
+        (+= frames-counter 8)
+        (+= frames-counter 1))
 
     (when (is-key-pressed KEY-ENTER)
       (set-box! frames-counter 0))

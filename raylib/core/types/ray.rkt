@@ -15,6 +15,10 @@
   (list (ptr-ref r _float 0) (ptr-ref r _float 1) (ptr-ref r _float 2)
         (ptr-ref r _float 3) (ptr-ref r _float 4) (ptr-ref r _float 5)))
 
+(define (bytes->ray lst)
+  (ray (list-ref lst 0) (list-ref lst 1) (list-ref lst 2)
+       (list-ref lst 3) (list-ref lst 4) (list-ref lst 5)))
+
 (provide _Ray _ray-bytes ray ray-pos-x ray-pos-y ray-pos-z ray-dir-x ray-dir-y ray-dir-z
          set-ray-pos-x! set-ray-pos-y! set-ray-pos-z! set-ray-dir-x! set-ray-dir-y! set-ray-dir-z!
-         ray->bytes)
+         ray->bytes bytes->ray)

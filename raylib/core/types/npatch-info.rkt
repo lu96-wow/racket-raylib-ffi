@@ -17,6 +17,20 @@
 (define (npatch-info-bottom lst)     (list-ref lst 7))
 (define (npatch-info-layout lst)     (list-ref lst 8))
 
+(define (bytes->npatch-info lst)
+  (let ([n (malloc _NPatchInfo 'atomic)])
+    (ptr-set! n _float 0 (list-ref lst 0))
+    (ptr-set! n _float 1 (list-ref lst 1))
+    (ptr-set! n _float 2 (list-ref lst 2))
+    (ptr-set! n _float 3 (list-ref lst 3))
+    (ptr-set! n _int 4 (list-ref lst 4))
+    (ptr-set! n _int 5 (list-ref lst 5))
+    (ptr-set! n _int 6 (list-ref lst 6))
+    (ptr-set! n _int 7 (list-ref lst 7))
+    (ptr-set! n _int 8 (list-ref lst 8))
+    n))
+
 (provide _NPatchInfo _npatch-info-bytes
          npatch-info-src-x npatch-info-src-y npatch-info-src-width npatch-info-src-height
-         npatch-info-left npatch-info-top npatch-info-right npatch-info-bottom npatch-info-layout)
+         npatch-info-left npatch-info-top npatch-info-right npatch-info-bottom npatch-info-layout
+         bytes->npatch-info)

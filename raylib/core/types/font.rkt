@@ -19,7 +19,22 @@
 (define (font-recs lst)           (list-ref lst 8))
 (define (font-glyphs lst)         (list-ref lst 9))
 
+(define (bytes->font lst)
+  (let ([f (malloc _Font 'atomic)])
+    (ptr-set! f _int 0 (list-ref lst 0))
+    (ptr-set! f _int 1 (list-ref lst 1))
+    (ptr-set! f _int 2 (list-ref lst 2))
+    (ptr-set! f _uint 3 (list-ref lst 3))
+    (ptr-set! f _int 4 (list-ref lst 4))
+    (ptr-set! f _int 5 (list-ref lst 5))
+    (ptr-set! f _int 6 (list-ref lst 6))
+    (ptr-set! f _int 7 (list-ref lst 7))
+    (ptr-set! f _pointer 8 (list-ref lst 8))
+    (ptr-set! f _pointer 9 (list-ref lst 9))
+    f))
+
 (provide _Font _font-bytes
          font-base-size font-glyph-count font-glyph-padding
          font-tex-id font-tex-width font-tex-height font-tex-mipmaps font-tex-format
-         font-recs font-glyphs)
+         font-recs font-glyphs
+         bytes->font)

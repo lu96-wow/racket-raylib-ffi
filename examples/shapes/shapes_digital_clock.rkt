@@ -14,7 +14,7 @@
 (init-window 800 450 "raylib [shapes] example - digital clock")
 (set-target-fps 60)
 
-(define clock-mode (box CLOCK-DIGITAL))
+(define-var clock-mode CLOCK-DIGITAL)
 (define (sec) (date-second (current-date)))
 (define (min) (date-minute (current-date)))
 (define (hr)  (date-hour (current-date)))
