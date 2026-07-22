@@ -16,33 +16,26 @@
 
 (set-exit-key KEY-NULL)      ;; 禁用 ESC 关闭
 
-(define-var exit-requested #f)
-(define-var exit-window #f)
-
 (set-target-fps 60)
 
-(let loop ()
-  (unless (unbox exit-window)
-    ;; 检测关闭请求
-    (when (or (window-should-close?) (is-key-pressed KEY-ESCAPE))
-      (set-box! exit-requested #t))
-
-    (when (unbox exit-requested)
-      (cond
-        [(is-key-pressed KEY-Y) (set-box! exit-window #t)]
-        [(is-key-pressed KEY-N) (set-box! exit-requested #f)]))
+(let loop ([exit-requested #f] [exit-window #f])
+  (unless exit-window
+    (define after-esc
+      (if (or (window-should-close?) (is-key-pressed KEY-ESCAPE)) #t exit-requested))
+    (define next-window
+      (if (and after-esc (is-key-pressed KEY-Y)) #t exit-window))
+    (define next-requested
+      (if (and after-esc (is-key-pressed KEY-N)) #f after-esc))
 
     (begin-drawing)
     (clear-background RAYWHITE)
-
-    (if (unbox exit-requested)
+    (if next-requested
       (begin
         (draw-rectangle 0 100 SCREEN-WIDTH 200 BLACK)
         (draw-text "Are you sure you want to exit program? [Y/N]" 40 180 30 WHITE))
       (draw-text "Try to close the window to get confirmation message!"
         120 200 20 LIGHTGRAY))
-
     (end-drawing)
-    (loop)))
+    (loop next-requested next-window)))
 
 (close-window)

@@ -70,10 +70,7 @@
 ;; should not be manually freed with C free)
 #;(free codepoints-no-dups-ptr)
 
-(define-var show-font-atlas? #f)
-
-(define-var ptr 0)
-(set-box! ptr (string-length text))
+(define ptr (string-length text))
 
 (set-target-fps 60)
 
@@ -81,11 +78,9 @@
 ;; 主循环
 ;; ============================================================
 
-(let loop ()
+(let loop ([show-font-atlas? #f])
   (unless (window-should-close?)
-    ;; 更新
-    (when (is-key-pressed KEY-SPACE)
-      (set-box! show-font-atlas? (not (unbox show-font-atlas?))))
+    (define show? (if (is-key-pressed KEY-SPACE) (not show-font-atlas?) show-font-atlas?))
 
     ;; 绘制
     (begin-drawing)
@@ -96,13 +91,13 @@
     (draw-text (format "Total codepoints contained in provided text: ~a" codepoint-count) 10 10 20 GREEN)
     (draw-text (format "Total codepoints required for font atlas (duplicates excluded): ~a" codepoints-no-dups-count) 10 40 20 GREEN)
 
-    (if (unbox show-font-atlas?)
+    (if show?
         (begin
           ;; Draw generated font texture atlas containing provided codepoints
           ;; The font texture is embedded within the font list
           ;; font texture id = (list-ref font 3), width = (list-ref font 4), height = (list-ref font 5)
           (draw-texture font-texture 150 100 BLACK)
-          (draw-rectangle-lines 150 100 (list-ref font 4) (list-ref font 5) BLACK))
+          (draw-rectangle-lines 150 100 (font-tex-width font) (font-tex-height font) BLACK))
         (begin
           ;; Draw provided text with loaded font
           (draw-text-ex font text (vector2 160.0 110.0) 48.0 5.0 BLACK)))
@@ -111,7 +106,7 @@
 
     (end-drawing)
 
-    (loop)))
+    (loop show?)))
 
 ;; ============================================================
 ;; 清理
