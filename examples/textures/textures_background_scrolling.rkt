@@ -7,14 +7,16 @@
 ;; 演示: 视差背景滚动
 ;;   使用多层纹理以不同速度水平滚动实现视差滚动效果
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 常量

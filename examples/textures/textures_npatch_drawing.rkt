@@ -8,14 +8,16 @@
 ;;   NPatchInfo 按值传递 (list: src-x src-y src-w src-h left top right bottom layout)
 ;;   移动鼠标可动态调整 n-patch 目标矩形大小
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; NPatchInfo 按值传递 → list (src-x src-y src-w src-h left top right bottom layout)

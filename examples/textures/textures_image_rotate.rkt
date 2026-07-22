@@ -6,14 +6,16 @@
 ;;
 ;; 演示: 加载同一图片并旋转不同角度，鼠标左键/→ 切换显示
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 常量

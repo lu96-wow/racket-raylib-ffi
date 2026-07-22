@@ -9,14 +9,16 @@
 ;;   需要资源: parrots.png, KAISG.ttf
 
 (require ffi/unsafe
-         "../../raylib/raylib.rkt")
+         "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 常量

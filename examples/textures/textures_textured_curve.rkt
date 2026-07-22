@@ -13,10 +13,12 @@
 ;;   ←/→      — 调整分段数
 ;;   拖拽控制点 — 编辑曲线形状
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 全局状态

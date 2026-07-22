@@ -8,14 +8,16 @@
 ;;   通过 triangle fan 将一个纹理映射到旋转的多边形上
 
 (require "../../raylib/raylib.rkt"
+         racket/runtime-path
          ffi/unsafe)
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 常量

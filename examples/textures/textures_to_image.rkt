@@ -9,14 +9,16 @@
 ;;   2. LoadImageFromTexture (VRAM → RAM)
 ;;   3. UnloadTexture → LoadTextureFromImage (RAM → VRAM)
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 常量

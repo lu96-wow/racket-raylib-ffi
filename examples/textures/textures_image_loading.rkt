@@ -10,14 +10,16 @@
 ;;   3. UnloadImage 释放 CPU 内存
 ;;   4. DrawTexture 绘制 GPU 纹理
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 常量

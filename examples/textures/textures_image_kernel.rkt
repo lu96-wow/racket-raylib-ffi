@@ -9,6 +9,7 @@
 ;; 注意: 此示例需要直接操作 C 内存中的 Image 结构体指针
 
 (require "../../raylib/raylib.rkt"
+         racket/runtime-path
          ffi/unsafe
          (prefix-in T: "../../raylib/types.rkt"))
 
@@ -16,8 +17,9 @@
 ;; 资源路径
 ;; ============================================================
 
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 辅助: Image list ↔ C Image* 指针转换

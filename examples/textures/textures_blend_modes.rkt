@@ -8,14 +8,16 @@
 ;;   BLEND_ALPHA / BLEND_ADDITIVE / BLEND_MULTIPLIED / BLEND_ADD_COLORS
 ;;   通过 LoadImage → LoadTextureFromImage → UnloadImage 管线加载纹理
 
-(require "../../raylib/raylib.rkt")
+(require "../../raylib/raylib.rkt"
+         racket/runtime-path)
+
+(define-runtime-path resource-dir-path
+  "../../../examples/textures/resources/")
+(define resource-dir (path->string resource-dir-path))
 
 ;; ============================================================
 ;; 资源路径
 ;; ============================================================
-
-(define resource-dir
-  (path->string (build-path (current-directory) "../../../examples/textures/resources/")))
 
 ;; ============================================================
 ;; 常量
