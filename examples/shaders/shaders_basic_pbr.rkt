@@ -258,12 +258,8 @@
     (end-drawing)
     (loop)))
 
-;; 清理
-(set-material-shader car-mats (list 0 0 #f))
-(unload-material car-mats)
+;; 清理 — UnloadModel 内部已释放 materials，无需手动 unload-material
 (unload-model car)
-(set-material-shader floor-mats (list 0 0 #f))
-(unload-material floor-mats)
 (unload-model floor)
 (unload-shader shader)
 (close-window)
