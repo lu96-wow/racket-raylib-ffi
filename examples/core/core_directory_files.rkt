@@ -29,11 +29,11 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - directory files")
 
-(define directory (box (get-working-directory)))
-(define files (box (load-directory-files-ex (unbox directory) FILE-FILTER #f)))
+(define-var directory (get-working-directory))
+(define-var files (load-directory-files-ex (unbox directory) FILE-FILTER #f))
 
-(define scroll-idx (box 0))
-(define item-active (box -1))
+(define-var scroll-idx 0)
+(define-var item-active -1)
 
 (set-target-fps 60)
 

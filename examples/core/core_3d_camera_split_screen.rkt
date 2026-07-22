@@ -66,8 +66,7 @@
 ;; ============================================================
 
 (define (rt->texture rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3)
-        (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt) (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 ;; ============================================================
 ;; 辅助: 绘制 3D 场景 (在两个玩家的纹理中共享)

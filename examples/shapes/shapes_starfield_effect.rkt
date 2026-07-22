@@ -13,8 +13,8 @@
     (ptr-set! c _ubyte 2 (exact-round (+ (ptr-ref DARKBLUE _ubyte 2) (* 0.69 (- (ptr-ref BLACK _ubyte 2) (ptr-ref DARKBLUE _ubyte 2))))))
     (ptr-set! c _ubyte 3 255) c))
 
-(define speed (box (/ 10.0 9.0)))
-(define draw-lines? (box #t))
+(define-var speed (/ 10.0 9.0))
+(define-var draw-lines? #t)
 
 (define stars (make-vector STAR-COUNT))
 (for ([i (in-range STAR-COUNT)])

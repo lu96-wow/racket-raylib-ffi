@@ -30,10 +30,10 @@
           (vector2 500.0 300.0)))
 
 ;; 是否选中顶点 (-1 = 未选中)
-(define triangle-index (box -1))
+(define-var triangle-index -1)
 
 ;; 线条模式?
-(define lines-mode? (box #f))
+(define-var lines-mode? #f)
 
 (define handle-radius 8.0)
 

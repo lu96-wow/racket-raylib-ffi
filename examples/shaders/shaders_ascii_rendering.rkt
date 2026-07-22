@@ -61,10 +61,9 @@
     (begin-drawing)
     (clear-background RAYWHITE)
     (begin-shader-mode shader)
-    (let ([tex (list (list-ref target 1) (list-ref target 2)
-                     (list-ref target 3) (list-ref target 4) (list-ref target 5))])
+    (let ([tex (list (render-texture-tex-id target) (render-texture-tex-width target) (render-texture-tex-height target) (render-texture-tex-mipmaps target) (render-texture-tex-format target))])
       (draw-texture-rec tex
-                      (rectangle 0.0 0.0 (list-ref target 2) (- (list-ref target 3)))
+                      (rectangle 0.0 0.0 (render-texture-tex-width target) (- (render-texture-tex-height target)))
                       (vector2 0.0 0.0) WHITE))
     (end-shader-mode)
 

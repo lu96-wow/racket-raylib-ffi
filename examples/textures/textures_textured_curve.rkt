@@ -118,7 +118,7 @@
 
 (define curve-end-pos       (vector2 700 350))
 (define curve-end-tangent   (vector2 600 100))
-(define selected-point (box #f))
+(define-var selected-point #f)
 (set-config-flags (bitwise-ior FLAG-VSYNC-HINT FLAG-MSAA-4X-HINT))
 
 (init-window 800 450

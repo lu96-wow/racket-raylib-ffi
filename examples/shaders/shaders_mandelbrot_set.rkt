@@ -126,8 +126,7 @@
     (begin-drawing)
     (clear-background BLACK)
     (begin-shader-mode shader)
-    (draw-texture-ex (list (list-ref target 1) (list-ref target 2)
-                           (list-ref target 3) (list-ref target 4) (list-ref target 5))
+    (draw-texture-ex (list (render-texture-tex-id target) (render-texture-tex-width target) (render-texture-tex-height target) (render-texture-tex-mipmaps target) (render-texture-tex-format target))
                      (vector2 0.0 0.0) 0.0 1.0 WHITE)
     (end-shader-mode)
 

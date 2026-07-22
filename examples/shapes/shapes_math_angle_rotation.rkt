@@ -29,7 +29,7 @@
 (define angle-colors (vector GREEN ORANGE BLUE MAGENTA))
 
 ;; 动画旋转总角度
-(define total-angle (box 0.0))
+(define-var total-angle 0.0)
 
 (set-target-fps 60)
 
@@ -40,9 +40,9 @@
 (let main-loop ()
   (unless (window-should-close?)
     ;; --- 更新 ---
-    (set-box! total-angle (+ (unbox total-angle) 1.0))
+    (+= total-angle 1.0)
     (when (>= (unbox total-angle) 360.0)
-      (set-box! total-angle (- (unbox total-angle) 360.0)))
+      (-= total-angle 360.0))
 
     ;; --- 绘制 ---
     (begin-drawing)

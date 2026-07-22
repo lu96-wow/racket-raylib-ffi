@@ -35,13 +35,13 @@
 (define player-pos  (vector3 0.0 0.0 0.0))
 (define player-vel  (vector3 0.0 0.0 0.0))
 (define player-dir  (vector3 0.0 0.0 0.0))
-(define player-grounded (box #t))
-(define look-yaw   (box 0.0))
-(define look-pitch (box 0.0))
+(define-var player-grounded #t)
+(define-var look-yaw 0.0)
+(define-var look-pitch 0.0)
 
 ;; 动画状态
-(define head-timer (box 0.0))
-(define walk-lerp  (box 0.0))
+(define-var head-timer 0.0)
+(define-var walk-lerp 0.0)
 
 (define camera
   (camera3d
@@ -166,10 +166,10 @@
            [fwd     (- (if (is-key-down KEY-W) 1 0) (if (is-key-down KEY-S) 1 0))])
 
       ;; 键盘控制视角
-      (when (is-key-down KEY-LEFT)  (set-box! look-yaw (+ (unbox look-yaw) (* LOOK-SPEED 60 delta))))
-      (when (is-key-down KEY-RIGHT) (set-box! look-yaw (- (unbox look-yaw) (* LOOK-SPEED 60 delta))))
-      (when (is-key-down KEY-UP)    (set-box! look-pitch (+ (unbox look-pitch) (* LOOK-SPEED 60 delta))))
-      (when (is-key-down KEY-DOWN)  (set-box! look-pitch (- (unbox look-pitch) (* LOOK-SPEED 60 delta))))
+      (when (is-key-down KEY-LEFT)  (+= look-yaw (* LOOK-SPEED 60 delta)))
+      (when (is-key-down KEY-RIGHT) (-= look-yaw (* LOOK-SPEED 60 delta)))
+      (when (is-key-down KEY-UP)    (+= look-pitch (* LOOK-SPEED 60 delta)))
+      (when (is-key-down KEY-DOWN)  (-= look-pitch (* LOOK-SPEED 60 delta)))
 
       ;; 移动
       (update-body (unbox look-yaw) sideway fwd (is-key-pressed KEY-SPACE))
@@ -177,7 +177,7 @@
       ;; 行走动画 (头部晃动)
       (if (and (unbox player-grounded) (or (not (= fwd 0)) (not (= sideway 0))))
         (begin
-          (set-box! head-timer (+ (unbox head-timer) (* delta 3.0)))
+          (+= head-timer (* delta 3.0))
           (set-box! walk-lerp (lerp (unbox walk-lerp) 1.0 (* 10.0 delta))))
         (begin
           (set-box! walk-lerp (lerp (unbox walk-lerp) 0.0 (* 10.0 delta)))))

@@ -55,15 +55,15 @@
 (init-window screen-width screen-height
   "raylib [text] example - unicode ranges")
 
-(define font-box (box (load-font font-path)))
+(define-var font-box (load-font font-path))
 ;; set-texture-filter 需要 Texture2D (5 元素)，Font 是 10 元素
 (define (font-texture font)
   (list (list-ref font 3) (list-ref font 4) (list-ref font 5)
         (list-ref font 6) (list-ref font 7)))
 (set-texture-filter (font-texture (unbox font-box)) TEXTURE-FILTER-BILINEAR)
-(define unicode-range (box 0))
-(define prev-unicode-range (box 0))
-(define generating? (box #f))
+(define-var unicode-range 0)
+(define-var prev-unicode-range 0)
+(define-var generating? #f)
 
 (set-target-fps 60)
 

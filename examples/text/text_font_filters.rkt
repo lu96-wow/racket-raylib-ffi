@@ -26,13 +26,13 @@
 ;; Extract texture from font for filter operations
 (define font-texture (list (list-ref font 3) (list-ref font 4) (list-ref font 5) (list-ref font 6) (list-ref font 7)))
 
-(define font-size (box (exact->inexact (list-ref font 0))))
-(define font-x (box 40.0))
-(define font-y (box (- (/ screen-height 2.0) 80.0)))
+(define-var font-size (exact->inexact (list-ref font 0)))
+(define-var font-x 40.0)
+(define-var font-y (- (/ screen-height 2.0) 80.0))
 
 ;; Setup texture scaling filter
 (set-texture-filter font-texture TEXTURE-FILTER-POINT)
-(define current-font-filter (box 0))  ; TEXTURE_FILTER_POINT
+(define-var current-font-filter 0)  ; TEXTURE_FILTER_POINT
 
 (set-target-fps 60)
 
@@ -43,7 +43,7 @@
 (let loop ()
   (unless (window-should-close?)
     ;; 更新
-    (set-box! font-size (+ (unbox font-size) (* (get-mouse-wheel-move) 4.0)))
+    (+= font-size (* (get-mouse-wheel-move) 4.0))
 
     ;; Choose font texture filter method
     (cond [(is-key-pressed KEY-ONE)
@@ -58,9 +58,9 @@
            (set-box! current-font-filter 2)])
 
     (when (is-key-down KEY-LEFT)
-      (set-box! font-x (- (unbox font-x) 10.0)))
+      (-= font-x 10.0))
     (when (is-key-down KEY-RIGHT)
-      (set-box! font-x (+ (unbox font-x) 10.0)))
+      (+= font-x 10.0))
 
     ;; 绘制
     (begin-drawing)

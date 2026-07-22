@@ -9,9 +9,9 @@
 (define start-pos (vector2 20.0 50.0))
 (define end-pos (vector2 780.0 400.0))  ;; 将被鼠标覆盖
 
-(define dash-length   (box 25.0))
-(define blank-length  (box 15.0))
-(define color-index   (box 0))
+(define-var dash-length 25.0)
+(define-var blank-length 15.0)
+(define-var color-index 0)
 (define colors (vector RED ORANGE GOLD GREEN BLUE VIOLET PINK BLACK))
 
 (let main-loop ()
@@ -19,12 +19,12 @@
     (ptr-set! end-pos _float 0 (exact->inexact (get-mouse-x)))
     (ptr-set! end-pos _float 1 (exact->inexact (get-mouse-y)))
 
-    (when (is-key-down KEY-UP)    (set-box! dash-length  (+ (unbox dash-length) 1.0)))
+    (when (is-key-down KEY-UP)    (+= dash-length 1.0))
     (when (and (is-key-down KEY-DOWN) (> (unbox dash-length) 1.0))
-      (set-box! dash-length (- (unbox dash-length) 1.0)))
-    (when (is-key-down KEY-RIGHT) (set-box! blank-length (+ (unbox blank-length) 1.0)))
+      (-= dash-length 1.0))
+    (when (is-key-down KEY-RIGHT) (+= blank-length 1.0))
     (when (and (is-key-down KEY-LEFT) (> (unbox blank-length) 1.0))
-      (set-box! blank-length (- (unbox blank-length) 1.0)))
+      (-= blank-length 1.0))
     (when (is-key-pressed KEY-C)
       (set-box! color-index (modulo (add1 (unbox color-index)) 8)))
 

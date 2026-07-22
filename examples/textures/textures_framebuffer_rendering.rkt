@@ -182,11 +182,11 @@
 ;; RenderTexture list: (rt-id tex-id w h mip fmt dep-id ...) 共 11 元素
 ;; Texture2D list:     (id w h mip fmt)
 (define (rt->texture rt)
-  (list (list-ref rt 1)  ;; id
-        (list-ref rt 2)  ;; width
-        (list-ref rt 3)  ;; height
-        (list-ref rt 4)  ;; mipmaps
-        (list-ref rt 5)));; format
+  (list (render-texture-tex-id rt)  ;; id
+        (render-texture-tex-width rt)  ;; width
+        (render-texture-tex-height rt)  ;; height
+        (render-texture-tex-mipmaps rt)  ;; mipmaps
+        (render-texture-tex-format rt)));; format
 
 (set-target-fps 60)
 (disable-cursor)

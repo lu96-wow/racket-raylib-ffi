@@ -34,8 +34,8 @@
 ;; 发射器参数
 ;; ------------------------------------------------------------
 
-(define emission-rate (box -2))
-(define current-type  (box WATER))
+(define-var emission-rate -2)
+(define-var current-type WATER)
 (define emitter (vector2 (/ SCREEN-W 2.0) (/ SCREEN-H 2.0)))
 
 
@@ -57,8 +57,8 @@
 (define p-cb (make-vector MAX-P 0))
 (define p-ca (make-vector MAX-P 255))
 
-(define head (box 0))
-(define tail (box 0))
+(define-var head 0)
+(define-var tail 0)
 
 
 ;; ------------------------------------------------------------

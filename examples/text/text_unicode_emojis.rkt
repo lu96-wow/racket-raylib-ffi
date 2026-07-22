@@ -106,8 +106,8 @@
 (define emoji-message (make-vector EMOJI-COUNT 0))
 (define emoji-color (make-vector EMOJI-COUNT (color 255 255 255)))
 
-(define hovered (box -1))
-(define selected (box -1))
+(define-var hovered -1)
+(define-var selected -1)
 (define hovered-pos (vector2 0.0 0.0))
 (define selected-pos (vector2 0.0 0.0))
 

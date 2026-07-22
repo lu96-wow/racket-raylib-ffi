@@ -16,8 +16,8 @@
 
 (set-exit-key KEY-NULL)      ;; 禁用 ESC 关闭
 
-(define exit-requested (box #f))
-(define exit-window (box #f))
+(define-var exit-requested #f)
+(define-var exit-window #f)
 
 (set-target-fps 60)
 

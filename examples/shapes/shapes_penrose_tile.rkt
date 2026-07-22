@@ -21,7 +21,7 @@
 
 ;; 海龟栈
 (define turtle-stack (make-vector TURTLE-STACK-MAX (turtle-state 0.0 0.0 0.0)))
-(define turtle-top (box -1))
+(define-var turtle-top -1)
 
 (define (push-turtle-state! ts)
   (when (< (unbox turtle-top) (sub1 TURTLE-STACK-MAX))
@@ -55,7 +55,7 @@
 (define (build-production-step! ls)
   (define old (penrose-ls-production ls))
   (define new (make-string (min (* (string-length old) 8) 100000)))
-  (define new-len (box 0))
+  (define-var new-len 0)
   (define (append-str s)
     (for ([ch (in-string s)])
       (when (< (unbox new-len) (string-length new))
@@ -78,7 +78,7 @@
   (define deg2rad (/ pi 180.0))
 
   (define turtle (turtle-state 0.0 0.0 -90.0))
-  (define repeats (box 1))
+  (define-var repeats 1)
   (define prod (penrose-ls-production ls))
   (define prod-len (string-length prod))
 
@@ -138,7 +138,7 @@
 (define draw-length 460.0)
 (define min-generations 0)
 (define max-generations 4)
-(define generations (box 0))
+(define-var generations 0)
 
 ;; 初始化 L-system
 (define ls (create-penrose-ls (* draw-length (/ (unbox generations) max-generations 1.0))))

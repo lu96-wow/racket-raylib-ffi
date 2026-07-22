@@ -95,8 +95,8 @@
         sdf-glyphs))
 
 (define font-position (vector2 40.0 (- (/ screen-height 2.0) 50.0)))
-(define font-size (box 16.0))
-(define current-font (box 0))  ; 0 - fontDefault, 1 - fontSDF
+(define-var font-size 16.0)
+(define-var current-font 0)  ; 0 - fontDefault, 1 - fontSDF
 
 (set-target-fps 60)
 
@@ -107,7 +107,7 @@
 (let loop ()
   (unless (window-should-close?)
     ;; 更新
-    (set-box! font-size (+ (unbox font-size) (* (get-mouse-wheel-move) 8.0)))
+    (+= font-size (* (get-mouse-wheel-move) 8.0))
 
     (when (< (unbox font-size) 6.0)
       (set-box! font-size 6.0))

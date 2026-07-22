@@ -36,8 +36,7 @@
 
 ;; 从 RenderTexture 提取纹理 (RenderTexture 11 元素 → Texture 5 元素)
 (define (rt->tex rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3)
-        (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt) (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 
 (let loop ([color-sel 0] [color-prev 0] [bsize 20.0]

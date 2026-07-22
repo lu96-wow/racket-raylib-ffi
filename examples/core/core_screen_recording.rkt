@@ -45,12 +45,12 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - screen recording")
 
-(define recording? (box #f))
-(define frame-skip-counter (box 0))
-(define frame-number (box 0))
+(define-var recording? #f)
+(define-var frame-skip-counter 0)
+(define-var frame-number 0)
 
 (define circle-pos (vector2 0.0 (/ SCREEN-HEIGHT 2.0)))
-(define time-counter (box 0.0))
+(define-var time-counter 0.0)
 
 ;; 预计算正弦波点
 (define sine-points
@@ -75,7 +75,7 @@
     ;; === 更新 ===
 
     ;; 正弦波动画
-    (set-box! time-counter (+ (unbox time-counter) delta))
+    (+= time-counter delta)
     (set-vector2-x! circle-pos (+ (vector2-x circle-pos) (/ screen-w 180.0)))
     (set-vector2-y! circle-pos
       (+ (/ screen-h 2.0)
@@ -100,10 +100,10 @@
 
     ;; 录制帧 (每隔 FRAME-SKIP 帧抓取一次)
     (when (unbox recording?)
-      (set-box! frame-skip-counter (+ (unbox frame-skip-counter) 1))
+      (+= frame-skip-counter 1)
       (when (> (unbox frame-skip-counter) FRAME-SKIP)
         (set-box! frame-skip-counter 0)
-        (set-box! frame-number (+ (unbox frame-number) 1))
+        (+= frame-number 1)
         (define img (load-image-from-screen))
         (define filename
           (format "screenrec_~a.png" (unbox frame-number)))

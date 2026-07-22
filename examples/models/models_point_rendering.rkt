@@ -52,7 +52,7 @@
 (init-window 800 450 "raylib [models] example - point rendering")
 (define cam (camera3d 3.0 3.0 3.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 CAMERA-PERSPECTIVE))
 (define origin (vector3 0.0 0.0 0.0))
-(define use-model? (box #t)) (define changed? (box #f)) (define npts (box 1000))
+(define-var use-model? #t) (define-var changed? #f) (define-var npts 1000)
 (define-values (mesh-list v c) (gen-mesh-points (unbox npts)))
 (define model (load-model-from-mesh mesh-list))
 (define tp (malloc _Vector3 'atomic)) (define tc (malloc _Color 'atomic))

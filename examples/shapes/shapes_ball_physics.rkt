@@ -36,10 +36,10 @@
         (vector2 0.0 0.0)
         40.0 0.99 0.9 BLUE #f))
 
-(define ball-count (box 1))
-(define grabbed-ball (box #f))
+(define-var ball-count 1)
+(define-var grabbed-ball #f)
 (define press-offset (vector2 0.0 0.0))
-(define gravity (box 100.0))
+(define-var gravity 100.0)
 (define window-pos (get-window-position))
 
 (define (vx v) (ptr-ref v _float 0))
@@ -123,7 +123,7 @@
                        (exact->inexact (get-random-value -2000 2000))))))))
 
     ;; 滚轮调整重力
-    (set-box! gravity (+ (unbox gravity) (* (get-mouse-wheel-move) 5.0)))
+    (+= gravity (* (get-mouse-wheel-move) 5.0))
 
     ;; 更新每个球
     (for ([i (in-range (unbox ball-count))])

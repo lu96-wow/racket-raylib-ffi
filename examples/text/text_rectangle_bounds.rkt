@@ -88,8 +88,8 @@
 
 (define text "Text cannot escape this container... word wrap also works when active so here's a long text for testing.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
 
-(define resizing? (box #f))
-(define word-wrap? (box #t))
+(define-var resizing? #f)
+(define-var word-wrap? #t)
 
 (define container (rectangle 25.0 25.0 (- screen-width 50.0) (- screen-height 250.0)))
 (define resizer (rectangle (+ (rectangle-x container) (rectangle-w container) -17.0)

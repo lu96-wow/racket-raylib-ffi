@@ -18,7 +18,7 @@
 
 ;; helper: extract texture from render texture
 (define (rt->texture rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3) (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt) (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 ;; helper: create a RenderTexture with writable depth texture
 (define (load-render-texture-depth-tex width height)
@@ -44,7 +44,7 @@
 
 (define (unload-render-texture-depth-tex rt)
   (when (> (list-ref rt 0) 0)
-    (rl-unload-texture (list-ref rt 1))
+    (rl-unload-texture (render-texture-tex-id rt))
     (rl-unload-texture (list-ref rt 6))
     (rl-unload-framebuffer (list-ref rt 0))))
 

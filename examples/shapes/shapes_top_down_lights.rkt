@@ -209,9 +209,9 @@
       (rectangle 0 0 (exact->inexact W)(exact->inexact H))(v2 0 0) 0.0 WHITE)
 
     ;; 叠加全局光罩
-    (define gm-tex (list (list-ref global-mask 1)(list-ref global-mask 2)
-                         (list-ref global-mask 3)(list-ref global-mask 4)
-                         (list-ref global-mask 5)))
+    (define gm-tex (list (render-texture-tex-id global-mask)(render-texture-tex-width global-mask)
+                         (render-texture-tex-height global-mask)(render-texture-tex-mipmaps global-mask)
+                         (render-texture-tex-format global-mask)))
     (draw-texture-rec gm-tex (rectangle 0 0 (exact->inexact W)(exact->inexact (- H)))
                       (v2 0 0) (color-alpha WHITE 1.0))
 

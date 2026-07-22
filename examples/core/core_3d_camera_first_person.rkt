@@ -40,7 +40,7 @@
             60.0             ;; fovy
             CAMERA-PERSPECTIVE))
 
-(define camera-mode (box CAMERA-FIRST-PERSON))
+(define-var camera-mode CAMERA-FIRST-PERSON)
 
 (define heights (make-vector MAX-COLUMNS 0.0))
 (define positions (make-vector MAX-COLUMNS #f))

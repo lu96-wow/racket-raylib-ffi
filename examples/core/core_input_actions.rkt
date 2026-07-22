@@ -86,11 +86,11 @@
   "raylib [core] example - input actions")
 
 (set-actions-default!)
-(define action-set (box 0))
+(define-var action-set 0)
 
 (define position (vector2 400.0 200.0))
 (define size     (vector2 40.0 40.0))
-(define release-action (box #f))
+(define-var release-action #f)
 
 (set-target-fps 60)
 

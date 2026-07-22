@@ -29,7 +29,7 @@
 ;; 参数
 ;; ------------------------------------------------------------
 
-(define symmetry  (box 6))
+(define-var symmetry 6)
 (define thickness 3.0)
 
 ;; Camera2D: 原点居中
@@ -51,8 +51,8 @@
 (define end-x   (make-vector MAX-LINES 0.0))
 (define end-y   (make-vector MAX-LINES 0.0))
 
-(define total-counter   (box 0))
-(define current-counter (box 0))
+(define-var total-counter 0)
+(define-var current-counter 0)
 
 
 ;; ------------------------------------------------------------

@@ -10,12 +10,12 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - window flags")
 
-(define ball-pos-x (box (/ SCREEN-WIDTH 2.0)))
-(define ball-pos-y (box (/ SCREEN-HEIGHT 2.0)))
-(define ball-speed-x (box 5.0))
-(define ball-speed-y (box 4.0))
+(define-var ball-pos-x (/ SCREEN-WIDTH 2.0))
+(define-var ball-pos-y (/ SCREEN-HEIGHT 2.0))
+(define-var ball-speed-x 5.0)
+(define-var ball-speed-y 4.0)
 (define ball-radius 20.0)
-(define frames-counter (box 0))
+(define-var frames-counter 0)
 
 (set-target-fps 60)
 
@@ -62,8 +62,8 @@
     (when (is-key-pressed KEY-V) (toggle-flag FLAG-VSYNC-HINT))
     (when (is-key-pressed KEY-B) (toggle-borderless-windowed))
 
-    (set-box! ball-pos-x (+ (unbox ball-pos-x) (unbox ball-speed-x)))
-    (set-box! ball-pos-y (+ (unbox ball-pos-y) (unbox ball-speed-y)))
+    (+= ball-pos-x (unbox ball-speed-x))
+    (+= ball-pos-y (unbox ball-speed-y))
     (let ([sw (get-screen-width)] [sh (get-screen-height)])
       (when (or (>= (unbox ball-pos-x) (- sw ball-radius))
                 (<= (unbox ball-pos-x) ball-radius))

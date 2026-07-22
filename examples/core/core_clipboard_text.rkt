@@ -57,8 +57,8 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - clipboard text")
 
-(define input-buffer (box "Hello from raylib!"))
-(define clipboard-text (box ""))
+(define-var input-buffer "Hello from raylib!")
+(define-var clipboard-text "")
 
 (set-target-fps 60)
 

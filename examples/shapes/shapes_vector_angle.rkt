@@ -14,7 +14,7 @@
 (define v1 (vec2-add v0 (vector2 100.0 80.0)))
 (define v2 (vector2 0.0 0.0))
 
-(define angle-mode (box 0))
+(define-var angle-mode 0)
 
 (define (vec2-angle a b)
   (let* ([ax (ptr-ref a _float 0)] [ay (ptr-ref a _float 1)]

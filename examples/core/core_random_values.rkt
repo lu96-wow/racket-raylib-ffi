@@ -21,8 +21,8 @@
 ;; 如果需要自定义随机种子:
 ;; (set-random-seed #xaabbccff)
 
-(define rand-value (box (get-random-value -8 5)))
-(define frames-counter (box 0))
+(define-var rand-value (get-random-value -8 5))
+(define-var frames-counter 0)
 
 (set-target-fps 60)
 

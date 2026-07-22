@@ -49,8 +49,8 @@
 (define font (get-font-default))
 
 ;; Initialize the alignment variables
-(define h-align (box TEXT-ALIGN-CENTRE))
-(define v-align (box TEXT-ALIGN-MIDDLE))
+(define-var h-align TEXT-ALIGN-CENTRE)
+(define-var v-align TEXT-ALIGN-MIDDLE)
 
 (set-target-fps 60)
 
@@ -80,19 +80,19 @@
     ;; 更新
     (when (is-key-pressed KEY-LEFT)
       (when (> (unbox h-align) 0)
-        (set-box! h-align (- (unbox h-align) 1))))
+        (-= h-align 1)))
 
     (when (is-key-pressed KEY-RIGHT)
-      (set-box! h-align (+ (unbox h-align) 1))
+      (+= h-align 1)
       (when (> (unbox h-align) 2)
         (set-box! h-align 2)))
 
     (when (is-key-pressed KEY-UP)
       (when (> (unbox v-align) 0)
-        (set-box! v-align (- (unbox v-align) 1))))
+        (-= v-align 1)))
 
     (when (is-key-pressed KEY-DOWN)
-      (set-box! v-align (+ (unbox v-align) 1))
+      (+= v-align 1)
       (when (> (unbox v-align) 2)
         (set-box! v-align 2)))
 

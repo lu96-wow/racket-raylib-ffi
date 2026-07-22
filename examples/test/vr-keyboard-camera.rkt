@@ -89,7 +89,7 @@
 
 ;; 相机
 (define cam (make-cam-ptr))
-(define speed-mult (box 1.0))
+(define-var speed-mult 1.0)
 
 (disable-cursor)
 (set-target-fps 60)

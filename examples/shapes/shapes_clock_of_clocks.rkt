@@ -140,10 +140,10 @@
 (define dst-x (make-vector TOTAL 0.0))
 (define dst-y (make-vector TOTAL 0.0))
 
-(define prev-seconds      (box -1))
-(define hands-move-timer  (box 0.0))
+(define-var prev-seconds -1)
+(define-var hands-move-timer 0.0)
 (define hands-move-duration 0.5)
-(define hour-mode         (box 24))
+(define-var hour-mode 24)
 
 
 ;; ------------------------------------------------------------

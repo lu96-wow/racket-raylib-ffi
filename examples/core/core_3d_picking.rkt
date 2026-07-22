@@ -15,9 +15,9 @@
   (camera3d 10.0 10.0 10.0 0.0 0.0 0.0 0.0 1.0 0.0 45.0 CAMERA-PERSPECTIVE))
 (define cube-pos (vector3 0.0 1.0 0.0))
 (define cube-size (vector3 2.0 2.0 2.0))
-(define ray (box #f))
-(define collision (box #f))
-(define cam-mode (box CAMERA-FIRST-PERSON))
+(define-var ray #f)
+(define-var collision #f)
+(define-var cam-mode CAMERA-FIRST-PERSON)
 (set-target-fps 60)
 
 (define (make-bb cx cy cz sx sy sz)

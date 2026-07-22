@@ -17,7 +17,7 @@
   "raylib [shapes] example - lines drawing")
 
 ;; 提示文字是否显示
-(define start-text? (box #t))
+(define-var start-text? #t)
 
 ;; 上一帧鼠标位置 (Vector2)
 (define mouse-pos-prev (get-mouse-position))
@@ -26,10 +26,10 @@
 (define canvas (load-render-texture screen-width screen-height))
 
 ;; 画线粗细
-(define line-thickness (box 8.0))
+(define-var line-thickness 8.0)
 
 ;; 颜色色相 (HSV, 0-360)
-(define line-hue (box 0.0))
+(define-var line-hue 0.0)
 
 ;; 清画布
 (begin-texture-mode canvas)
@@ -38,8 +38,7 @@
 
 ;; 从 RenderTexture list 提取内嵌 Texture (5 元素 list: id w h mipmaps format)
 (define (rt->texture rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3)
-        (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt) (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 (set-target-fps 60)
 
@@ -69,13 +68,11 @@
         (if left-down?
             (begin
               ;; 根据鼠标移动距离更新色相
-              (set-box! line-hue
-                (+ (unbox line-hue)
-                   (/ (vec2-length (vec2-subtract (get-mouse-position) mouse-pos-prev)) 3.0)))
+              (+= line-hue (/ (vec2-length (vec2-subtract (get-mouse-position) mouse-pos-prev) 3.0)))
               ;; 将色相保持在 [0, 360)
               (let loop-hue ()
                 (when (>= (unbox line-hue) 360.0)
-                  (set-box! line-hue (- (unbox line-hue) 360.0))
+                  (-= line-hue 360.0)
                   (loop-hue)))
               (color-from-hsv (unbox line-hue) 1.0 1.0))
             RAYWHITE))  ;; 右键作为擦除
@@ -88,7 +85,7 @@
       (end-texture-mode))
 
     ;; 滚轮调整粗细
-    (set-box! line-thickness (+ (unbox line-thickness) (get-mouse-wheel-move)))
+    (+= line-thickness (get-mouse-wheel-move))
     (set-box! line-thickness (clamp (unbox line-thickness) 1.0 500.0))
 
     ;; 更新上一帧鼠标位置
@@ -102,8 +99,8 @@
     ;; 把画布贴到屏幕上 (纵轴翻转以补偿 OpenGL 坐标系)
     (draw-texture-rec (rt->texture canvas)
                       (rectangle 0.0 0.0
-                        (exact->inexact (list-ref canvas 2))
-                        (exact->inexact (- (list-ref canvas 3))))
+                        (exact->inexact (render-texture-tex-width canvas))
+                        (exact->inexact (- (render-texture-tex-height canvas))))
                       (vector2 0.0 0.0) WHITE)
 
     ;; 预览圆 (没按左键时显示)

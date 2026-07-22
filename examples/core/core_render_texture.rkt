@@ -29,8 +29,7 @@
 ;; ============================================================
 
 (define (rt->texture rt)
-  (list (list-ref rt 1) (list-ref rt 2) (list-ref rt 3)
-        (list-ref rt 4) (list-ref rt 5)))
+  (list (render-texture-tex-id rt) (render-texture-tex-width rt) (render-texture-tex-height rt) (render-texture-tex-mipmaps rt) (render-texture-tex-format rt)))
 
 ;; ============================================================
 ;; 初始化
@@ -98,21 +97,21 @@
     ;; 源矩形: (0, 0, tex-w, -tex-h) — height 为负 = OpenGL 上下翻转
     (define source-rec
       (rectangle 0.0 0.0
-        (exact->inexact (list-ref target 2))           ;; tex-width
-        (exact->inexact (* -1 (list-ref target 3)))))  ;; -tex-height
+        (exact->inexact (render-texture-tex-width target))           ;; tex-width
+        (exact->inexact (* -1 (render-texture-tex-height target)))))  ;; -tex-height
 
     ;; 目标矩形: 屏幕居中, 保持纹理原始大小
     (define dest-rec
       (rectangle
         (exact->inexact (/ SCREEN-WIDTH 2.0))
         (exact->inexact (/ SCREEN-HEIGHT 2.0))
-        (exact->inexact (list-ref target 2))           ;; tex-width
-        (exact->inexact (list-ref target 3))))         ;; tex-height
+        (exact->inexact (render-texture-tex-width target))           ;; tex-width
+        (exact->inexact (render-texture-tex-height target))))         ;; tex-height
 
     ;; 原点: 纹理中心 (用于旋转锚点)
     (define origin
-      (vector2 (/ (list-ref target 2) 2.0)
-               (/ (list-ref target 3) 2.0)))
+      (vector2 (/ (render-texture-tex-width target) 2.0)
+               (/ (render-texture-tex-height target) 2.0)))
 
     ;; 带旋转绘制纹理
     (draw-texture-pro tex source-rec dest-rec origin rotation WHITE)

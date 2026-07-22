@@ -97,7 +97,7 @@
 (define init-tar-y 0.0)
 (define init-tar-z 0.0)
 
-(define speed-mult (box 1.0))
+(define-var speed-mult 1.0)
 
 (disable-cursor)
 (set-target-fps 60)

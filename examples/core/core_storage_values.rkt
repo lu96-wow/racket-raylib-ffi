@@ -69,9 +69,9 @@
 (init-window screen-width screen-height
              "raylib [core] example - storage values")
 
-(define score (box 0))
-(define hiscore (box 0))
-(define frames-counter (box 0))
+(define-var score 0)
+(define-var hiscore 0)
+(define-var frames-counter 0)
 
 ;; 位置常量（对应 C 的 StorageData 枚举）
 (define STORAGE-POSITION-SCORE   0)

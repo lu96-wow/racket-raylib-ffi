@@ -23,11 +23,11 @@
   "raylib [text] example - input box")
 
 (define name (make-string (+ max-input-chars 1) #\nul))
-(define letter-count (box 0))
+(define-var letter-count 0)
 
 (define text-box (rectangle (- (/ screen-width 2.0) 100) 180.0 225.0 50.0))
-(define mouse-on-text? (box #f))
-(define frames-counter (box 0))
+(define-var mouse-on-text? #f)
+(define-var frames-counter 0)
 
 (set-target-fps 60)
 
@@ -57,11 +57,11 @@
           (when (and (>= key 32) (<= key 125) (< (unbox letter-count) max-input-chars))
             (string-set! name (unbox letter-count) (integer->char key))
             (string-set! name (+ (unbox letter-count) 1) (integer->char 0))
-            (set-box! letter-count (+ (unbox letter-count) 1)))
+            (+= letter-count 1))
           (key-loop (get-char-pressed))))
 
       (when (is-key-pressed KEY-BACKSPACE)
-        (set-box! letter-count (- (unbox letter-count) 1))
+        (-= letter-count 1)
         (when (< (unbox letter-count) 0)
           (set-box! letter-count 0))
         (string-set! name (unbox letter-count) (integer->char 0))))
@@ -70,7 +70,7 @@
       (set-mouse-cursor MOUSE-CURSOR-DEFAULT))
 
     (if (unbox mouse-on-text?)
-        (set-box! frames-counter (+ (unbox frames-counter) 1))
+        (+= frames-counter 1)
         (set-box! frames-counter 0))
 
     ;; 绘制

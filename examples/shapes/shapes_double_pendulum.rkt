@@ -15,8 +15,8 @@
 (define screen-w 800) (define screen-h 450)
 
 ;; 物理参数
-(define l1 15.0) (define m1 0.2) (define theta1 (box (* DEG2RAD 170))) (define w1 (box 0.0))
-(define l2 15.0) (define m2 0.1) (define theta2 (box 0.0)) (define w2 (box 0.0))
+(define l1 15.0) (define m1 0.2) (define-var theta1 (* DEG2RAD 170)) (define-var w1 0.0)
+(define l2 15.0) (define m2 0.1) (define-var theta2 0.0) (define-var w2 0.0)
 (define length-scaler 0.1)
 (define total-m (+ m1 m2))
 
@@ -27,16 +27,16 @@
 ;; RenderTexture + texture filter
 (define target (load-render-texture screen-w screen-h))
 (set-texture-filter (list (cadr target) (caddr target) (cadddr target)  ;; texture.id/w/h
-                          (list-ref target 4) (list-ref target 5))       ;; mipmaps/format
+                          (render-texture-tex-mipmaps target) (render-texture-tex-format target))       ;; mipmaps/format
                     TEXTURE-FILTER-BILINEAR)
 
 ;; rt->texture: 从 RenderTexture 的 11 元素 list 提取内嵌 Texture
 (define (rt->texture rt)
-  (list (list-ref rt 1)   ;; tex-id
-        (list-ref rt 2)   ;; tex-width
-        (list-ref rt 3)   ;; tex-height
-        (list-ref rt 4)   ;; tex-mipmaps
-        (list-ref rt 5))) ;; tex-format
+  (list (render-texture-tex-id rt)   ;; tex-id
+        (render-texture-tex-width rt)   ;; tex-width
+        (render-texture-tex-height rt)   ;; tex-height
+        (render-texture-tex-mipmaps rt)   ;; tex-mipmaps
+        (render-texture-tex-format rt))) ;; tex-format
 
 (define (pend-endpoint l theta)
   (vector2 (* 10 l (sin theta)) (* 10 l (cos theta))))
