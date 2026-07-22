@@ -97,8 +97,6 @@
 (define init-tar-y 0.0)
 (define init-tar-z 0.0)
 
-(define-var speed-mult 1.0)
-
 (disable-cursor)
 (set-target-fps 60)
 
@@ -106,10 +104,10 @@
 ;; 主循环
 ;; ============================================================
 
-(let main-loop ()
+(let main-loop ([speed-mult 1.0])
   (unless (window-should-close?)
     (define dt (get-frame-time))
-    (define base-speed (* MOVE-SPEED (unbox speed-mult) dt))
+    (define base-speed (* MOVE-SPEED speed-mult dt))
     (define look-angle (* LOOK-SPEED dt))
 
     ;; --- 相机更新 ---
@@ -160,10 +158,9 @@
       (camera-pitch cam (- look-angle) #t #f #f))
 
     ;; Shift/Ctrl: 速度倍率
-    (set-box! speed-mult
-              (cond [(is-key-down KEY-LEFT-SHIFT) 3.0]
-                    [(is-key-down KEY-LEFT-CONTROL) 0.3]
-                    [else 1.0]))
+    (define next-speed (cond [(is-key-down KEY-LEFT-SHIFT) 3.0]
+                             [(is-key-down KEY-LEFT-CONTROL) 0.3]
+                             [else 1.0]))
 
     ;; R: 重置相机
     (when (is-key-pressed KEY-R)
@@ -211,12 +208,12 @@
     (draw-text (format "Pos: ~a ~a ~a"
                        (vector3-x cur-pos) (vector3-y cur-pos) (vector3-z cur-pos))
                10 110 15 BLACK)
-    (draw-text (string-append "Speed: " (number->string (unbox speed-mult)))
+    (draw-text (string-append "Speed: " (number->string next-speed))
                10 130 15 BLACK)
 
     (end-drawing)
 
-    (main-loop)))
+    (main-loop next-speed)))
 
 ;; ============================================================
 ;; 清理

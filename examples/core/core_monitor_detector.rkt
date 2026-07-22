@@ -8,7 +8,6 @@
 (init-window SCREEN-WIDTH SCREEN-HEIGHT
   "raylib [core] example - monitor detector")
 
-(define-var current-monitor 0)
 (set-target-fps 60)
 
 (define (build-monitors count)
@@ -18,7 +17,7 @@
           (get-monitor-physical-width i) (get-monitor-physical-height i)
           (get-monitor-refresh-rate i))))
 
-(let loop ()
+(let loop ([current-monitor 0])
   (unless (window-should-close?)
     (let* ([count (get-monitor-count)]
            [monitors (build-monitors count)]
@@ -34,11 +33,11 @@
                        (for/list ([m monitors])
                          (inexact->exact (floor (vector2-x (list-ref m 0)))))))])
 
-      (when (and (is-key-pressed KEY-ENTER) (> count 1))
-        (set-box! current-monitor (modulo (add1 (unbox current-monitor)) count))
-        (set-window-monitor (unbox current-monitor)))
-      (unless (is-key-pressed KEY-ENTER)
-        (set-box! current-monitor (get-current-monitor)))
+      (define next-monitor
+        (if (and (is-key-pressed KEY-ENTER) (> count 1))
+            (modulo (add1 current-monitor) count)
+            (get-current-monitor)))
+      (set-window-monitor next-monitor)
 
       (let* ([base-scale 0.6]
              [scale (if (> maxH (+ maxW offX))
@@ -57,7 +56,7 @@
                  [pos (list-ref m 0)]
                  [px (+ (* (+ (inexact->exact (floor (vector2-x pos))) offX) scale) 140)]
                  [py (+ (* (inexact->exact (floor (vector2-y pos))) scale) 80)]
-                 [is-cur? (= i (unbox current-monitor))]
+                 [is-cur? (= i next-monitor)]
                  [rec (rectangle px py (* (list-ref m 2) scale) (* (list-ref m 3) scale))])
             (draw-rectangle-lines-ex rec 5.0 (if is-cur? RED GRAY))
             (draw-text (format "[~a] ~a" i (list-ref m 1))
@@ -81,6 +80,6 @@
                   (fade GREEN 0.5))))))
 
         (end-drawing)
-        (loop)))))
+        (loop next-monitor)))))
 
 (close-window)

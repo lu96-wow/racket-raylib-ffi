@@ -159,13 +159,12 @@
 (define global-mask (load-render-texture W H))
 (setup-light 0 600.0 400.0 300.0)
 (define next-light 1)
-(define-var show-lines? #f)
 (set-target-fps 60)
 
 ;; ============================================================
 ;; 主循环
 ;; ============================================================
-(let main ()
+(let main ([show-lines? #f])
   (unless (window-should-close?)
 
     (when (is-mouse-button-down MOUSE-BUTTON-LEFT)
@@ -173,7 +172,7 @@
     (when (and (is-mouse-button-pressed MOUSE-BUTTON-RIGHT)(< next-light MAX-LIGHTS))
       (setup-light next-light (vx (get-mouse-position))(vy (get-mouse-position)) 200.0)
       (set! next-light (+ next-light 1)))
-    (when (is-key-pressed KEY-F1)(set-box! show-lines?(not (unbox show-lines?))))
+    (define lines? (if (is-key-pressed KEY-F1) (not show-lines?) show-lines?))
 
     ;; 检查脏光源, 更新 mask
     (define dirty? #f)
@@ -224,7 +223,7 @@
                        10.0 (if (= i 0) YELLOW WHITE)))))
 
     ;; F1 调试
-    (if (unbox show-lines?)
+    (if lines?
       (begin
         (for ([s (in-range (light-sc (vector-ref lights 0)))])
           (let* ([sg (vector-ref (light-sgs (vector-ref lights 0)) s)]
@@ -241,7 +240,7 @@
     (draw-fps (- W 80) 10)
     (draw-text "Drag=move, Right-click=add" 10 10 10 DARKGREEN)
     (end-drawing)
-    (main)))
+    (main lines?)))
 
 ;; ============================================================
 ;; 清理

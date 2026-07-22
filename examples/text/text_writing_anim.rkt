@@ -18,36 +18,22 @@
 
 (define message "This sample illustrates a text writing\nanimation effect! Check it out! ;)")
 
-(define-var frames-counter 0)
-
 (set-target-fps 60)
 
-;; ============================================================
-;; 主循环
-;; ============================================================
-
-(let loop ()
+(let loop ([frames-counter 0])
   (unless (window-should-close?)
-    ;; 更新
-    (if (is-key-down KEY-SPACE)
-        (+= frames-counter 8)
-        (+= frames-counter 1))
+    (define next-counter
+      (cond [(is-key-pressed KEY-ENTER) 0]
+            [(is-key-down KEY-SPACE) (+ frames-counter 8)]
+            [else (+ frames-counter 1)]))
 
-    (when (is-key-pressed KEY-ENTER)
-      (set-box! frames-counter 0))
-
-    ;; 绘制
     (begin-drawing)
-
     (clear-background RAYWHITE)
-
-    (draw-text (text-subtext message 0 (quotient (unbox frames-counter) 10)) 210 160 20 MAROON)
+    (draw-text (text-subtext message 0 (quotient next-counter 10)) 210 160 20 MAROON)
     (draw-text "PRESS [ENTER] to RESTART!" 240 260 20 LIGHTGRAY)
     (draw-text "HOLD [SPACE] to SPEED UP!" 239 300 20 LIGHTGRAY)
-
     (end-drawing)
-
-    (loop)))
+    (loop next-counter)))
 
 ;; ============================================================
 ;; 清理

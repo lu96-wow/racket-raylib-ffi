@@ -27,27 +27,17 @@
 
 (set-text-line-spacing 16)
 
-(define-var use-ttf? #f)
-
 (set-target-fps 60)
 
-;; ============================================================
-;; 主循环
-;; ============================================================
-
-(let loop ()
+(let loop ([use-ttf? #f])
   (unless (window-should-close?)
-    ;; 更新
-    (set-box! use-ttf? (is-key-down KEY-SPACE))
+    (define next-ttf? (is-key-down KEY-SPACE))
 
-    ;; 绘制
     (begin-drawing)
-
     (clear-background RAYWHITE)
-
     (draw-text "Hold SPACE to use TTF generated font" 20 20 20 LIGHTGRAY)
 
-    (if (not (unbox use-ttf?))
+    (if (not next-ttf?)
         (begin
           (draw-text-ex font-bm msg (vector2 20.0 100.0) (exact->inexact (car font-bm)) 2.0 MAROON)
           (draw-text "Using BMFont (Angelcode) imported" 20 (- (get-screen-height) 30) 20 GRAY))
@@ -56,8 +46,7 @@
           (draw-text "Using TTF font generated" 20 (- (get-screen-height) 30) 20 GRAY)))
 
     (end-drawing)
-
-    (loop)))
+    (loop next-ttf?)))
 
 ;; ============================================================
 ;; 清理

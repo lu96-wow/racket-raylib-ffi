@@ -80,8 +80,8 @@
 (define render-target (load-render-texture (list-ref vr-device 0) (list-ref vr-device 1)))
 (define source-rect
   (rectangle 0.0 0.0
-             (exact->inexact (list-ref render-target 2))
-             (- (exact->inexact (list-ref render-target 3)))))
+             (exact->inexact (render-texture-tex-width render-target))
+             (- (exact->inexact (render-texture-tex-height render-target)))))
 (define dest-rect
   (rectangle 0.0 0.0
              (exact->inexact (get-screen-width))
@@ -89,8 +89,6 @@
 
 ;; 相机
 (define cam (make-cam-ptr))
-(define-var speed-mult 1.0)
-
 (disable-cursor)
 (set-target-fps 60)
 
@@ -98,10 +96,10 @@
 ;; 主循环
 ;; ============================================================
 
-(let main-loop ()
+(let main-loop ([speed-mult 1.0])
   (unless (window-should-close?)
     (define dt (get-frame-time))
-    (define base-speed (* MOVE-SPEED (unbox speed-mult) dt))
+    (define base-speed (* MOVE-SPEED speed-mult dt))
     (define look-angle (* LOOK-SPEED dt))
 
     ;; --- 键盘相机 ---
@@ -120,7 +118,9 @@
     (when (is-key-down KEY-LEFT)  (camera-yaw cam look-angle #t))
     (when (is-key-down KEY-UP)    (camera-pitch cam look-angle #t #f #f))
     (when (is-key-down KEY-DOWN)  (camera-pitch cam (- look-angle) #t #f #f))
-    (set-box! speed-mult (cond [(is-key-down KEY-LEFT-SHIFT) 3.0] [(is-key-down KEY-LEFT-CONTROL) 0.3] [else 1.0]))
+    (define next-speed (cond [(is-key-down KEY-LEFT-SHIFT) 3.0]
+                             [(is-key-down KEY-LEFT-CONTROL) 0.3]
+                             [else 1.0]))
     (when (is-key-pressed KEY-R)
       (cam-move! cam (- 5.0 (camera3d-pos-x cam)) (- 2.0 (camera3d-pos-y cam)) (- 5.0 (camera3d-pos-z cam)))
       (set-camera3d-tar-x! cam 0.0) (set-camera3d-tar-y! cam 2.0) (set-camera3d-tar-z! cam 0.0))
@@ -141,9 +141,9 @@
     (begin-drawing)
     (clear-background (color 245 245 245))
     (begin-shader-mode distortion-shader)
-    (draw-texture-pro (list (list-ref render-target 1) (list-ref render-target 2)
-                            (list-ref render-target 3) (list-ref render-target 4)
-                            (list-ref render-target 5))
+    (draw-texture-pro (list (render-texture-tex-id render-target) (render-texture-tex-width render-target)
+                            (render-texture-tex-height render-target) (render-texture-tex-mipmaps render-target)
+                            (render-texture-tex-format render-target))
                       source-rect dest-rect (vector2 0.0 0.0) 0.0 WHITE)
     (end-shader-mode)
 
@@ -152,7 +152,7 @@
     (draw-text (format "Pos: ~a ~a ~a" (camera3d-pos-x cam) (camera3d-pos-y cam) (camera3d-pos-z cam)) 10 80 15 BLACK)
 
     (end-drawing)
-    (main-loop)))
+    (main-loop next-speed)))
 
 ;; ============================================================
 ;; 清理

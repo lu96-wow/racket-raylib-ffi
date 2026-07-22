@@ -119,20 +119,13 @@
   "raylib [text] example - inline styling")
 
 (define col-random (color 230 41 55 255))  ; RED
-(define-var frame-counter 0)
-
 (set-target-fps 60)
 
-;; ============================================================
-;; 主循环
-;; ============================================================
-
-(let loop ()
+(let loop ([frame-counter 0])
   (unless (window-should-close?)
-    ;; 更新
-    (+= frame-counter 1)
+    (define next-counter (+ frame-counter 1))
 
-    (when (= (modulo (unbox frame-counter) 20) 0)
+    (when (= (modulo next-counter 20) 0)
       (ptr-set! col-random _ubyte 0 (get-random-value 0 255))
       (ptr-set! col-random _ubyte 1 (get-random-value 0 255))
       (ptr-set! col-random _ubyte 2 (get-random-value 0 255)))
@@ -172,8 +165,7 @@
                             GREEN))
 
     (end-drawing)
-
-    (loop)))
+    (loop next-counter)))
 
 ;; ============================================================
 ;; 清理
