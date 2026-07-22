@@ -29,8 +29,8 @@
     (ptr-set! f _int 5 (list-ref lst 5))
     (ptr-set! f _int 6 (list-ref lst 6))
     (ptr-set! f _int 7 (list-ref lst 7))
-    (ptr-set! f _pointer 8 (list-ref lst 8))
-    (ptr-set! f _pointer 9 (list-ref lst 9))
+    (ptr-set! f _pointer 4 (list-ref lst 8))
+    (ptr-set! f _pointer 5 (list-ref lst 9))
     f))
 
 (provide _Font _font-bytes

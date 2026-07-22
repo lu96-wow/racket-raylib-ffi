@@ -24,11 +24,11 @@
     (ptr-set! g _int 1 (list-ref lst 1))
     (ptr-set! g _int 2 (list-ref lst 2))
     (ptr-set! g _int 3 (list-ref lst 3))
-    (ptr-set! g _pointer 4 (list-ref lst 4))
-    (ptr-set! g _int 5 (list-ref lst 5))
-    (ptr-set! g _int 6 (list-ref lst 6))
-    (ptr-set! g _int 7 (list-ref lst 7))
-    (ptr-set! g _int 8 (list-ref lst 8))
+    (ptr-set! g _pointer 2 (list-ref lst 4))
+    (ptr-set! g _int 6 (list-ref lst 5))
+    (ptr-set! g _int 7 (list-ref lst 6))
+    (ptr-set! g _int 8 (list-ref lst 7))
+    (ptr-set! g _int 9 (list-ref lst 8))
     g))
 
 (provide _GlyphInfo _glyph-info-bytes
