@@ -13,7 +13,7 @@
   (_list-struct _pointer _pointer _uint _uint _uint _uint _uint _uint))
 
 (define (sound-stream-buffer lst) (list-ref lst 0))
-(define (sound-frame-count lst)   (list-ref lst 5))
+(define (sound-frame-count lst)   (list-ref lst 6))
 
 (provide _Sound _sound-bytes
          sound-stream-buffer sound-frame-count)

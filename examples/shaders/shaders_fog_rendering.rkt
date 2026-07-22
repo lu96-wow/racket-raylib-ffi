@@ -41,18 +41,13 @@
   (ptr-set! locs-ptr _int SHADER-LOC-VECTOR-VIEW (get-shader-location shader "viewPos")))
 
 ;; 环境光
-(let ([ambient (malloc _float 4 'atomic)])
-  (ptr-set! ambient _float 0 0.2) (ptr-set! ambient _float 1 0.2)
-  (ptr-set! ambient _float 2 0.2) (ptr-set! ambient _float 3 1.0)
-  (set-shader-value shader (get-shader-location shader "ambient") ambient SHADER-UNIFORM-VEC4))
+(set-shader-value-vec4 shader (get-shader-location shader "ambient")
+                       (vector4 0.2 0.2 0.2 1.0))
 
-;; 雾颜色
-(let ([fog-col (malloc _float 4 'atomic)])
-  (ptr-set! fog-col _float 0 (/ (color-r GRAY) 255.0))
-  (ptr-set! fog-col _float 1 (/ (color-g GRAY) 255.0))
-  (ptr-set! fog-col _float 2 (/ (color-b GRAY) 255.0))
-  (ptr-set! fog-col _float 3 (/ (color-a GRAY) 255.0))
-  (set-shader-value shader (get-shader-location shader "fogColor") fog-col SHADER-UNIFORM-VEC4))
+;; 雾颜色 (GRAY → normalized float)
+(set-shader-value-vec4 shader (get-shader-location shader "fogColor")
+                       (vector4 (/ (color-r GRAY) 255.0) (/ (color-g GRAY) 255.0)
+                                (/ (color-b GRAY) 255.0) (/ (color-a GRAY) 255.0)))
 
 (define fog-density 0.15)
 (define fog-density-loc (get-shader-location shader "fogDensity"))
@@ -94,7 +89,6 @@
 
 (update-light!)
 
-(define cam-pos-buf (malloc _float 3 'atomic))
 (set-target-fps 60)
 
 (let loop ()
@@ -113,12 +107,9 @@
       (set! modelA (model-set-transform modelA
                       (matrix-multiply (take modelA 16) rot))))
 
-    (ptr-set! cam-pos-buf _float 0 (camera3d-pos-x camera))
-    (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
-    (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
-    (set-shader-value shader
+    (set-shader-value-vec3 shader
       (ptr-ref (shader-list-locs shader) _int SHADER-LOC-VECTOR-VIEW)
-      cam-pos-buf SHADER-UNIFORM-VEC3)
+      (camera3d-position camera))
 
     (begin-drawing)
     (clear-background GRAY)

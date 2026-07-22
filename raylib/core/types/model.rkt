@@ -46,10 +46,10 @@
 (define (model-materials lst)      (list-ref lst 19))
 (define (model-mesh-material lst)  (list-ref lst 20))
 (define (model-bone-count lst)     (list-ref lst 21))
-(define (model-bones lst)          (list-ref lst 22))
-(define (model-bind-pose lst)      (list-ref lst 23))
-(define (model-current-pose lst)   (list-ref lst 24))
-(define (model-bone-matrices lst)  (list-ref lst 25))
+(define (model-bones lst)          (list-ref lst 23))
+(define (model-bind-pose lst)      (list-ref lst 24))
+(define (model-current-pose lst)   (list-ref lst 25))
+(define (model-bone-matrices lst)  (list-ref lst 26))
 
 ;; ═══════════════════════════════════════════════════════════
 ;; 导出

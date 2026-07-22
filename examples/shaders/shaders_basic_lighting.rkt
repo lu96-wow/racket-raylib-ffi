@@ -26,10 +26,8 @@
 (let ([locs-ptr (shader-list-locs shader)])
   (ptr-set! locs-ptr _int SHADER-LOC-VECTOR-VIEW (get-shader-location shader "viewPos")))
 
-(let ([ambient (malloc _float 4 'atomic)])
-  (ptr-set! ambient _float 0 0.1) (ptr-set! ambient _float 1 0.1)
-  (ptr-set! ambient _float 2 0.1) (ptr-set! ambient _float 3 1.0)
-  (set-shader-value shader (get-shader-location shader "ambient") ambient SHADER-UNIFORM-VEC4))
+(set-shader-value-vec4 shader (get-shader-location shader "ambient")
+                       (vector4 0.1 0.1 0.1 1.0))
 
 (define lights
   (list
@@ -38,18 +36,15 @@
    (create-light LIGHT-POINT -2.0 1.0  2.0 0.0 0.0 0.0 GREEN  shader)
    (create-light LIGHT-POINT  2.0 1.0 -2.0 0.0 0.0 0.0 BLUE   shader)))
 
-(define cam-pos-buf (malloc _float 3 'atomic))
 (set-target-fps 60)
 
 (let loop ()
   (unless (window-should-close?)
     (update-camera camera CAMERA-ORBITAL)
-    (ptr-set! cam-pos-buf _float 0 (camera3d-pos-x camera))
-    (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
-    (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
-    (set-shader-value shader
+
+    (set-shader-value-vec3 shader
       (ptr-ref (shader-list-locs shader) _int SHADER-LOC-VECTOR-VIEW)
-      cam-pos-buf SHADER-UNIFORM-VEC3)
+      (camera3d-position camera))
 
     ;; toggle lights with Y/R/G/B
     (when (is-key-pressed KEY-Y)

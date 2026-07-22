@@ -57,8 +57,8 @@
       (define sx (/ (get-random-value -400 40) 25.0))
       (define sy (/ (get-random-value -400 40) 25.0))
       (if (< (+ (abs sx) (abs sy)) 2.0) (loop-sx)
-          (vector (exact->inexact (get-random-value 64 (- (f->i SCREEN-WIDTH) 64)))
-                  (exact->inexact (get-random-value 64 (- (f->i SCREEN-HEIGHT) 64)))
+          (vector (get-random-float 64 (- (f->i SCREEN-WIDTH) 64))
+                  (get-random-float 64 (- (f->i SCREEN-HEIGHT) 64))
                   sx sy)))))
 
 ;; ============================================================

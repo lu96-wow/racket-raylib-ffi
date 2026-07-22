@@ -141,10 +141,10 @@
   (vector-set! boxes 4 (rectangle 500 350 40 40))
   (for ([i (in-range 5 MAX-BOXES)])
     (vector-set! boxes i
-      (rectangle (exact->inexact (get-random-value 0 W))
-                 (exact->inexact (get-random-value 0 H))
-                 (exact->inexact (get-random-value 10 100))
-                 (exact->inexact (get-random-value 10 100))))))
+      (rectangle (get-random-float 0 W)
+                 (get-random-float 0 H)
+                 (get-random-float 10 100)
+                 (get-random-float 10 100)))))
 
 ;; ============================================================
 ;; 初始化

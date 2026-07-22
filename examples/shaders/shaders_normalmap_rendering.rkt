@@ -89,7 +89,6 @@
 
 ;; 预分配缓冲区
 (define light-pos-buf (malloc _float 3 'atomic))
-(define cam-pos-buf   (malloc _float 3 'atomic))
 (define float-buf     (malloc _float 1 'atomic))
 (define int-buf       (malloc _int   1 'atomic))
 
@@ -129,12 +128,9 @@
     (ptr-set! light-pos-buf _float 2 light-pos-z)
     (set-shader-value shader light-pos-loc light-pos-buf SHADER-UNIFORM-VEC3)
 
-    (ptr-set! cam-pos-buf _float 0 (camera3d-pos-x camera))
-    (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
-    (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
-    (set-shader-value shader
+    (set-shader-value-vec3 shader
       (ptr-ref (shader-list-locs shader) _int SHADER-LOC-VECTOR-VIEW)
-      cam-pos-buf SHADER-UNIFORM-VEC3)
+      (camera3d-position camera))
 
     (ptr-set! float-buf _float 0 specular-exponent)
     (set-shader-value shader specular-exponent-loc float-buf SHADER-UNIFORM-FLOAT)

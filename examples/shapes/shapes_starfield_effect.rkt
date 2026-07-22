@@ -19,8 +19,8 @@
 (define stars (make-vector STAR-COUNT))
 (for ([i (in-range STAR-COUNT)])
   (define v (malloc _Vector3 'atomic))
-  (ptr-set! v _float 0 (exact->inexact (get-random-value (- (quotient screen-w 2)) (quotient screen-w 2))))
-  (ptr-set! v _float 1 (exact->inexact (get-random-value (- (quotient screen-h 2)) (quotient screen-h 2))))
+  (ptr-set! v _float 0 (get-random-float (- (quotient screen-w 2)) (quotient screen-w 2)))
+  (ptr-set! v _float 1 (get-random-float (- (quotient screen-h 2)) (quotient screen-h 2)))
   (ptr-set! v _float 2 1.0)
   (vector-set! stars i v))
 
@@ -52,8 +52,8 @@
       ;; 检测重生
       (when (or (< new-sz 0.0) (< screen-x 0) (< screen-y 0.0)
                 (> screen-x screen-w) (> screen-y screen-h))
-        (ptr-set! s _float 0 (exact->inexact (get-random-value (- (quotient screen-w 2)) (quotient screen-w 2))))
-        (ptr-set! s _float 1 (exact->inexact (get-random-value (- (quotient screen-h 2)) (quotient screen-h 2))))
+        (ptr-set! s _float 0 (get-random-float (- (quotient screen-w 2)) (quotient screen-w 2)))
+        (ptr-set! s _float 1 (get-random-float (- (quotient screen-h 2)) (quotient screen-h 2)))
         (ptr-set! s _float 2 1.0))
 
       ;; 绘制

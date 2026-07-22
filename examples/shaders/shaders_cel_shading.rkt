@@ -59,7 +59,6 @@
 (define-var cel-enabled #t)
 (define-var outline-enabled #t)
 
-(define cam-pos-buf (malloc _float 3 'atomic))
 (define thickness-buf (malloc _float 1 'atomic))
 
 (set-target-fps 60)
@@ -69,12 +68,9 @@
     (update-camera camera CAMERA-ORBITAL)
 
     ;; update viewPos uniform
-    (ptr-set! cam-pos-buf _float 0 (camera3d-pos-x camera))
-    (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
-    (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
-    (set-shader-value cel-shader
-                      (ptr-ref (shader-list-locs cel-shader) _int SHADER-LOC-VECTOR-VIEW)
-                      cam-pos-buf SHADER-UNIFORM-VEC3)
+    (set-shader-value-vec3 cel-shader
+      (ptr-ref (shader-list-locs cel-shader) _int SHADER-LOC-VECTOR-VIEW)
+      (camera3d-position camera))
 
     ;; [Z] toggle cel shading
     (when (is-key-pressed KEY-Z)

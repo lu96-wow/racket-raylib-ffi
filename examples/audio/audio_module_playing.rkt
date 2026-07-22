@@ -31,14 +31,14 @@
 ;; CircleWave struct as vectors: position-x position-y radius alpha speed color
 (define circles
   (for/vector ([i (in-range MAX-CIRCLES)])
-    (let* ([radius (exact->inexact (get-random-value 10 40))]
+    (let* ([radius (get-random-float 10 40)]
            [r (exact-round radius)])
       (vector
-       (exact->inexact (get-random-value r (- screen-width r)))
-       (exact->inexact (get-random-value r (- screen-height r)))
+       (get-random-float r (- screen-width r))
+       (get-random-float r (- screen-height r))
        radius
        0.0  ; alpha
-       (/ (exact->inexact (get-random-value 1 100)) 2000.0)  ; speed
+       (/ (get-random-float 1 100) 2000.0)  ; speed
        (vector-ref colors (get-random-value 0 13))))))
 
 (define music (load-music-stream (resource "mini1111.xm")))
@@ -60,14 +60,14 @@
     (vector-set! c 2 radius)
     (when (> alpha 1.0) (vector-set! c 4 (- speed)))
     (when (<= alpha 0.0)
-      (let ([new-radius (exact->inexact (get-random-value 10 40))]
-            [r (exact-round (exact->inexact (get-random-value 10 40)))])
+      (let ([new-radius (get-random-float 10 40)]
+            [r (exact-round (get-random-float 10 40))])
         (vector-set! c 3 0.0)
         (vector-set! c 2 new-radius)
-        (vector-set! c 0 (exact->inexact (get-random-value (exact-round new-radius) (- screen-width (exact-round new-radius)))))
-        (vector-set! c 1 (exact->inexact (get-random-value (exact-round new-radius) (- screen-height (exact-round new-radius)))))
+        (vector-set! c 0 (get-random-float (exact-round new-radius) (- screen-width (exact-round new-radius))))
+        (vector-set! c 1 (get-random-float (exact-round new-radius) (- screen-height (exact-round new-radius))))
         (vector-set! c 5 (vector-ref colors (get-random-value 0 13)))
-        (vector-set! c 4 (/ (exact->inexact (get-random-value 1 100)) 2000.0))))))
+        (vector-set! c 4 (/ (get-random-float 1 100)) 2000.0)))))
 
 (define (main-loop)
   (when (not (window-should-close?))

@@ -75,9 +75,6 @@
 (define camera (camera3d 0.5 1.0 1.5  0.0 0.5 0.0  0.0 1.0 0.0  45.0 CAMERA-PERSPECTIVE))
 (define cam-dist (/ 1.0 (tan (* 45.0 0.5 (/ pi 180.0)))))
 
-(define cam-pos-buf (malloc _float 3 'atomic))
-(define cam-dir-buf (malloc _float 3 'atomic))
-
 (set-target-fps 60)
 
 (let loop ()
@@ -85,20 +82,13 @@
     (update-camera camera CAMERA-ORBITAL)
 
     ;; update raymarch camera position
-    (ptr-set! cam-pos-buf _float 0 (camera3d-pos-x camera))
-    (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
-    (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
-    (set-shader-value shdr-raymarch cam-pos-loc cam-pos-buf SHADER-UNIFORM-VEC3)
+    (set-shader-value-vec3 shdr-raymarch cam-pos-loc (camera3d-position camera))
 
-    ;; update raymarch camera direction (normalized direction × camDist)
-    (let-values ([(dx dy dz) (v3-sub (camera3d-tar-x camera) (camera3d-tar-y camera) (camera3d-tar-z camera)
-                                      (camera3d-pos-x camera) (camera3d-pos-y camera) (camera3d-pos-z camera))])
-      (let-values ([(nx ny nz) (v3-normalize dx dy dz)])
-        (let-values ([(sx sy sz) (v3-scale nx ny nz cam-dist)])
-          (ptr-set! cam-dir-buf _float 0 sx)
-          (ptr-set! cam-dir-buf _float 1 sy)
-          (ptr-set! cam-dir-buf _float 2 sz)))
-      (set-shader-value shdr-raymarch cam-dir-loc cam-dir-buf SHADER-UNIFORM-VEC3))
+    ;; update raymarch camera direction (normalized × camDist)
+    (set-shader-value-vec3 shdr-raymarch cam-dir-loc
+      (vec3-scale (vec3-normalize (vec3-subtract (camera3d-target camera)
+                                                  (camera3d-position camera)))
+                  cam-dist))
 
     ;; draw into custom render texture
     (begin-texture-mode target)

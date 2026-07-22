@@ -7,7 +7,11 @@
          "ffi-helpers.rkt"
          "types/image.rkt"
          "types/ray.rkt"
-         "types/shader.rkt")
+         "types/shader.rkt"
+         "types/vector2.rkt"
+         "types/vector3.rkt"
+         "types/vector4.rkt"
+         "../../raylib-var/config.rkt")
 
 ;; ═══════════════════════════════════════════════════════════
 ;; 1. 窗口管理
@@ -426,7 +430,10 @@
 ;; 12. 随机
 ;; ═══════════════════════════════════════════════════════════
 
-(define get-random-value (get-ffi-obj "GetRandomValue" lib (_fun _int _int -> _int)))
+(def-ffi get-random-value "GetRandomValue" (_fun _int _int -> _int))
+
+(define (get-random-float mn mx)
+  (exact->inexact (get-random-value mn mx)))
 (define set-random-seed  (get-ffi-obj "SetRandomSeed" lib (_fun _uint -> _void)))
 
 (define (load-random-sequence count min max)
@@ -492,6 +499,31 @@
   (let ([f (get-ffi-obj "SetShaderValueTexture" lib
                         (_fun (s : _shader-bytes) _int (t : _texture-bytes) -> _void))])
     (lambda (shader loc-index texture) (f shader loc-index texture))))
+
+;; 便捷包装 — 接受 Vector2/3/4 cpointer，无需手动 malloc float 缓冲区
+;; vec2/vec4 一次性分配（初始化时调用，不释放）
+(define (set-shader-value-vec2 shader loc v)
+  (let ([p (malloc _float 2 'atomic)])
+    (ptr-set! p _float 0 (vector2-x v))
+    (ptr-set! p _float 1 (vector2-y v))
+    (set-shader-value shader loc p SHADER-UNIFORM-VEC2)))
+
+(define (set-shader-value-vec4 shader loc v)
+  (let ([p (malloc _float 4 'atomic)])
+    (ptr-set! p _float 0 (vector4-x v))
+    (ptr-set! p _float 1 (vector4-y v))
+    (ptr-set! p _float 2 (vector4-z v))
+    (ptr-set! p _float 3 (vector4-w v))
+    (set-shader-value shader loc p SHADER-UNIFORM-VEC4)))
+
+;; vec3 每帧调用 — 用闭包复用缓冲区（glUniform* 会拷贝数据，安全）
+(define set-shader-value-vec3
+  (let ([buf (malloc _float 3 'atomic)])
+    (lambda (shader loc v)
+      (ptr-set! buf _float 0 (vector3-x v))
+      (ptr-set! buf _float 1 (vector3-y v))
+      (ptr-set! buf _float 2 (vector3-z v))
+      (set-shader-value shader loc buf SHADER-UNIFORM-VEC3))))
 
 (define begin-shader-mode
   (let ([f (get-ffi-obj "BeginShaderMode" lib
@@ -702,10 +734,10 @@
  set-load-file-text-callback set-save-file-text-callback
  load-file-data save-file-data export-data-as-code
  load-file-text load-directory-files load-directory-files-ex load-dropped-files
- get-random-value set-random-seed load-random-sequence
+ get-random-value get-random-float set-random-seed load-random-sequence
  load-shader load-shader-from-memory unload-shader is-shader-valid
  get-shader-location get-shader-location-attrib
- set-shader-value set-shader-value-v
+ set-shader-value set-shader-value-v set-shader-value-vec2 set-shader-value-vec3 set-shader-value-vec4
  set-shader-value-matrix set-shader-value-texture
  begin-shader-mode end-shader-mode
  fade color-alpha color-from-hsv color-is-equal

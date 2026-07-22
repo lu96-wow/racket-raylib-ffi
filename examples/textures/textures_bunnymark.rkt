@@ -69,9 +69,9 @@
               (vector-set! pos-xs bunnies-count (vector2-x mp))
               (vector-set! pos-ys bunnies-count (vector2-y mp))
               (vector-set! speed-xs bunnies-count
-                           (exact->inexact (get-random-value -250 250)))
+                           (get-random-float -250 250))
               (vector-set! speed-ys bunnies-count
-                           (exact->inexact (get-random-value -250 250)))
+                           (get-random-float -250 250))
               (vector-set! colors bunnies-count
                            (color (get-random-value 50 240)
                                   (get-random-value 80 240)

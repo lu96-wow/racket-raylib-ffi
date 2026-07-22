@@ -91,10 +91,10 @@
       (when (< (unbox ball-count) MAX-BALLS)
         (vector-set! balls (unbox ball-count)
           (ball mouse-pos
-                (vector2 (exact->inexact (get-random-value -300 300))
-                         (exact->inexact (get-random-value -300 300)))
+                (vector2 (get-random-float -300 300)
+                         (get-random-float -300 300))
                 (vector2 0.0 0.0)
-                (+ 20.0 (exact->inexact (get-random-value 0 30)))
+                (+ 20.0 (get-random-float 0 30))
                 0.99 0.9
                 (make-color (get-random-value 0 255)
                             (get-random-value 0 255)
@@ -119,8 +119,8 @@
         (let ([b (vector-ref balls i)])
           (unless (ball-grabbed b)
             (set-ball-speed! b
-              (vector2 (exact->inexact (get-random-value -2000 2000))
-                       (exact->inexact (get-random-value -2000 2000))))))))
+              (vector2 (get-random-float -2000 2000)
+                       (get-random-float -2000 2000)))))))
 
     ;; 滚轮调整重力
     (+= gravity (* (get-mouse-wheel-move) 5.0))

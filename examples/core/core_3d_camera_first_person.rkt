@@ -47,12 +47,12 @@
 (define colors   (make-vector MAX-COLUMNS #f))
 
 (for ([i (in-range MAX-COLUMNS)])
-  (let ([h (exact->inexact (get-random-value 1 12))])
+  (let ([h (get-random-float 1 12)])
     (vector-set! heights i h)
     (vector-set! positions i
-                 (vector3 (exact->inexact (get-random-value -15 15))
+                 (vector3 (get-random-float -15 15)
                           (/ h 2.0)
-                          (exact->inexact (get-random-value -15 15))))
+                          (get-random-float -15 15)))
     (vector-set! colors i
                  (color (get-random-value 20 255)
                              (get-random-value 10 55)
