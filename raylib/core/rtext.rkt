@@ -76,8 +76,8 @@
     (lambda (font cp) (f font cp))))
 (define get-glyph-atlas-rec
   (let ([f (get-ffi-obj "GetGlyphAtlasRec" lib
-                        (_fun (font : _font-bytes) _int -> (r : _rect-bytes)))])
-    (lambda (font cp) (bytes->rect (f font cp)))))
+                        (_fun (font : _font-bytes) _int -> (r : _rectangle-bytes)))])
+    (lambda (font cp) (bytes->rectangle (f font cp)))))
 (define load-utf8
   (let ([f (get-ffi-obj "LoadUTF8" lib (_fun _pointer _int -> _pointer))])
     (lambda (cp l) (f cp l))))

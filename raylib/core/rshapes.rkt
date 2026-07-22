@@ -97,27 +97,27 @@
 
 (define draw-rectangle-rec
   (let ([f (get-ffi-obj "DrawRectangleRec" lib
-                        (_fun (r : _rect-bytes) (col : _color-bytes) -> _void))])
-    (λ (rec c) (f (rect->bytes rec) (color->bytes c)))))
+                        (_fun (r : _rectangle-bytes) (col : _color-bytes) -> _void))])
+    (λ (rec c) (f (rectangle->bytes rec) (color->bytes c)))))
 
 (define draw-rectangle-pro
   (let ([f (get-ffi-obj "DrawRectanglePro" lib
-                        (_fun (r : _rect-bytes) (o : _vec2-bytes) _float
+                        (_fun (r : _rectangle-bytes) (o : _vec2-bytes) _float
                               (col : _color-bytes) -> _void))])
     (λ (rec origin rot c)
-      (f (rect->bytes rec) (vec2->bytes origin) rot (color->bytes c)))))
+      (f (rectangle->bytes rec) (vec2->bytes origin) rot (color->bytes c)))))
 
 (define draw-rectangle-rounded
   (let ([f (get-ffi-obj "DrawRectangleRounded" lib
-                        (_fun (r : _rect-bytes) _float _int
+                        (_fun (r : _rectangle-bytes) _float _int
                               (col : _color-bytes) -> _void))])
-    (λ (rec rn seg c) (f (rect->bytes rec) rn seg (color->bytes c)))))
+    (λ (rec rn seg c) (f (rectangle->bytes rec) rn seg (color->bytes c)))))
 
 (define draw-rectangle-rounded-lines-ex
   (let ([f (get-ffi-obj "DrawRectangleRoundedLinesEx" lib
-                        (_fun (r : _rect-bytes) _float _int _float
+                        (_fun (r : _rectangle-bytes) _float _int _float
                               (col : _color-bytes) -> _void))])
-    (λ (rec rn seg lt c) (f (rect->bytes rec) rn seg lt (color->bytes c)))))
+    (λ (rec rn seg lt c) (f (rectangle->bytes rec) rn seg lt (color->bytes c)))))
 
 (define draw-rectangle-lines
   (let ([f (get-ffi-obj "DrawRectangleLines" lib
@@ -126,8 +126,8 @@
 
 (define draw-rectangle-lines-ex
   (let ([f (get-ffi-obj "DrawRectangleLinesEx" lib
-                        (_fun (r : _rect-bytes) _float (col : _color-bytes) -> _void))])
-    (λ (rec lt c) (f (rect->bytes rec) lt (color->bytes c)))))
+                        (_fun (r : _rectangle-bytes) _float (col : _color-bytes) -> _void))])
+    (λ (rec lt c) (f (rectangle->bytes rec) lt (color->bytes c)))))
 
 (define draw-rectangle-gradient-h
   (let ([f (get-ffi-obj "DrawRectangleGradientH" lib
@@ -138,11 +138,11 @@
 
 (define draw-rectangle-gradient-ex
   (let ([f (get-ffi-obj "DrawRectangleGradientEx" lib
-                        (_fun (r : _rect-bytes)
+                        (_fun (r : _rectangle-bytes)
                               (tl : _color-bytes) (bl : _color-bytes)
                               (br : _color-bytes) (tr : _color-bytes) -> _void))])
     (λ (rec tl bl br tr)
-      (f (rect->bytes rec) (color->bytes tl) (color->bytes bl)
+      (f (rectangle->bytes rec) (color->bytes tl) (color->bytes bl)
          (color->bytes br) (color->bytes tr)))))
 
 ;; ═══════════════════════════════════════════════════════════
@@ -321,8 +321,8 @@
 
 (define check-collision-point-rec
   (let ([f (get-ffi-obj "CheckCollisionPointRec" lib
-                        (_fun (p : _vec2-bytes) (r : _rect-bytes) -> _stdbool))])
-    (λ (p r) (f (vec2->bytes p) (rect->bytes r)))))
+                        (_fun (p : _vec2-bytes) (r : _rectangle-bytes) -> _stdbool))])
+    (λ (p r) (f (vec2->bytes p) (rectangle->bytes r)))))
 
 (define check-collision-point-circle
   (let ([f (get-ffi-obj "CheckCollisionPointCircle" lib
@@ -331,19 +331,19 @@
 
 (define check-collision-recs
   (let ([f (get-ffi-obj "CheckCollisionRecs" lib
-                        (_fun (r1 : _rect-bytes) (r2 : _rect-bytes) -> _stdbool))])
-    (λ (r1 r2) (f (rect->bytes r1) (rect->bytes r2)))))
+                        (_fun (r1 : _rectangle-bytes) (r2 : _rectangle-bytes) -> _stdbool))])
+    (λ (r1 r2) (f (rectangle->bytes r1) (rectangle->bytes r2)))))
 
 (define check-collision-circle-rec
   (let ([f (get-ffi-obj "CheckCollisionCircleRec" lib
-                        (_fun (c : _vec2-bytes) _float (r : _rect-bytes) -> _stdbool))])
-    (λ (c radius r) (f (vec2->bytes c) radius (rect->bytes r)))))
+                        (_fun (c : _vec2-bytes) _float (r : _rectangle-bytes) -> _stdbool))])
+    (λ (c radius r) (f (vec2->bytes c) radius (rectangle->bytes r)))))
 
 (define get-collision-rec
   (let ([f (get-ffi-obj "GetCollisionRec" lib
-                        (_fun (r1 : _rect-bytes) (r2 : _rect-bytes)
-                              -> (r : _rect-bytes)))])
-    (λ (r1 r2) (bytes->rect (f (rect->bytes r1) (rect->bytes r2))))))
+                        (_fun (r1 : _rectangle-bytes) (r2 : _rectangle-bytes)
+                              -> (r : _rectangle-bytes)))])
+    (λ (r1 r2) (bytes->rectangle (f (rectangle->bytes r1) (rectangle->bytes r2))))))
 
 (define get-shapes-texture
   (let ([f (get-ffi-obj "GetShapesTexture" lib
@@ -352,8 +352,8 @@
 
 (define get-shapes-texture-rectangle
   (let ([f (get-ffi-obj "GetShapesTextureRectangle" lib
-                        (_fun -> (r : _rect-bytes)))])
-    (λ () (bytes->rect (f)))))
+                        (_fun -> (r : _rectangle-bytes)))])
+    (λ () (bytes->rectangle (f)))))
 
 ;; ═══════════════════════════════════════════════════════════
 ;; 自定义: 渐变圆角矩形

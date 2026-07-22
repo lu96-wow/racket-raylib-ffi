@@ -27,8 +27,8 @@
   (let ([f (get-ffi-obj "UpdateTexture" lib (_fun (t : _texture-bytes) _pointer -> _void))])
     (λ (t p) (f t p))))
 (define (update-texture-rec texture ptr rec)
-  ((get-ffi-obj "UpdateTextureRec" lib (_fun (t : _texture-bytes) (r : _rect-bytes) _pointer -> _void))
-   texture (rect->bytes rec) ptr))
+  ((get-ffi-obj "UpdateTextureRec" lib (_fun (t : _texture-bytes) (r : _rectangle-bytes) _pointer -> _void))
+   texture (rectangle->bytes rec) ptr))
 (define set-texture-filter
   (let ([f (get-ffi-obj "SetTextureFilter" lib (_fun (t : _texture-bytes) _int -> _void))])
     (λ (t fm) (f t fm))))
@@ -46,9 +46,9 @@
     (lambda (t p c) (f t (vec2->bytes p) (color->bytes c)))))
 (define draw-texture-rec
   (let ([f (get-ffi-obj "DrawTextureRec" lib
-                        (_fun (t : _texture-bytes) (r : _rect-bytes)
+                        (_fun (t : _texture-bytes) (r : _rectangle-bytes)
                               (p : _vec2-bytes) (c : _color-bytes) -> _void))])
-    (λ (t src pos c) (f t (rect->bytes src) (vec2->bytes pos) (color->bytes c)))))
+    (λ (t src pos c) (f t (rectangle->bytes src) (vec2->bytes pos) (color->bytes c)))))
 (define draw-texture-ex
   (let ([f (get-ffi-obj "DrawTextureEx" lib
                         (_fun (t : _texture-bytes) (p : _vec2-bytes) _float _float
@@ -56,17 +56,17 @@
     (λ (t p rot scl c) (f t (vec2->bytes p) rot scl (color->bytes c)))))
 (define draw-texture-pro
   (let ([f (get-ffi-obj "DrawTexturePro" lib
-                        (_fun (t : _texture-bytes) (src : _rect-bytes) (dst : _rect-bytes)
+                        (_fun (t : _texture-bytes) (src : _rectangle-bytes) (dst : _rectangle-bytes)
                               (org : _vec2-bytes) _float (col : _color-bytes) -> _void))])
     (λ (t src dst org rot c)
-      (f t (rect->bytes src) (rect->bytes dst) (vec2->bytes org) rot (color->bytes c)))))
+      (f t (rectangle->bytes src) (rectangle->bytes dst) (vec2->bytes org) rot (color->bytes c)))))
 (define draw-texture-n-patch
   (let ([f (get-ffi-obj "DrawTextureNPatch" lib
                         (_fun (t : _texture-bytes) (n : _npatch-info-bytes)
-                              (dst : _rect-bytes) (orig : _vec2-bytes) _float
+                              (dst : _rectangle-bytes) (orig : _vec2-bytes) _float
                               (c : _color-bytes) -> _void))])
     (lambda (t npi dst orig rot c)
-      (f t npi (rect->bytes dst) (vec2->bytes orig) rot (color->bytes c)))))
+      (f t npi (rectangle->bytes dst) (vec2->bytes orig) rot (color->bytes c)))))
 (define load-render-texture
   (let ([f (get-ffi-obj "LoadRenderTexture" lib
                         (_fun _int _int -> (rt : _render-texture-bytes)))])
@@ -116,8 +116,8 @@
     (lambda (img) (f img))))
 (define image-from-image
   (let ([f (get-ffi-obj "ImageFromImage" lib
-                        (_fun (img : _image-bytes) (r : _rect-bytes) -> (out : _image-bytes)))])
-    (lambda (img rec) (f img (rect->bytes rec)))))
+                        (_fun (img : _image-bytes) (r : _rectangle-bytes) -> (out : _image-bytes)))])
+    (lambda (img rec) (f img (rectangle->bytes rec)))))
 (define image-from-channel
   (let ([f (get-ffi-obj "ImageFromChannel" lib
                         (_fun (img : _image-bytes) _int -> (out : _image-bytes)))])
@@ -126,7 +126,7 @@
 (define (image-to-pot ip fc)
   ((get-ffi-obj "ImageToPOT" lib (_fun _pointer (c : _color-bytes) -> _void)) ip (color->bytes fc)))
 (define (image-crop ip cr)
-  ((get-ffi-obj "ImageCrop" lib (_fun _pointer (r : _rect-bytes) -> _void)) ip (rect->bytes cr)))
+  ((get-ffi-obj "ImageCrop" lib (_fun _pointer (r : _rectangle-bytes) -> _void)) ip (rectangle->bytes cr)))
 (define (image-alpha-crop ip t) ((get-ffi-obj "ImageAlphaCrop" lib (_fun _pointer _float -> _void)) ip t))
 (define (image-alpha-clear ip c t)
   ((get-ffi-obj "ImageAlphaClear" lib (_fun _pointer (c : _color-bytes) _float -> _void))
@@ -185,8 +185,8 @@
 (define (unload-image-palette pp) ((get-ffi-obj "UnloadImagePalette" lib (_fun _pointer -> _void)) pp))
 (define get-image-alpha-border
   (let ([f (get-ffi-obj "GetImageAlphaBorder" lib
-                        (_fun (img : _image-bytes) _float -> (r : _rect-bytes)))])
-    (lambda (image t) (bytes->rect (f image t)))))
+                        (_fun (img : _image-bytes) _float -> (r : _rectangle-bytes)))])
+    (lambda (image t) (bytes->rectangle (f image t)))))
 (define get-image-color
   (let ([f (get-ffi-obj "GetImageColor" lib
                         (_fun (img : _image-bytes) _int _int -> (c : _color-bytes)))])
@@ -273,13 +273,13 @@
    dp (vec2->bytes p) (vec2->bytes s) (color->bytes c)))
 (define (image-draw-rectangle-rec dp rec c)
   ((get-ffi-obj "ImageDrawRectangleRec" lib
-    (_fun _pointer (r : _rect-bytes) (c : _color-bytes) -> _void)) dp (rect->bytes rec) (color->bytes c)))
+    (_fun _pointer (r : _rectangle-bytes) (c : _color-bytes) -> _void)) dp (rectangle->bytes rec) (color->bytes c)))
 (define (image-draw-rectangle-lines dp x y w h c)
   ((get-ffi-obj "ImageDrawRectangleLines" lib
     (_fun _pointer _int _int _int _int (c : _color-bytes) -> _void)) dp x y w h (color->bytes c)))
 (define (image-draw-rectangle-lines-ex dp rec t c)
   ((get-ffi-obj "ImageDrawRectangleLinesEx" lib
-    (_fun _pointer (r : _rect-bytes) _int (c : _color-bytes) -> _void)) dp (rect->bytes rec) t (color->bytes c)))
+    (_fun _pointer (r : _rectangle-bytes) _int (c : _color-bytes) -> _void)) dp (rectangle->bytes rec) t (color->bytes c)))
 (define (image-draw-triangle dp v1 v2 v3 c)
   ((get-ffi-obj "ImageDrawTriangle" lib
     (_fun _pointer (p1 : _vec2-bytes) (p2 : _vec2-bytes) (p3 : _vec2-bytes) (c : _color-bytes) -> _void))
@@ -302,8 +302,8 @@
     (_fun _pointer _pointer _int (c : _color-bytes) -> _void)) dp pp pc (color->bytes c)))
 (define (image-draw dp si sr dr t)
   ((get-ffi-obj "ImageDraw" lib
-    (_fun _pointer (src : _image-bytes) (sr : _rect-bytes) (dr : _rect-bytes) (c : _color-bytes) -> _void))
-   dp si (rect->bytes sr) (rect->bytes dr) (color->bytes t)))
+    (_fun _pointer (src : _image-bytes) (sr : _rectangle-bytes) (dr : _rectangle-bytes) (c : _color-bytes) -> _void))
+   dp si (rectangle->bytes sr) (rectangle->bytes dr) (color->bytes t)))
 (define (image-draw-text dp text x y fs c)
   ((get-ffi-obj "ImageDrawText" lib
     (_fun _pointer _string _int _int _int (c : _color-bytes) -> _void)) dp text x y fs (color->bytes c)))

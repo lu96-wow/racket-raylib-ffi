@@ -86,7 +86,7 @@
 
  ;; pass-by-value 类型
  _color-bytes _vec2-bytes _vec3-bytes _vec4-bytes
- _rect-bytes _matrix-bytes
+ _rectangle-bytes _matrix-bytes
  _camera2d-bytes _camera3d-bytes
  _ray-bytes _ray-collision-bytes _bounding-box-bytes
  _image-bytes _texture-bytes _render-texture-bytes
@@ -99,9 +99,9 @@
 
  ;; 转换器
  color->bytes vec2->bytes vec3->bytes vec4->bytes
- rect->bytes camera2d->bytes camera3d->bytes
+ rectangle->bytes camera2d->bytes camera3d->bytes
  ray->bytes bounding-box->bytes image->bytes
- bytes->vec2 bytes->vec3 bytes->vec4 bytes->rect bytes->color bytes->bounding-box
+ bytes->vec2 bytes->vec3 bytes->vec4 bytes->rectangle bytes->color bytes->bounding-box
  bytes->ray bytes->ray-collision bytes->npatch-info bytes->glyph-info bytes->font
  bytes->camera2d bytes->camera3d bytes->image
  malloc-float-vec2 malloc-float-vec3 malloc-float-vec4

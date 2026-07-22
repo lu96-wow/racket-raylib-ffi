@@ -100,11 +100,11 @@
   (let ([f (get-ffi-obj "DrawBillboard" lib (_fun (c : _camera3d-bytes) (t : _texture-bytes) (pos : _vec3-bytes) _float (col : _color-bytes) -> _void))])
     (lambda (cam t p s c) (f (camera3d->bytes cam) t (vec3->bytes p) s (color->bytes c)))))
 (define draw-billboard-rec
-  (let ([f (get-ffi-obj "DrawBillboardRec" lib (_fun (c : _camera3d-bytes) (t : _texture-bytes) (src : _rect-bytes) (pos : _vec3-bytes) (size : _vec2-bytes) (col : _color-bytes) -> _void))])
-    (lambda (cam t src p s c) (f (camera3d->bytes cam) t (rect->bytes src) (vec3->bytes p) (vec2->bytes s) (color->bytes c)))))
+  (let ([f (get-ffi-obj "DrawBillboardRec" lib (_fun (c : _camera3d-bytes) (t : _texture-bytes) (src : _rectangle-bytes) (pos : _vec3-bytes) (size : _vec2-bytes) (col : _color-bytes) -> _void))])
+    (lambda (cam t src p s c) (f (camera3d->bytes cam) t (rectangle->bytes src) (vec3->bytes p) (vec2->bytes s) (color->bytes c)))))
 (define draw-billboard-pro
-  (let ([f (get-ffi-obj "DrawBillboardPro" lib (_fun (c : _camera3d-bytes) (t : _texture-bytes) (src : _rect-bytes) (pos : _vec3-bytes) (up : _vec3-bytes) (size : _vec2-bytes) (orig : _vec2-bytes) _float (col : _color-bytes) -> _void))])
-    (lambda (cam t src p up s o rot c) (f (camera3d->bytes cam) t (rect->bytes src) (vec3->bytes p) (vec3->bytes up) (vec2->bytes s) (vec2->bytes o) rot (color->bytes c)))))
+  (let ([f (get-ffi-obj "DrawBillboardPro" lib (_fun (c : _camera3d-bytes) (t : _texture-bytes) (src : _rectangle-bytes) (pos : _vec3-bytes) (up : _vec3-bytes) (size : _vec2-bytes) (orig : _vec2-bytes) _float (col : _color-bytes) -> _void))])
+    (lambda (cam t src p up s o rot c) (f (camera3d->bytes cam) t (rectangle->bytes src) (vec3->bytes p) (vec3->bytes up) (vec2->bytes s) (vec2->bytes o) rot (color->bytes c)))))
 (define load-model-animations
   (let ([f (get-ffi-obj "LoadModelAnimations" lib (_fun _string _pointer -> _pointer))])
     (lambda (fn) (let ([cp (malloc _int 'atomic)]) (ptr-set! cp _int 0 0) (let ([ap (f fn cp)]) (values ap (ptr-ref cp _int 0)))))))
