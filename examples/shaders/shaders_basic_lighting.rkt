@@ -33,14 +33,10 @@
 
 (define lights
   (list
-   (create-light LIGHT-POINT -2.0 1.0 -2.0 0.0 0.0 0.0
-                 (color-r YELLOW) (color-g YELLOW) (color-b YELLOW) (color-a YELLOW) shader)
-   (create-light LIGHT-POINT  2.0 1.0  2.0 0.0 0.0 0.0
-                 (color-r RED) (color-g RED) (color-b RED) (color-a RED) shader)
-   (create-light LIGHT-POINT -2.0 1.0  2.0 0.0 0.0 0.0
-                 (color-r GREEN) (color-g GREEN) (color-b GREEN) (color-a GREEN) shader)
-   (create-light LIGHT-POINT  2.0 1.0 -2.0 0.0 0.0 0.0
-                 (color-r BLUE) (color-g BLUE) (color-b BLUE) (color-a BLUE) shader)))
+   (create-light LIGHT-POINT -2.0 1.0 -2.0 0.0 0.0 0.0 YELLOW shader)
+   (create-light LIGHT-POINT  2.0 1.0  2.0 0.0 0.0 0.0 RED    shader)
+   (create-light LIGHT-POINT -2.0 1.0  2.0 0.0 0.0 0.0 GREEN  shader)
+   (create-light LIGHT-POINT  2.0 1.0 -2.0 0.0 0.0 0.0 BLUE   shader)))
 
 (define cam-pos-buf (malloc _float 3 'atomic))
 (set-target-fps 60)
@@ -55,14 +51,15 @@
       (ptr-ref (shader-list-locs shader) _int SHADER-LOC-VECTOR-VIEW)
       cam-pos-buf SHADER-UNIFORM-VEC3)
 
+    ;; toggle lights with Y/R/G/B
     (when (is-key-pressed KEY-Y)
-      (vector-set! (list-ref lights 0) 0 (- 1 (vector-ref (list-ref lights 0) 0))))
+      (set-light-enabled! (list-ref lights 0) (not (light-enabled? (list-ref lights 0)))))
     (when (is-key-pressed KEY-R)
-      (vector-set! (list-ref lights 1) 0 (- 1 (vector-ref (list-ref lights 1) 0))))
+      (set-light-enabled! (list-ref lights 1) (not (light-enabled? (list-ref lights 1)))))
     (when (is-key-pressed KEY-G)
-      (vector-set! (list-ref lights 2) 0 (- 1 (vector-ref (list-ref lights 2) 0))))
+      (set-light-enabled! (list-ref lights 2) (not (light-enabled? (list-ref lights 2)))))
     (when (is-key-pressed KEY-B)
-      (vector-set! (list-ref lights 3) 0 (- 1 (vector-ref (list-ref lights 3) 0))))
+      (set-light-enabled! (list-ref lights 3) (not (light-enabled? (list-ref lights 3)))))
 
     (for ([light lights]) (update-light-values shader light))
 
@@ -75,14 +72,13 @@
     (end-shader-mode)
 
     (for ([light lights])
-      (let* ([enabled (vector-ref light 0)]
-            [px (vector-ref light 2)] [py (vector-ref light 3)] [pz (vector-ref light 4)]
-            [cr (vector-ref light 8)] [cg (vector-ref light 9)]
-            [cb (vector-ref light 10)] [ca (vector-ref light 11)]
-            [lc (color cr cg cb ca)])
-        (if (= enabled 1)
-            (draw-sphere-ex (vector3 px py pz) 0.2 8 8 lc)
-            (draw-sphere-wires (vector3 px py pz) 0.2 8 8 (color-alpha lc 0.3)))))
+      (let ([lc (light-color light)]
+            [pos (vector3 (light-position-x light)
+                          (light-position-y light)
+                          (light-position-z light))])
+        (if (light-enabled? light)
+            (draw-sphere-ex pos 0.2 8 8 lc)
+            (draw-sphere-wires pos 0.2 8 8 (color-alpha lc 0.3)))))
 
     (draw-grid 10 1.0)
     (end-mode-3d)

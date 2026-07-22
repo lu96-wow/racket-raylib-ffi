@@ -34,15 +34,15 @@
   (ptr-set! locs-ptr _int SHADER-LOC-VECTOR-VIEW (get-shader-location cel-shader "viewPos")))
 
 ;; save default shader, apply cel shader
-(define mats-ptr (list-ref model 19))
+(define mats-ptr (model-materials model))
 (define default-shader (ptr-ref mats-ptr _shader-bytes 0))
 (set-material-shader mats-ptr cel-shader)
 
 ;; numBands: toon quantization steps (2=hard binary, 20=near-smooth)
-(define num-bands 10.0)
+(define-var num-bands 10.0)
 (define num-bands-loc (get-shader-location cel-shader "numBands"))
 (define num-bands-buf (malloc _float 1 'atomic))
-(ptr-set! num-bands-buf _float 0 num-bands)
+(ptr-set! num-bands-buf _float 0 (unbox num-bands))
 (set-shader-value cel-shader num-bands-loc num-bands-buf SHADER-UNIFORM-FLOAT)
 
 ;; outline shader (inverted-hull)
@@ -54,11 +54,10 @@
 (reset-lights!)
 (define lights
   (list
-   (create-light LIGHT-DIRECTIONAL 50.0 50.0 50.0 0.0 0.0 0.0
-                 (color-r WHITE) (color-g WHITE) (color-b WHITE) (color-a WHITE) cel-shader)))
+   (create-light LIGHT-DIRECTIONAL 50.0 50.0 50.0 0.0 0.0 0.0 WHITE cel-shader)))
 
-(define cel-enabled #t)
-(define outline-enabled #t)
+(define-var cel-enabled #t)
+(define-var outline-enabled #t)
 
 (define cam-pos-buf (malloc _float 3 'atomic))
 (define thickness-buf (malloc _float 1 'atomic))
@@ -79,27 +78,25 @@
 
     ;; [Z] toggle cel shading
     (when (is-key-pressed KEY-Z)
-      (set! cel-enabled (not cel-enabled))
-      (set-material-shader mats-ptr (if cel-enabled cel-shader default-shader)))
+      (set-box! cel-enabled (not (unbox cel-enabled)))
+      (set-material-shader mats-ptr (if (unbox cel-enabled) cel-shader default-shader)))
 
     ;; [C] toggle outline
     (when (is-key-pressed KEY-C)
-      (set! outline-enabled (not outline-enabled)))
+      (set-box! outline-enabled (not (unbox outline-enabled))))
 
     ;; [Q/E] adjust band count
     (when (or (is-key-pressed KEY-E) (is-key-pressed-repeat KEY-E))
-      (set! num-bands (min 20.0 (max 2.0 (+ num-bands 1.0)))))
+      (+= num-bands 1.0) (set-box! num-bands (min 20.0 (unbox num-bands))))
     (when (or (is-key-pressed KEY-Q) (is-key-pressed-repeat KEY-Q))
-      (set! num-bands (min 20.0 (max 2.0 (- num-bands 1.0)))))
-    (ptr-set! num-bands-buf _float 0 num-bands)
+      (-= num-bands 1.0) (set-box! num-bands (max 2.0 (unbox num-bands))))
+    (ptr-set! num-bands-buf _float 0 (unbox num-bands))
     (set-shader-value cel-shader num-bands-loc num-bands-buf SHADER-UNIFORM-FLOAT)
 
     ;; spin light
-    (let ([t (get-time)]
-          [l (list-ref lights 0)])
-      (vector-set! l 2 (* (sin (* -0.3 t)) 5.0))
-      (vector-set! l 3 5.0)
-      (vector-set! l 4 (* (cos (* -0.3 t)) 5.0)))
+    (let* ([t (get-time)]
+           [l (list-ref lights 0)])
+      (set-light-position! l (* (sin (* -0.3 t)) 5.0) 5.0 (* (cos (* -0.3 t)) 5.0)))
 
     (for ([light lights]) (update-light-values cel-shader light))
 
@@ -108,29 +105,29 @@
     (clear-background RAYWHITE)
     (begin-mode-3d camera)
 
-    (when outline-enabled
+    (when (unbox outline-enabled)
       (ptr-set! thickness-buf _float 0 0.005)
       (set-shader-value outline-shader outline-thickness-loc thickness-buf SHADER-UNIFORM-FLOAT)
       (rl-set-cull-face RL-CULL-FACE-FRONT)
       (set-material-shader mats-ptr outline-shader)
       (draw-model model (vector3 0.0 0.0 0.0) 0.75 WHITE)
-      (set-material-shader mats-ptr (if cel-enabled cel-shader default-shader))
+      (set-material-shader mats-ptr (if (unbox cel-enabled) cel-shader default-shader))
       (rl-set-cull-face RL-CULL-FACE-BACK))
 
     (draw-model model (vector3 0.0 0.0 0.0) 0.75 WHITE)
     (let ([l (list-ref lights 0)])
-      (draw-sphere-ex (vector3 (vector-ref l 2) (vector-ref l 3) (vector-ref l 4))
+      (draw-sphere-ex (vector3 (light-position-x l) (light-position-y l) (light-position-z l))
                        0.2 50 50 YELLOW))
     (draw-grid 10 10.0)
 
     (end-mode-3d)
 
     (draw-fps 10 10)
-    (draw-text (format "Cel: ~a  [Z]" (if cel-enabled "ON" "OFF")) 10 65 20
-               (if cel-enabled DARKGREEN DARKGRAY))
-    (draw-text (format "Outline: ~a  [C]" (if outline-enabled "ON" "OFF")) 10 90 20
-               (if outline-enabled DARKGREEN DARKGRAY))
-    (draw-text (format "Bands: ~a  [Q/E]" (inexact->exact (round num-bands))) 10 115 20 DARKGRAY)
+    (draw-text (format "Cel: ~a  [Z]" (if (unbox cel-enabled) "ON" "OFF")) 10 65 20
+               (if (unbox cel-enabled) DARKGREEN DARKGRAY))
+    (draw-text (format "Outline: ~a  [C]" (if (unbox outline-enabled) "ON" "OFF")) 10 90 20
+               (if (unbox outline-enabled) DARKGREEN DARKGRAY))
+    (draw-text (format "Bands: ~a  [Q/E]" (inexact->exact (round (unbox num-bands)))) 10 115 20 DARKGRAY)
 
     (end-drawing)
     (loop)))

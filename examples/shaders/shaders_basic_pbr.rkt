@@ -133,7 +133,7 @@
 
 ;; 加载 car 模型
 (define car (load-model (res "models/old_car_new.glb")))
-(define car-mats (list-ref car 19))
+(define car-mats (model-materials car))
 (set-material-shader car-mats shader)
 (set-material-map-color! car-mats MATERIAL-MAP-ALBEDO 255 255 255 255)
 (set-material-map-value! car-mats MATERIAL-MAP-METALNESS 1.0)
@@ -147,7 +147,7 @@
 
 ;; 加载 floor 模型
 (define floor (load-model (res "models/plane.glb")))
-(define floor-mats (list-ref floor 19))
+(define floor-mats (model-materials floor))
 (set-material-shader floor-mats shader)
 (set-material-map-color! floor-mats MATERIAL-MAP-ALBEDO 255 255 255 255)
 (set-material-map-value! floor-mats MATERIAL-MAP-METALNESS 0.8)

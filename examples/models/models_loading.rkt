@@ -31,19 +31,16 @@
 (define castle-path (path->string (build-path resource-dir "models/obj/castle.obj")))
 (define model (load-model castle-path))
 (define texture (load-texture (path->string (build-path resource-dir "models/obj/castle_diffuse.png"))))
-(set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
+(set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
 
 (define position (vector3 0.0 0.0 0.0))
 
-;; 获取包围盒: model.meshes[0] = 从 meshes 指针读第 0 个 Mesh (按值)
-(define meshes-ptr (list-ref model 18))
-(define mesh0 (ptr-ref meshes-ptr _mesh-bytes 0))  ;; 读 Mesh 为 list
-(define (list->bounding-box lst)
-  (bounding-box (list-ref lst 0) (list-ref lst 1) (list-ref lst 2)
-                (list-ref lst 3) (list-ref lst 4) (list-ref lst 5)))
-(define bounds-cptr (list->bounding-box (get-mesh-bounding-box mesh0)))
+;; 获取包围盒: model.meshes → 读第 0 个 Mesh (按值)
+(define meshes-ptr (model-meshes model))
+(define mesh0 (ptr-ref meshes-ptr _mesh-bytes 0))
+(define bounds-cptr (bytes->bounding-box (get-mesh-bounding-box mesh0)))
 
-(define selected #f)
+(define-var selected #f)
 
 (set-target-fps 60)
 
@@ -71,11 +68,11 @@
                    (string-suffix? path ".m3d"))
                (unload-model model)
                (set! model (load-model path))
-               (set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)
-               (set! meshes-ptr (list-ref model 18))
-               (set! bounds-cptr (list->bounding-box
+               (set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)
+               (set! meshes-ptr (model-meshes model))
+               (set! bounds-cptr (bytes->bounding-box
                                    (get-mesh-bounding-box
-                                     (ptr-ref (list-ref model 18) _mesh-bytes 0))))
+                                     (ptr-ref (model-meshes model) _mesh-bytes 0))))
                ;; 调整相机位置以适配新模型
                (set-camera3d-pos-x! camera (+ (bounding-box-max-x bounds-cptr) 10.0))
                (set-camera3d-pos-y! camera (+ (bounding-box-max-y bounds-cptr) 10.0))
@@ -84,14 +81,13 @@
               [(string-suffix? path ".png")
                (unload-texture texture)
                (set! texture (load-texture path))
-               (set-material-texture (list-ref model 19) MATERIAL-MAP-DIFFUSE texture)])))))
+               (set-material-texture (model-materials model) MATERIAL-MAP-DIFFUSE texture)])))))
 
     ;; 鼠标点击选中模型
     (when (is-mouse-button-pressed MOUSE-BUTTON-LEFT)
       (let* ([mouse-ray (get-screen-to-world-ray (get-mouse-position) camera)]
              [hit (get-ray-collision-box mouse-ray bounds-cptr)])
-        ;; RayCollision: index 0 = hit (_stdbool)
-        (set! selected (if (list-ref hit 0) (not selected) #f))))
+        (set-box! selected (if (ray-collision-hit hit) (not (unbox selected)) #f))))
 
     ;; ---- Draw ----
     (begin-drawing)
@@ -101,12 +97,12 @@
 
     (draw-model model position 1.0 WHITE)
     (draw-grid 20 10.0)
-    (when selected (draw-bounding-box bounds-cptr GREEN))
+    (when (unbox selected) (draw-bounding-box bounds-cptr GREEN))
 
     (end-mode-3d)
 
     (draw-text "Drag & drop model to load mesh/texture." 10 (- (get-screen-height) 20) 10 DARKGRAY)
-    (when selected (draw-text "MODEL SELECTED" (- (get-screen-width) 110) 10 10 GREEN))
+    (when (unbox selected) (draw-text "MODEL SELECTED" (- (get-screen-width) 110) 10 10 GREEN))
     (draw-text "(c) Castle 3D model by Alberto Cano" (- screen-width 200) (- screen-height 20) 10 GRAY)
 
     (draw-fps 10 10)

@@ -15,9 +15,13 @@
   (list (ptr-ref bb _float 0) (ptr-ref bb _float 1) (ptr-ref bb _float 2)
         (ptr-ref bb _float 3) (ptr-ref bb _float 4) (ptr-ref bb _float 5)))
 
+(define (bytes->bounding-box lst)
+  (bounding-box (car lst) (cadr lst) (caddr lst)
+                (cadddr lst) (car (cddddr lst)) (cadr (cddddr lst))))
+
 (provide _BoundingBox _bounding-box-bytes bounding-box
          bounding-box-min-x bounding-box-min-y bounding-box-min-z
          bounding-box-max-x bounding-box-max-y bounding-box-max-z
          set-bounding-box-min-x! set-bounding-box-min-y! set-bounding-box-min-z!
          set-bounding-box-max-x! set-bounding-box-max-y! set-bounding-box-max-z!
-         bounding-box->bytes)
+         bounding-box->bytes bytes->bounding-box)

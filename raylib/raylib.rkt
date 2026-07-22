@@ -103,5 +103,6 @@
           "core/types/automation-event.rkt"
           "core/types/automation-event-list.rkt")
          (all-from-out "../raylib-var/var.rkt")
+         define-var += -=
          ptr-ref ptr-set! ptr-add
          _ubyte _float _int _uint _pointer _bool _stdbool _double _long)

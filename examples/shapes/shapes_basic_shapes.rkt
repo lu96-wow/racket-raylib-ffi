@@ -16,7 +16,7 @@
 (init-window screen-width screen-height
   "raylib [shapes] example - basic shapes")
 
-(define rotation (box 0.0))
+(define-var rotation 0.0)
 
 (set-target-fps 60)
 
@@ -27,7 +27,7 @@
 (let loop ()
   (unless (window-should-close?)
     ;; 更新
-    (set-box! rotation (+ (unbox rotation) 0.2))
+    (+= rotation 0.2)
 
     ;; 绘制
     (begin-drawing)

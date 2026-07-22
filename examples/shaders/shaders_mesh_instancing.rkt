@@ -58,8 +58,7 @@
 
 ;; create light
 (reset-lights!)
-(create-light LIGHT-DIRECTIONAL 50.0 50.0 0.0 0.0 0.0 0.0
-              (color-r WHITE) (color-g WHITE) (color-b WHITE) (color-a WHITE) shader)
+(create-light LIGHT-DIRECTIONAL 50.0 50.0 0.0 0.0 0.0 0.0 WHITE shader)
 
 ;; material for instanced drawing (RED)
 (define mat-ptr-inst (load-material-default))

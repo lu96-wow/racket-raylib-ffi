@@ -101,7 +101,7 @@
  color->bytes vec2->bytes vec3->bytes vec4->bytes
  rect->bytes camera2d->bytes camera3d->bytes
  ray->bytes bounding-box->bytes
- bytes->vec2 bytes->vec3 bytes->vec4 bytes->rect bytes->color
+ bytes->vec2 bytes->vec3 bytes->vec4 bytes->rect bytes->color bytes->bounding-box
  malloc-float-vec2 malloc-float-vec3 malloc-float-vec4
 
  ;; 辅助
