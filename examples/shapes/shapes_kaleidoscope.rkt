@@ -34,9 +34,9 @@
 
 ;; Camera2D: 原点居中
 (define camera
-  (camera2d 0.0 0.0                        ; target
-            (/ SCREEN-W 2.0) (/ SCREEN-H 2.0)  ; offset
-            0.0 1.0))                      ; rotation, zoom
+  (camera2d (/ SCREEN-W 2.0) (/ SCREEN-H 2.0)  ; offset
+            0.0 0.0                              ; target
+            0.0 1.0))                            ; rotation, zoom
 
 (define offset   (vector2 (/ SCREEN-W 2.0) (/ SCREEN-H 2.0)))
 (define scale-v  (vector2 1.0 -1.0))       ; x 翻转做镜像

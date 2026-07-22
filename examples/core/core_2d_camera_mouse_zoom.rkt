@@ -38,7 +38,7 @@
 (init-window screen-width screen-height
   "raylib [core] example - 2d camera mouse zoom")
 
-;; Camera2D: (camera2d target-x target-y offset-x offset-y rotation zoom)
+;; Camera2D: (camera2d offset-x offset-y target-x target-y rotation zoom)
 (define camera (camera2d 0.0 0.0 0.0 0.0 0.0 1.0))
 
 (define zoom-mode 0)  ;; 0-Mouse Wheel, 1-Mouse Move

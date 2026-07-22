@@ -29,6 +29,9 @@
     (ptr-set! p _float 2 z)
     p))
 
+(define vector3-zero (vector3 0.0 0.0 0.0))
+(define vector3-one  (vector3 1.0 1.0 1.0))
+
 (provide _Vector3 _vec3-bytes vector3 vector3-x vector3-y vector3-z
          set-vector3-x! set-vector3-y! set-vector3-z!
-         vec3->bytes bytes->vec3 malloc-float-vec3)
+         vec3->bytes bytes->vec3 malloc-float-vec3 vector3-zero vector3-one)

@@ -49,6 +49,19 @@
     (get-ffi-obj c-name lib fun-spec)))
 
 ;; ═══════════════════════════════════════════════════════════
+;; 游戏循环可变状态
+;; ═══════════════════════════════════════════════════════════
+
+(define-syntax-rule (define-var name expr)
+  (define name (box expr)))
+
+(define-syntax-rule (+= var delta)
+  (set-box! var (+ (unbox var) delta)))
+
+(define-syntax-rule (-= var delta)
+  (set-box! var (- (unbox var) delta)))
+
+;; ═══════════════════════════════════════════════════════════
 ;; malloc 辅助
 ;; ═══════════════════════════════════════════════════════════
 
@@ -69,7 +82,7 @@
  lib
 
  ;; 宏
- def-ffi
+ def-ffi define-var += -=
 
  ;; pass-by-value 类型
  _color-bytes _vec2-bytes _vec3-bytes _vec4-bytes

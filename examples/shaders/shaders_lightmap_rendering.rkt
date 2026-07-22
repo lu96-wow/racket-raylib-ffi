@@ -56,11 +56,11 @@
 ;; helper: call GenTextureMipmaps on a texture list (creates temp cpointer, reads back)
 (define (gen-texture-mipmaps* tex-list)
   (define ptr (malloc 20 'atomic))
-  (ptr-set! ptr _uint 0 (list-ref tex-list 0))
-  (ptr-set! ptr _int 1 (list-ref tex-list 1))
-  (ptr-set! ptr _int 2 (list-ref tex-list 2))
-  (ptr-set! ptr _int 3 (list-ref tex-list 3))
-  (ptr-set! ptr _int 4 (list-ref tex-list 4))
+  (ptr-set! ptr _uint 0 (texture-id tex-list))
+  (ptr-set! ptr _int 1 (texture-width tex-list))
+  (ptr-set! ptr _int 2 (texture-height tex-list))
+  (ptr-set! ptr _int 3 (texture-mipmaps tex-list))
+  (ptr-set! ptr _int 4 (texture-format tex-list))
   (gen-texture-mipmaps ptr)
   (list (ptr-ref ptr _uint 0) (ptr-ref ptr _int 1) (ptr-ref ptr _int 2)
         (ptr-ref ptr _int 3) (ptr-ref ptr _int 4)))
@@ -78,27 +78,30 @@
 ;; red spot — full coverage
 (draw-texture-pro
  light
- (rectangle 0.0 0.0 (exact->inexact (list-ref light 1)) (exact->inexact (list-ref light 2)))
+ (rectangle 0.0 0.0 (exact->inexact (texture-width light)) (exact->inexact (texture-height light)))
  (rectangle 0.0 0.0 (* 2.0 MAP-SIZE) (* 2.0 MAP-SIZE))
  (vector2 (exact->inexact MAP-SIZE) (exact->inexact MAP-SIZE)) 0.0 RED)
 ;; blue spot
 (draw-texture-pro
  light
- (rectangle 0.0 0.0 (exact->inexact (list-ref light 1)) (exact->inexact (list-ref light 2)))
+ (rectangle 0.0 0.0 (exact->inexact (texture-width light)) (exact->inexact (texture-height light)))
  (rectangle (* MAP-SIZE 0.8) (/ MAP-SIZE 2.0) (* 2.0 MAP-SIZE) (* 2.0 MAP-SIZE))
  (vector2 (exact->inexact MAP-SIZE) (exact->inexact MAP-SIZE)) 0.0 BLUE)
 ;; green spot
 (draw-texture-pro
  light
- (rectangle 0.0 0.0 (exact->inexact (list-ref light 1)) (exact->inexact (list-ref light 2)))
+ (rectangle 0.0 0.0 (exact->inexact (texture-width light)) (exact->inexact (texture-height light)))
  (rectangle (* MAP-SIZE 0.8) (* MAP-SIZE 0.8) (exact->inexact MAP-SIZE) (exact->inexact MAP-SIZE))
  (vector2 (/ MAP-SIZE 2.0) (/ MAP-SIZE 2.0)) 0.0 GREEN)
 (begin-blend-mode BLEND-ALPHA)
 (end-texture-mode)
 
 ;; extract lightmap texture (indices 1-5 of rendertexture) and set mipmaps
-(define lm-tex (gen-texture-mipmaps* (list (list-ref lightmap 1) (list-ref lightmap 2) (list-ref lightmap 3)
-                                           (list-ref lightmap 4) (list-ref lightmap 5))))
+(define lm-tex (gen-texture-mipmaps* (list (render-texture-tex-id lightmap)
+                                           (render-texture-tex-width lightmap)
+                                           (render-texture-tex-height lightmap)
+                                           (render-texture-tex-mipmaps lightmap)
+                                           (render-texture-tex-format lightmap))))
 (set-texture-filter lm-tex TEXTURE-FILTER-TRILINEAR)
 
 ;; set up material

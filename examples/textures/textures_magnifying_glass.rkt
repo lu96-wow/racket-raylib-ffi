@@ -38,7 +38,7 @@
 (define magnified-world (load-render-texture 256 256))
 
 ;; 放大镜相机 (zoom=2, offset=128,128)
-(define camera (camera2d 0.0 0.0 128.0 128.0 0.0 2.0))
+(define camera (camera2d 128.0 128.0 0.0 0.0 0.0 2.0))
 
 (set-target-fps 60)
 

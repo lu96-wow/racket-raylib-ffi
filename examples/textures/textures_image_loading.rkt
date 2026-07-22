@@ -60,8 +60,8 @@
     (clear-background RAYWHITE)
 
     ;; 将纹理居中绘制
-    (let* ([tex-w (list-ref texture 1)]   ;; texture.width
-           [tex-h (list-ref texture 2)])  ;; texture.height
+    (let* ([tex-w (texture-width texture)]
+           [tex-h (texture-height texture)])
       (draw-texture texture
                     (- (quotient screen-width 2) (quotient tex-w 2))
                     (- (quotient screen-height 2) (quotient tex-h 2))

@@ -36,7 +36,7 @@
 (define shader (load-shader (res (format "shaders/glsl~a/lighting.vs" GLSL-VERSION))
                             (res (format "shaders/glsl~a/fog.fs" GLSL-VERSION))))
 
-(let ([locs-ptr (caddr shader)])
+(let ([locs-ptr (shader-list-locs shader)])
   (ptr-set! locs-ptr _int SHADER-LOC-MATRIX-MODEL (get-shader-location shader "matModel"))
   (ptr-set! locs-ptr _int SHADER-LOC-VECTOR-VIEW (get-shader-location shader "viewPos")))
 
@@ -117,7 +117,7 @@
     (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
     (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
     (set-shader-value shader
-      (ptr-ref (caddr shader) _int SHADER-LOC-VECTOR-VIEW)
+      (ptr-ref (shader-list-locs shader) _int SHADER-LOC-VECTOR-VIEW)
       cam-pos-buf SHADER-UNIFORM-VEC3)
 
     (begin-drawing)

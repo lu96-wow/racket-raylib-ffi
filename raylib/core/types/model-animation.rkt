@@ -20,9 +20,9 @@
    _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte _ubyte
    _int _int _pointer))
 
-(define (ma-bone-count lst)      (list-ref lst 32))
-(define (ma-keyframe-count lst)  (list-ref lst 33))
-(define (ma-keyframe-poses lst)  (list-ref lst 34))
+(define (model-animation-bone-count lst)      (list-ref lst 32))
+(define (model-animation-frame-count lst)     (list-ref lst 33))
+(define (model-animation-frame-poses lst)     (list-ref lst 34))
 
 (provide _ModelAnimation _model-animation-bytes
-         ma-bone-count ma-keyframe-count ma-keyframe-poses)
+         model-animation-bone-count model-animation-frame-count model-animation-frame-poses)

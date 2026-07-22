@@ -1,0 +1,1 @@
+("9.2" ta6le ("7115a119a8b4a667b1133cb0ff22dacdd86a5dc1" . "754559342f6ff51e2a324cb932d64bd30eae94da") #"/home/debian/raylib/racket-raylib-ffi-rebuild/raylib/core/types/bone-info.rkt" #"/home/debian/raylib/racket-raylib-ffi-rebuild/raylib/core/types/transform.rkt" (collects #"ffi" #"unsafe.rkt") (collects #"racket" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))

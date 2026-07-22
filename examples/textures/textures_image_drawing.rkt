@@ -32,14 +32,6 @@
 ;; ============================================================
 
 ;; Image: (data width height mipmaps format) ↔ T:_Image*
-(define (image-list->ptr img)
-  (let ([p (malloc _Image 'atomic)])
-    (ptr-set! p _pointer 0 (list-ref img 0))
-    (ptr-set! p _int 2 (list-ref img 1))
-    (ptr-set! p _int 3 (list-ref img 2))
-    (ptr-set! p _int 4 (list-ref img 3))
-    (ptr-set! p _int 5 (list-ref img 4))
-    p))
 
 (define (image-ptr->list p)
   (list (ptr-ref p _pointer 0)

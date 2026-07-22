@@ -12,7 +12,8 @@
 ;;       回放用唯一 FFI: PlayAutomationEvent
 
 (require racket/string
-         (except-in "../../raylib/raylib.rkt" play-automation-event)
+         (except-in "../../raylib/raylib.rkt" play-automation-event
+                    automation-event-type automation-event-frame)
          "../../raylib-racket/automation.rkt")
 
 ;; ============================================================
@@ -60,8 +61,8 @@
 
 ;; Camera
 (define camera
-  (camera2d 400 280
-            (/ SCREEN-WIDTH 2.0) (/ SCREEN-HEIGHT 2.0)
+  (camera2d (/ SCREEN-WIDTH 2.0) (/ SCREEN-HEIGHT 2.0)
+            400 280
             0.0 1.0))
 
 ;; Automation events — 纯 Racket 录制

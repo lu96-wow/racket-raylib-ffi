@@ -30,7 +30,7 @@
 ;; load cel shader
 (define cel-shader (load-shader (res (format "shaders/glsl~a/cel.vs" GLSL-VERSION))
                                 (res (format "shaders/glsl~a/cel.fs" GLSL-VERSION))))
-(let ([locs-ptr (caddr cel-shader)])
+(let ([locs-ptr (shader-list-locs cel-shader)])
   (ptr-set! locs-ptr _int SHADER-LOC-VECTOR-VIEW (get-shader-location cel-shader "viewPos")))
 
 ;; save default shader, apply cel shader
@@ -74,7 +74,7 @@
     (ptr-set! cam-pos-buf _float 1 (camera3d-pos-y camera))
     (ptr-set! cam-pos-buf _float 2 (camera3d-pos-z camera))
     (set-shader-value cel-shader
-                      (ptr-ref (caddr cel-shader) _int SHADER-LOC-VECTOR-VIEW)
+                      (ptr-ref (shader-list-locs cel-shader) _int SHADER-LOC-VECTOR-VIEW)
                       cam-pos-buf SHADER-UNIFORM-VEC3)
 
     ;; [Z] toggle cel shading

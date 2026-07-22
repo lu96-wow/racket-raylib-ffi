@@ -1,0 +1,1 @@
+("9.2" ta6le ("6132533b4a9687124dbe09be61514e1b8611b142" . "ff04b52b76e1b066b5c543cd404e8ccfec7c2b6c") (collects #"ffi" #"unsafe.rkt") (collects #"racket" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))

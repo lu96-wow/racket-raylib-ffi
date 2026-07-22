@@ -3,9 +3,18 @@
 ;; core/rlights.rkt — 光照系统 (rlights.h) 纯Racket封装
 
 (require ffi/unsafe
-         "rcore.rkt")
+         "rcore.rkt"
+         "types/color.rkt")
 
-(provide create-light update-light-values reset-lights! MAX-LIGHTS LIGHT-DIRECTIONAL LIGHT-POINT)
+(provide create-light update-light-values reset-lights!
+         MAX-LIGHTS LIGHT-DIRECTIONAL LIGHT-POINT
+         ;; 光源的命名访问器
+         light-enabled? light-type
+         light-position-x light-position-y light-position-z
+         light-target-x light-target-y light-target-z
+         light-color
+         set-light-enabled! set-light-position! set-light-target!
+         set-light-color!)
 
 (define MAX-LIGHTS 4)
 (define LIGHT-DIRECTIONAL 0)
@@ -13,7 +22,56 @@
 (define lights-count 0)
 (define (reset-lights!) (set! lights-count 0))
 
-(define (create-light type px py pz tx ty tz cr cg cb ca shader)
+;; ============================================================
+;; 光源字段索引 (内部)
+;; ============================================================
+;; [0]enabled [1]type [2]px [3]py [4]pz [5]tx [6]ty [7]tz
+;; [8]cr  [9]cg  [10]cb [11]ca
+;; [12]loc-enabled [13]loc-type [14]loc-position [15]loc-target [16]loc-color
+
+;; ============================================================
+;; 命名访问器
+;; ============================================================
+
+(define (light-enabled? l)       (= (vector-ref l 0) 1))
+(define (light-type l)           (vector-ref l 1))
+(define (light-position-x l)     (vector-ref l 2))
+(define (light-position-y l)     (vector-ref l 3))
+(define (light-position-z l)     (vector-ref l 4))
+(define (light-target-x l)       (vector-ref l 5))
+(define (light-target-y l)       (vector-ref l 6))
+(define (light-target-z l)       (vector-ref l 7))
+(define (light-color l)          (color (vector-ref l 8) (vector-ref l 9)
+                                        (vector-ref l 10) (vector-ref l 11)))
+
+(define (set-light-enabled! l v)       (vector-set! l 0 (if v 1 0)))
+(define (set-light-position! l x y z)  (vector-set! l 2 (exact->inexact x))
+                                       (vector-set! l 3 (exact->inexact y))
+                                       (vector-set! l 4 (exact->inexact z)))
+(define (set-light-target! l x y z)    (vector-set! l 5 (exact->inexact x))
+                                       (vector-set! l 6 (exact->inexact y))
+                                       (vector-set! l 7 (exact->inexact z)))
+(define (set-light-color! l c)         (vector-set! l 8  (color-r c))
+                                       (vector-set! l 9  (color-g c))
+                                       (vector-set! l 10 (color-b c))
+                                       (vector-set! l 11 (color-a c)))
+
+;; ============================================================
+;; create-light (两种调用方式)
+;; ============================================================
+
+(define create-light
+  (case-lambda
+    ;; 新式: (create-light type px py pz tx ty tz color shader)
+    [(type px py pz tx ty tz color shader)
+     (create-light* type px py pz tx ty tz
+                    (color-r color) (color-g color) (color-b color) (color-a color)
+                    shader)]
+    ;; 旧式: (create-light type px py pz tx ty tz cr cg cb ca shader)
+    [(type px py pz tx ty tz cr cg cb ca shader)
+     (create-light* type px py pz tx ty tz cr cg cb ca shader)]))
+
+(define (create-light* type px py pz tx ty tz cr cg cb ca shader)
   (when (>= lights-count MAX-LIGHTS) (error "create-light: max lights reached"))
   (define idx lights-count)
   (set! lights-count (+ lights-count 1))

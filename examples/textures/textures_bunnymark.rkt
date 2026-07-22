@@ -49,8 +49,8 @@
              "raylib [textures] example - bunnymark")
 
 (define tex-bunny (load-texture (string-append resource-dir "raybunny.png")))
-(define tex-w (list-ref tex-bunny 1))
-(define tex-h (list-ref tex-bunny 2))
+(define tex-w (texture-width tex-bunny))
+(define tex-h (texture-height tex-bunny))
 
 ;; ============================================================
 ;; 主循环

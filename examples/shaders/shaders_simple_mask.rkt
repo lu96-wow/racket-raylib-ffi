@@ -52,7 +52,7 @@
   (set-material-shader mats2 shader))
 
 ;; 设置 shader.locs[SHADER_LOC_MAP_EMISSION] = "mask" uniform location
-(let ([locs-ptr (caddr shader)]  ;; shader 是 list (id pad locs)
+(let ([locs-ptr (shader-list-locs shader)]  ;; shader 是 list (id pad locs)
       [mask-loc (get-shader-location shader "mask")])
   (ptr-set! locs-ptr _int SHADER-LOC-MAP-EMISSION mask-loc))
 

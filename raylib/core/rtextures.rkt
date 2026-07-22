@@ -122,7 +122,7 @@
   (let ([f (get-ffi-obj "ImageFromChannel" lib
                         (_fun (img : _image-bytes) _int -> (out : _image-bytes)))])
     (lambda (img ch) (f img ch))))
-(define (image-format ip nf) ((get-ffi-obj "ImageFormat" lib (_fun _pointer _int -> _void)) ip nf))
+(define (image-format! ip nf) ((get-ffi-obj "ImageFormat" lib (_fun _pointer _int -> _void)) ip nf))
 (define (image-to-pot ip fc)
   ((get-ffi-obj "ImageToPOT" lib (_fun _pointer (c : _color-bytes) -> _void)) ip (color->bytes fc)))
 (define (image-crop ip cr)
@@ -142,7 +142,7 @@
 (define (image-resize-canvas ip w h ox oy fc)
   ((get-ffi-obj "ImageResizeCanvas" lib (_fun _pointer _int _int _int _int (c : _color-bytes) -> _void))
    ip w h ox oy (color->bytes fc)))
-(define (image-mipmaps ip) ((get-ffi-obj "ImageMipmaps" lib (_fun _pointer -> _void)) ip))
+(define (image-mipmaps! ip) ((get-ffi-obj "ImageMipmaps" lib (_fun _pointer -> _void)) ip))
 (define (image-dither ip r g b a)
   ((get-ffi-obj "ImageDither" lib (_fun _pointer _int _int _int _int -> _void)) ip r g b a))
 (define (image-flip-vertical ip) ((get-ffi-obj "ImageFlipVertical" lib (_fun _pointer -> _void)) ip))
@@ -334,10 +334,10 @@
  load-image load-image-raw load-image-anim load-image-anim-from-memory
  load-image-from-memory load-image-from-texture is-image-valid
  image-copy image-from-image image-from-channel
- image-format image-to-pot image-crop image-alpha-crop image-alpha-clear
+ image-format! image-to-pot image-crop image-alpha-crop image-alpha-clear
  image-alpha-mask image-alpha-premultiply image-blur-gaussian
  image-kernel-convolution image-resize image-resize-nn image-resize-canvas
- image-mipmaps image-dither image-flip-vertical image-flip-horizontal
+ image-mipmaps! image-dither image-flip-vertical image-flip-horizontal
  image-rotate-cw image-rotate-ccw image-color-tint image-color-invert
  image-color-grayscale image-color-contrast image-color-brightness
  image-color-replace image-rotate

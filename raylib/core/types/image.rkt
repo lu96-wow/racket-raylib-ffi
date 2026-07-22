@@ -8,11 +8,22 @@
     (ptr-set! img _int 3 mipmaps) (ptr-set! img _int 4 format) img))
 (define _image-bytes (_list-struct _pointer _int _int _int _int))
 
-(define (image-get-data lst)     (list-ref lst 0))
-(define (image-get-width lst)    (list-ref lst 1))
-(define (image-get-height lst)   (list-ref lst 2))
-(define (image-get-mipmaps lst)  (list-ref lst 3))
-(define (image-get-format lst)   (list-ref lst 4))
+(define (image-data lst)     (list-ref lst 0))
+(define (image-width lst)    (list-ref lst 1))
+(define (image-height lst)   (list-ref lst 2))
+(define (image-mipmaps lst)  (list-ref lst 3))
+(define (image-format lst)   (list-ref lst 4))
+
+;; 将 bytes 列表转回 cpointer（供需要指针的 FFI 函数使用）
+(define (image-list->ptr lst)
+  (let ([p (malloc _Image 'atomic)])
+    (ptr-set! p _pointer 0 (list-ref lst 0))
+    (ptr-set! p _int 1 (list-ref lst 1))
+    (ptr-set! p _int 2 (list-ref lst 2))
+    (ptr-set! p _int 3 (list-ref lst 3))
+    (ptr-set! p _int 4 (list-ref lst 4))
+    p))
 
 (provide _Image _image-bytes image
-         image-get-data image-get-width image-get-height image-get-mipmaps image-get-format)
+         image-data image-width image-height image-mipmaps image-format
+         image-list->ptr)

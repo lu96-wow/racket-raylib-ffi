@@ -12,15 +12,6 @@
 (define-runtime-path resource-dir-path "../../../examples/textures/resources/")
 (define resource-dir (path->string resource-dir-path))
 
-;; Image list ↔ C Image* 指针转换
-(define (image-list->ptr img)
-  (let ([ptr (malloc T:_Image 'atomic)])
-    (ptr-set! ptr _pointer 0 (list-ref img 0))
-    (ptr-set! ptr _int 2 (list-ref img 1))
-    (ptr-set! ptr _int 3 (list-ref img 2))
-    (ptr-set! ptr _int 4 (list-ref img 3))
-    (ptr-set! ptr _int 5 (list-ref img 4))
-    ptr))
 
 (define (image-ptr->list ptr)
   (list (ptr-ref ptr _pointer 0)
@@ -48,7 +39,7 @@
              "raylib [textures] example - image processing")
 
 (define im-origin (load-image (string-append resource-dir "parrots.png")))
-(image-format (image-list->ptr im-origin) PFORMAT-R8G8B8A8)
+(image-format! (image-list->ptr im-origin) PFORMAT-R8G8B8A8)
 ;; re-read after format
 (set! im-origin (list (ptr-ref (image-list->ptr im-origin) _pointer 0)
                       (list-ref im-origin 1) (list-ref im-origin 2)

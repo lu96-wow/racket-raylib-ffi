@@ -24,14 +24,6 @@
 ;; 辅助: Image list ↔ C Image* 指针转换 (同 image_kernel 示例)
 ;; ============================================================
 
-(define (image-list->ptr img)
-  (let ([ptr (malloc T:_Image 'atomic)])
-    (ptr-set! ptr _pointer 0 (list-ref img 0))
-    (ptr-set! ptr _int 2 (list-ref img 1))
-    (ptr-set! ptr _int 3 (list-ref img 2))
-    (ptr-set! ptr _int 4 (list-ref img 3))
-    (ptr-set! ptr _int 5 (list-ref img 4))
-    ptr))
 
 (define (image-ptr->list ptr)
   (list (ptr-ref ptr _pointer 0)

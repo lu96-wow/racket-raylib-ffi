@@ -24,14 +24,6 @@
 ;; ============================================================
 
 ;; 将 Image 列表 (data width height mipmaps format) 写入 malloc'd C struct
-(define (image-list->ptr img)
-  (let ([ptr (malloc T:_Image 'atomic)])
-    (ptr-set! ptr _pointer 0 (list-ref img 0))
-    (ptr-set! ptr _int 2 (list-ref img 1))
-    (ptr-set! ptr _int 3 (list-ref img 2))
-    (ptr-set! ptr _int 4 (list-ref img 3))
-    (ptr-set! ptr _int 5 (list-ref img 4))
-    ptr))
 
 ;; 从 malloc'd C Image* 读取回列表
 (define (image-ptr->list ptr)
