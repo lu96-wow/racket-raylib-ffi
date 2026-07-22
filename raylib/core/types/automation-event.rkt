@@ -1,9 +1,15 @@
 #lang racket/base
+
+;; types/automation-event.rkt — AutomationEvent (24 bytes, pass-by-value)
+
 (require ffi/unsafe)
 
 (define-cstruct _AutomationEvent
-  ([frame _uint] [type _uint] [param0 _int] [param1 _int] [param2 _int] [param3 _int]))
-(define _automation-event-bytes (_list-struct _uint _uint _int _int _int _int))
+  ([frame _uint] [type _uint]
+   [param0 _int] [param1 _int] [param2 _int] [param3 _int]))
+
+(define _automation-event-bytes
+  (_list-struct _uint _uint _int _int _int _int))
 
 (define (automation-event-frame lst)  (list-ref lst 0))
 (define (automation-event-type lst)   (list-ref lst 1))
